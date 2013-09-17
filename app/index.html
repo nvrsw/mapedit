@@ -2,19 +2,51 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>EMAP Editor</title>
-  <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <title>CMS Map Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="app.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container-fluid">
-    <div class="row-fluid">
-      <div id="app-table" class="span2">
-        <h1>ha</h1>
+
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container app-container">
+        <ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              File
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#" id="app-menu-new-file">New File</a></li>
+              <li><a href="#" id="app-menu-open-file">Open File</a></li>
+              <li><a href="#" id="app-menu-save">Save</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              Edit
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#" id="app-menu-copy">Copy</a></li>
+              <li><a href="#" id="app-menu-cut">Cut</a></li>
+              <li><a href="#" id="app-menu-paste">Paste</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
-      <div id="app-diagram" class="span10">
-        <h1>ho</h1>
-      </div>
+    </div>
+  </div>
+
+  <div class="container app-container">
+    <div class="row">
+      <div class="span2">Sidebar</div>
+      <div class="span10">Canvas</div>
     </div>
   </div>
 
