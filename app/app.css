@@ -7,3 +7,8 @@ body {
   margin-right: 0;
   margin-left: 0;
 }
+
+#app-diagram {
+  overflow: scroll;
+  white-space: nowrap;
+}
