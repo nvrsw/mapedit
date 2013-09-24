@@ -8,7 +8,24 @@ body {
   margin-left: 0;
 }
 
+#app-sidebar {
+  position: fixed;
+  width: 140px;
+  height: 100%;
+  right: 0;
+  left: 0;
+  z-index: 1000;
+  margin-height: 0;
+  margin-left: 0;
+  margin-bottom: 0;
+  background-color: gray;
+}
+
 #app-diagram {
-  overflow: scroll;
-  white-space: nowrap;
+  position: fixed;
+  top: 40px;
+  left: 140px;
+  width: 1140px;
+  height: 680px;
+  overflow: auto;
 }

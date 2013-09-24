@@ -7,6 +7,55 @@ app.Diagram = function(diagram_id, setting) {
   var diagram = this;
   var canvas = null;
 
+  function findCenter(x1, y1, x2, y2) {
+    return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
+  }
+
+  function addItem(item) {
+    var obj = null;
+    var center = findCenter(item.x1, item.y1, item.x2, item.y2);
+
+    switch (item.type)
+      {
+      case 0: // DAI
+        var cpoints = [];
+        cpoints.push({x: item.x1 - center.x, y: item.y1 - center.y});
+        cpoints.push({x: item.x2 - center.x, y: item.y1 - center.y});
+        cpoints.push({x: item.x2 - center.x, y: item.y2 - center.y});
+        cpoints.push({x: item.x1 - center.x, y: item.y2 - center.y});
+
+        obj = new fabric.Polygon(cpoints, {
+          left: center.x,
+          top: center.y,
+          fill: 'rgb(255,255,255)',
+          stroke: 'rgb(0,0,0)',
+          strokeWidth: 1
+        });
+        break;
+      }
+
+    if (!obj)
+      return;
+
+    obj.set('hasRotatingPoint', false);
+    obj.set('hasControls', true);
+    obj.set('hasBorders', false);
+    obj.set('lockRotation', true);
+
+    canvas.add(obj);
+  }
+
+  function load() {
+    if (!canvas)
+      return;
+
+    var items = setting.config.maps[setting.map_idx].items;
+    for (var i = 0; i < items.length; i++)
+      addItem(items[i]);
+
+    canvas.renderAll();
+  }
+
   setting.callbacks.add(function(data) {
     switch(data.name)
       {
@@ -22,6 +71,8 @@ app.Diagram = function(diagram_id, setting) {
 
         $('#' + diagram_id).empty();
         $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
+        $('#' + diagram_id).attr('width', width);
+        $('#' + diagram_id).attr('height', height);
         $('#app-canvas').attr('width', width);
         $('#app-canvas').attr('height', height);
 
@@ -29,8 +80,9 @@ app.Diagram = function(diagram_id, setting) {
             selection: false,
             perPixelTargetFind: true
           });
-
-        console.log('diagram inited');
+        break;
+      case 'setting.load':
+        load();
         break;
       }
   });
@@ -60,7 +112,9 @@ app.Setting = function(config) {
     that.config = config;
     this.callbacks.fire({ name: 'setting.init' });
   };
-
+  this.load = function() {
+    this.callbacks.fire({ name: 'setting.load' });
+  };
   this.add = function() {
   };
   this.remove = function() {
@@ -79,6 +133,7 @@ function loadSetting(filename, setting) {
     }
 
     setting.init(config);
+    setting.load(config);
   });
 };
 
