@@ -18,15 +18,11 @@ app.Diagram = function(diagram_id, setting) {
     switch (item.type)
       {
       case 0: // DAI
-        var cpoints = [];
-        cpoints.push({x: item.x1 - center.x, y: item.y1 - center.y});
-        cpoints.push({x: item.x2 - center.x, y: item.y1 - center.y});
-        cpoints.push({x: item.x2 - center.x, y: item.y2 - center.y});
-        cpoints.push({x: item.x1 - center.x, y: item.y2 - center.y});
-
-        obj = new fabric.Polygon(cpoints, {
+        obj = new fabric.Rect({
           left: center.x,
           top: center.y,
+          width: item.x2 - item.x1,
+          height: item.y2 - item.y1,
           fill: 'rgb(255,255,255)',
           stroke: 'rgb(0,0,0)',
           strokeWidth: 1
