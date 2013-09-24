@@ -17,12 +17,22 @@ app.Diagram = function(diagram_id, setting) {
 
     switch (item.type)
       {
-      case 0: // DAI
+      case 0: // DAI_BOX
         obj = new fabric.Rect({
           left: center.x,
           top: center.y,
           width: item.x2 - item.x1,
           height: item.y2 - item.y1,
+          fill: 'rgb(255,255,255)',
+          stroke: 'rgb(0,0,0)',
+          strokeWidth: 1
+        });
+        break;
+      case 1: // DAI_CIRCLE
+        obj = new fabric.Circle({
+          left: center.x,
+          top: center.y,
+          radius: (item.x2 - item.x1) / 2,
           fill: 'rgb(255,255,255)',
           stroke: 'rgb(0,0,0)',
           strokeWidth: 1
