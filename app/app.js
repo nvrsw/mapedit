@@ -58,7 +58,7 @@ app.Diagram = function(diagram_id, setting) {
     var items = setting.config.maps[setting.map_idx].items;
     for (var i = 0; i < items.length; i++)
       addItem(items[i]);
-
+ 
     canvas.renderAll();
   }
 
@@ -130,16 +130,22 @@ app.Setting = function(config) {
 };
 
 function loadSetting(filename, setting) {
+  var loadingObj = $('#app-loading-overlay');
+
+  loadingObj.show();
   app_fs.readFile(filename, function(err, data) {
     var config = eval("(" + data + ")");
 
     if (!config.maps || config.maps.length <= 0) {
       console.log('there is no maps in' + filename);
+      loadingObj.hide();
       return;
     }
 
     setting.init(config);
     setting.load(config);
+
+    loadingObj.hide();
   });
 };
 

@@ -29,3 +29,24 @@ body {
   height: 680px;
   overflow: auto;
 }
+
+#app-loading-overlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #000000;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+
+#app-loading-overlay img {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -16px;  /* half the image height */
+  margin-left: -16px; /* half the image width. */
+}
