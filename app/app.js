@@ -55,11 +55,15 @@ app.Diagram = function(diagram_id, setting) {
     if (!canvas)
       return;
 
+    var t = new Date();
+
     var items = setting.config.maps[setting.map_idx].items;
     for (var i = 0; i < items.length; i++)
       addItem(items[i]);
  
     canvas.renderAll();
+
+    console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
   }
 
   setting.callbacks.add(function(data) {
