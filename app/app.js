@@ -77,8 +77,6 @@ app.Diagram = function(diagram_id, setting) {
 
         $('#' + diagram_id).empty();
         $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
-        $('#' + diagram_id).attr('width', width);
-        $('#' + diagram_id).attr('height', height);
         $('#app-canvas').attr('width', width);
         $('#app-canvas').attr('height', height);
 
@@ -133,6 +131,7 @@ function loadSetting(filename, setting) {
   var loadingObj = $('#app-loading-overlay');
 
   loadingObj.show();
+
   app_fs.readFile(filename, function(err, data) {
     var config = eval("(" + data + ")");
 
@@ -169,6 +168,18 @@ $(function() {
   });
   $('#app-menu-save').click(function(event) {
     console.log($(this).attr('id') + " is clicked");
+  });
+
+  var diff_w = $(window).width() - $('#app-diagram').width();
+  var diff_h = $(window).height() - $('#app-diagram').height();
+
+  /* change position of scrollbar according to window size */
+  $(window).resize(function() {
+    var width = $(window).width() - diff_w;
+    var height = $(window).height() - diff_h;
+
+    $('#app-diagram').css('width', width + 'px');
+    $('#app-diagram').css('height', height + 'px');
   });
 
   app_window.showDevTools();
