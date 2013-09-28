@@ -174,13 +174,13 @@ $(function() {
   var diff_h = $(window).height() - $('#app-diagram').height();
 
   /* change position of scrollbar according to window size */
-  $(window).on('resize', function(e) {
+  $(window).resize(function() {
     var width = $(window).width() - diff_w;
     var height = $(window).height() - diff_h;
 
     $('#app-diagram').css('width', width + 'px');
     $('#app-diagram').css('height', height + 'px');
-  }, 100);
+  });
 
   app_window.showDevTools();
   app_window.show();
