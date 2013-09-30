@@ -6,6 +6,7 @@ var app = {};
 app.Diagram = function(diagram_id, setting) {
   var diagram = this;
   var canvas = null;
+  var scale = 1.0;
 
   function findCenter(x1, y1, x2, y2) {
     return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
@@ -85,12 +86,77 @@ app.Diagram = function(diagram_id, setting) {
         $('#app-canvas').attr('height', height);
 
         canvas = new fabric.Canvas('app-canvas', {
-            selection: false,
-            perPixelTargetFind: true
-          });
+          selection: false,
+          perPixelTargetFind: true,
+          scaleValue: 1.0,
+          scale: function(value) {
+            var self = this;
+            var restoreIt = function(prop) {
+              return parseFloat(prop, 10) * value;
+            };
+            var scaleIt = function(prop) {
+              return parseFloat(prop, 10) / self.scaleValue;
+            };
+
+            self.setHeight(self.getHeight() / self.scaleValue);
+            self.setWidth(self.getWidth() / self.scaleValue);
+            self.forEachObject(function(obj) {
+              var currentObjTop = obj.get('top'),
+                  currentObjLeft = obj.get('left'),
+                  currentObjScaleX = obj.get('scaleX'),
+                  currentObjScaleY = obj.get('scaleY'),
+                  scaledObjTop = restoreIt(currentObjTop),
+                  scaledObjLeft = restoreIt(currentObjLeft),
+                  scaledObjScaleX = restoreIt(currentObjScaleX),
+                  scaledObjScaleY = restoreIt(currentObjScaleY);
+
+              obj.set({
+                top: scaledObjTop,
+                left: scaledObjLeft,
+                scaleX: scaledObjScaleX,
+                scaleY: scaledObjScaleY
+              });
+              obj.setCoords();
+            });
+
+            self.setHeight(self.getHeight() * value);
+            self.setWidth(self.getWidth() * value);
+            self.forEachObject(function(obj) {
+              var currentObjTop = obj.get('top'),
+                  currentObjLeft = obj.get('left'),
+                  currentObjScaleX = obj.get('scaleX'),
+                  currentObjScaleY = obj.get('scaleY'),
+                  scaledObjTop = scaleIt(currentObjTop),
+                  scaledObjLeft = scaleIt(currentObjLeft),
+                  scaledObjScaleX = scaleIt(currentObjScaleX),
+                  scaledObjScaleY = scaleIt(currentObjScaleY);
+
+              obj.set({
+                top: scaledObjTop,
+                left: scaledObjLeft,
+                scaleX: scaledObjScaleX,
+                scaleY: scaledObjScaleY
+              });
+              obj.setCoords();
+            });
+
+            self.scaleValue = value;
+            self.renderAll();
+          }
+        });
+
         break;
       case 'setting.load':
         load();
+        break;
+      case 'setting.zoom':
+        var new_scale = parseFloat (data.value, 10);
+        if (scale != new_scale)
+          {
+            console.log ('change scale from '+ scale + ' to ' + new_scale);
+            canvas.scale(new_scale);
+            scale = new_scale;
+          }
         break;
       }
   });
@@ -128,6 +194,9 @@ app.Setting = function(config) {
   this.remove = function() {
   };
   this.save = function() {
+  };
+  this.zoom = function(scale) {
+    this.callbacks.fire({ name: 'setting.zoom', value: scale })
   };
 };
 
@@ -172,6 +241,22 @@ $(function() {
   });
   $('#app-menu-save').click(function(event) {
     console.log($(this).attr('id') + " is clicked");
+  });
+
+  $('#app-view-200').click(function(event) {
+    setting.zoom("2.0");
+  });
+
+  $('#app-view-100').click(function(event) {
+    setting.zoom("1.0");
+  });
+
+  $('#app-view-75').click(function(event) {
+    setting.zoom("0.75");
+  });
+
+  $('#app-view-50').click(function(event) {
+    setting.zoom("0.5");
   });
 
   var diff_w = $(window).width() - $('#app-diagram').width();

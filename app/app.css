@@ -50,3 +50,7 @@ body {
   margin-top: -16px;  /* half the image height */
   margin-left: -16px; /* half the image width. */
 }
+
+#app-canvas {
+  border: solid;
+}
