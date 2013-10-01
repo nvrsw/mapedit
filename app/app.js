@@ -145,6 +145,28 @@ app.Diagram = function(diagram_id, setting) {
           }
         });
 
+        canvas.findTarget = (function(originalFn) {
+          return function() {
+            var target = originalFn.apply(this, arguments);
+            if (target) {
+              if (this._hoveredTarget !== target) {
+                canvas.fire('object:over', { target: target });
+                if (this._hoveredTarget) {
+                  canvas.fire('object:out', { target: this._hoveredTarget });
+                }
+                this._hoveredTarget = target;
+              }
+            } else {
+              if (this._hoveredTarget) {
+                canvas.fire('object:out', { target: this._hoveredTarget });
+                this._hoveredTarget = null;
+              }
+            }
+
+            return target;
+          };
+        })(canvas.findTarget);
+
         break;
       case 'setting.load':
         load();
