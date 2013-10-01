@@ -88,18 +88,18 @@ app.Diagram = function(diagram_id, setting) {
         canvas = new fabric.Canvas('app-canvas', {
           selection: false,
           perPixelTargetFind: true,
-          scaleValue: 1.0,
-          scale: function(value) {
+          c_scaleValue: 1.0,
+          c_scale: function(value) {
             var self = this;
             var restoreIt = function(prop) {
               return parseFloat(prop, 10) * value;
             };
             var scaleIt = function(prop) {
-              return parseFloat(prop, 10) / self.scaleValue;
+              return parseFloat(prop, 10) / self.c_scaleValue;
             };
 
-            self.setHeight(self.getHeight() / self.scaleValue);
-            self.setWidth(self.getWidth() / self.scaleValue);
+            self.setHeight(self.getHeight() / self.c_scaleValue);
+            self.setWidth(self.getWidth() / self.c_scaleValue);
             self.forEachObject(function(obj) {
               var currentObjTop = obj.get('top'),
                   currentObjLeft = obj.get('left'),
@@ -140,7 +140,7 @@ app.Diagram = function(diagram_id, setting) {
               obj.setCoords();
             });
 
-            self.scaleValue = value;
+            self.c_scaleValue = value;
             self.renderAll();
           }
         });
@@ -154,7 +154,7 @@ app.Diagram = function(diagram_id, setting) {
         if (scale != new_scale)
           {
             console.log ('change scale from '+ scale + ' to ' + new_scale);
-            canvas.scale(new_scale);
+            canvas.c_scale(new_scale);
             scale = new_scale;
           }
         break;
