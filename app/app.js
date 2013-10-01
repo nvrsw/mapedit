@@ -162,10 +162,23 @@ app.Diagram = function(diagram_id, setting) {
                 this._hoveredTarget = null;
               }
             }
-
             return target;
           };
         })(canvas.findTarget);
+
+        canvas.on('object:over', function(e) {
+          var obj = e.target;
+
+          obj.setFill('red');
+          canvas.renderAll();
+        });
+
+        canvas.on('object:out', function(e) {
+          var obj = e.target;
+
+          obj.setFill('white');
+          canvas.renderAll();
+        });
 
         break;
       case 'setting.load':
