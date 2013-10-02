@@ -261,11 +261,11 @@ $(function() {
   var diagram;
   var sidebar;
 
+  app_window = app_gui.Window.get();
+
   setting = new app.Setting();
   diagram = new app.Diagram('app-diagram', setting);
   sidebar = new app.Sidebar('app-sidebar', setting);
-
-  app_window = app_gui.Window.get();
 
   $('#app-menu-new-file').click(function(event) {
     console.log($(this).attr('id') + " is clicked");
@@ -294,10 +294,11 @@ $(function() {
     setting.zoom("0.5");
   });
 
-  var diff_w = $(window).width() - $('#app-diagram').width();
-  var diff_h = $(window).height() - $('#app-diagram').height();
+  // window width(1280)/height(720) of package.json
+  var diff_w = 1280 - $('#app-diagram').width();
+  var diff_h = 720 - $('#app-diagram').height();
 
-  /* change position of scrollbar according to window size */
+  // change position of scrollbar according to window size
   function resize_real() {
     var width = $(window).width() - diff_w;
     var height = $(window).height() - diff_h;
