@@ -52,11 +52,46 @@ app.Diagram = function(diagram_id, setting) {
     canvas.add(obj);
   }
 
+  function addBgImage(filename, w, h, name)
+  {
+    fabric.util.loadImage("test/" + filename, function(data) {
+      var obj = new fabric.Image(data, {
+        left: parseInt(w) / 2,
+        top: parseInt(h) / 2
+      });
+
+      obj.set('hasRotatingPoint', false);
+      obj.set('hasControls', false);
+      obj.set('lockUniScaling', true);
+      obj.set('hasBorders', false);
+      obj.set('lockScalingX', true);
+      obj.set('lockScalingY', true);
+      obj.set('lockMovementX', true);
+      obj.set('lockMovementY', true);
+      obj.set('lockRotation', true);
+      obj.set('disableHover', true);
+      obj.set('selectable', false);
+
+      canvas.add(obj);
+      canvas.sendToBack(obj);
+    });
+  }
+
   function load() {
     if (!canvas)
       return;
 
     var t = new Date();
+
+    if (setting.config.maps[setting.map_idx].background_images)
+      {
+        var files = setting.config.maps[setting.map_idx].background_images;
+        for (var i = 0; i < files.length; i++)
+          addBgImage(files[i],
+                     setting.config.maps[setting.map_idx].width,
+                     setting.config.maps[setting.map_idx].height,
+                     setting.config.maps[setting.map_idx].name + '-' + i);
+      }
 
     var items = setting.config.maps[setting.map_idx].items;
     for (var i = 0; i < items.length; i++)
