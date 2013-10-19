@@ -49,6 +49,8 @@ app.Diagram = function(diagram_id, setting) {
     obj.set('hasBorders', false);
     obj.set('lockRotation', true);
 
+    obj.uid = item.uid;
+
     canvas.add(obj);
   }
 
@@ -95,7 +97,10 @@ app.Diagram = function(diagram_id, setting) {
 
     var items = setting.config.maps[setting.map_idx].items;
     for (var i = 0; i < items.length; i++)
-      addItem(items[i]);
+      {
+        if (items[i].alive)
+          addItem(items[i]);
+      }
  
     canvas.renderAll();
 
@@ -245,7 +250,7 @@ app.Sidebar = function(sidebar_id, setting) {
   });
 };
 
-app.Setting = function(config) {
+app.Setting = function() {
   var that = this;
 
   this.config = null;
@@ -253,7 +258,20 @@ app.Setting = function(config) {
   this.callbacks = $.Callbacks();
 
   this.init = function(config) {
-    that.config = config;
+    this.config = config;
+
+    var uid;
+    uid = 0;
+    for (var m = 0; m < config.maps.length; m++)
+      {
+        for (var i = 0; i < config.maps[m].items.length; i++)
+          {
+            config.maps[m].items[i].uid = uid;
+            config.maps[m].items[i].alive = true;
+            uid++;
+          }
+      }
+
     this.callbacks.fire({ name: 'setting.init' });
   };
   this.load = function() {
@@ -270,7 +288,7 @@ app.Setting = function(config) {
   };
 };
 
-function loadSetting(filename, setting) {
+function loadMap(filename, setting) {
   var loadingObj = $('#app-loading-overlay');
 
   loadingObj.show();
@@ -285,7 +303,7 @@ function loadSetting(filename, setting) {
     }
 
     setting.init(config);
-    setting.load(config);
+    setting.load();
 
     loadingObj.hide();
   });
@@ -307,7 +325,7 @@ $(function() {
   });
   $('#app-menu-open-file').click(function(event) {
     console.log($(this).attr('id') + " is clicked");
-    loadSetting('test/maps.json', setting);
+    loadMap('test/maps.json', setting);
   });
   $('#app-menu-save').click(function(event) {
     console.log($(this).attr('id') + " is clicked");
