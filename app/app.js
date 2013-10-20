@@ -42,10 +42,10 @@ app.Diagram = function(diagram_id, setting) {
       c_scale: function(value) {
         var self = this;
         var restoreIt = function(prop) {
-          return parseFloat(prop, 10) * value;
+          return parseFloat(prop, 10) / self.c_scaleValue;
         };
         var scaleIt = function(prop) {
-          return parseFloat(prop, 10) / self.c_scaleValue;
+          return parseFloat(prop, 10) * value;
         };
 
         self.setHeight(self.getHeight() / self.c_scaleValue);
