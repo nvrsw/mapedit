@@ -6,7 +6,6 @@ var app = {};
 app.Diagram = function(diagram_id, setting) {
   var diagram = this;
   var canvas = null;
-  var scale = 1.0;
   var currentObject = null;
   var previousObject = null;
 
@@ -30,7 +29,6 @@ app.Diagram = function(diagram_id, setting) {
     $('#app-canvas').attr('height', diagram.height);
 
     /* initialize varialbes */
-    scale = 1.0;
     currentObject = null;
     previousObject = null;
 
@@ -149,7 +147,7 @@ app.Diagram = function(diagram_id, setting) {
       if (e.target)
         return;
 
-      setting.selectItem(null);
+      setting.select(null);
     });
 
     canvas.on('object:selected', function(e) {
@@ -159,7 +157,7 @@ app.Diagram = function(diagram_id, setting) {
         return;
 
       if (obj.c_id) {
-        setting.selectItem(obj.c_id);
+        setting.select(obj.c_id);
         return;
       }
     });
@@ -174,6 +172,26 @@ app.Diagram = function(diagram_id, setting) {
         obj.c_dragBoundFunc();
     });
 
+    canvas.on('object:modified', function(e) {
+      var obj = e.target;
+
+      if (!obj)
+        return;
+
+      if (obj.c_id)
+        {
+          var hw = obj.getWidth() / 2;
+          var hh = obj.getHeight() / 2;
+          var points = [];
+
+          points.push(Math.round((obj.left - hw) / canvas.c_scaleValue / 2));
+          points.push(Math.round((obj.top - hh) / canvas.c_scaleValue / 2));
+          points.push(Math.round((obj.left + hw) / canvas.c_scaleValue / 2));
+          points.push(Math.round((obj.top + hh) / canvas.c_scaleValue / 2));
+
+          setting.modify(obj.c_id, 'points', points.join(','));
+        }
+    });
   }
 
   function addItem(c_id, item) {
@@ -218,8 +236,8 @@ app.Diagram = function(diagram_id, setting) {
     obj.set('lockRotation', true);
 
     obj.c_dragBoundFunc = function() {
-      var w = diagram.width - 1;
-      var h = diagram.height - 1;
+      var w = diagram.width;
+      var h = diagram.height;
 
       var xoff = this.getWidth() / 2;
       var yoff = this.getHeight() / 2;
@@ -239,16 +257,16 @@ app.Diagram = function(diagram_id, setting) {
         y: this.top + yoff
       };
 
-      if (tl.x < 1) {
-        var diff = 1 - tl.x;
+      if (tl.x < 0) {
+        var diff = 0 - tl.x;
         this.left += diff;
       } else if (tr.x > w) {
         var diff = tr.x - w;
         this.left -= diff;
       }
 
-      if (tl.y < 1) {
-        var diff = 1 - tl.y;
+      if (tl.y < 0) {
+        var diff = 0 - tl.y;
         this.top += diff;
       } else if (bl.y > h) {
         var diff = bl.y - h;
@@ -298,10 +316,7 @@ app.Diagram = function(diagram_id, setting) {
     previousObject = currentObject;
     currentObject = obj;
     if (currentObject)
-      {
-        canvas.bringToFront(currentObject);
-        console.log(currentObject);
-      }
+      canvas.bringToFront(currentObject);
 
     canvas.renderAll();
   }
@@ -348,12 +363,11 @@ app.Diagram = function(diagram_id, setting) {
         load();
         break;
       case 'setting.zoom':
-        var new_scale = parseFloat (data.value, 10);
-        if (scale != new_scale)
+        if (canvas)
           {
-            console.log ('change scale from '+ scale + ' to ' + new_scale);
-            canvas.c_scale(new_scale);
-            scale = new_scale;
+            var value = parseFloat (data.value, 10);
+            if (canvas.c_scaleValue != value)
+              canvas.c_scale(value);
           }
         break;
       case 'item.selected':
@@ -377,12 +391,12 @@ app.Sidebar = function(sidebar_id, setting) {
 };
 
 app.Setting = function() {
-  var that = this;
+  var setting = this;
 
   this.config = null;
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
-  this.selectedItem ='';
+  this.selectId ='';
 
   this.init = function(config) {
     this.config = config;
@@ -407,12 +421,30 @@ app.Setting = function() {
   this.zoom = function(scale) {
     this.callbacks.fire({ name: 'setting.zoom', value: scale })
   };
-  this.selectItem = function(c_id) {
-    if (this.selectedItem == c_id)
+  this.select = function(c_id) {
+    if (this.selectId == c_id)
       return;
 
-    this.selectedItem = c_id;
+    this.selectId = c_id;
     this.callbacks.fire({ name: 'item.selected', value: c_id});
+  };
+  this.modify = function(c_id, key, value) {
+    var k = c_id.split('-');
+    var item;
+
+    item = setting.config.maps[k[1]].items[k[3]];
+    switch (key) {
+      case 'points':
+        var points = value.split(',');
+
+        item.x1 = points[0];
+        item.y1 = points[1];
+        item.x2 = points[2];
+        item.y2 = points[3];
+        break;
+    }
+
+    console.log(c_id + '[' + key + '] : ' + value);
   };
 };
 
