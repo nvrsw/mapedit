@@ -7,12 +7,165 @@ app.Diagram = function(diagram_id, setting) {
   var diagram = this;
   var canvas = null;
   var scale = 1.0;
+  var currentObject = null;
+  var previousObject = null;
 
   function findCenter(x1, y1, x2, y2) {
     return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
   }
 
-  function addItem(item) {
+  function init() {
+    var width;
+    var height;
+
+    width = setting.config.maps[setting.map_idx].width;
+    height = setting.config.maps[setting.map_idx].height;
+
+    if (canvas)
+      canvas.clear();
+
+    $('#' + diagram_id).empty();
+    $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
+    $('#app-canvas').attr('width', width);
+    $('#app-canvas').attr('height', height);
+
+    /* initialize varialbes */
+    scale = 1.0;
+    currentObject = null;
+    previousObject = null;
+
+    /* initialize canvas */
+    canvas = new fabric.Canvas('app-canvas', {
+      selection: false,
+      perPixelTargetFind: true,
+      c_scaleValue: 1.0,
+      c_scale: function(value) {
+        var self = this;
+        var restoreIt = function(prop) {
+          return parseFloat(prop, 10) * value;
+        };
+        var scaleIt = function(prop) {
+          return parseFloat(prop, 10) / self.c_scaleValue;
+        };
+
+        self.setHeight(self.getHeight() / self.c_scaleValue);
+        self.setWidth(self.getWidth() / self.c_scaleValue);
+        self.forEachObject(function(obj) {
+          var currentObjTop = obj.get('top'),
+              currentObjLeft = obj.get('left'),
+              currentObjScaleX = obj.get('scaleX'),
+              currentObjScaleY = obj.get('scaleY'),
+              scaledObjTop = restoreIt(currentObjTop),
+              scaledObjLeft = restoreIt(currentObjLeft),
+              scaledObjScaleX = restoreIt(currentObjScaleX),
+              scaledObjScaleY = restoreIt(currentObjScaleY);
+
+          obj.set({
+            top: scaledObjTop,
+            left: scaledObjLeft,
+            scaleX: scaledObjScaleX,
+            scaleY: scaledObjScaleY
+          });
+          obj.setCoords();
+        });
+
+        self.setHeight(self.getHeight() * value);
+        self.setWidth(self.getWidth() * value);
+        self.forEachObject(function(obj) {
+          var currentObjTop = obj.get('top'),
+              currentObjLeft = obj.get('left'),
+              currentObjScaleX = obj.get('scaleX'),
+              currentObjScaleY = obj.get('scaleY'),
+              scaledObjTop = scaleIt(currentObjTop),
+              scaledObjLeft = scaleIt(currentObjLeft),
+              scaledObjScaleX = scaleIt(currentObjScaleX),
+              scaledObjScaleY = scaleIt(currentObjScaleY);
+
+          obj.set({
+            top: scaledObjTop,
+            left: scaledObjLeft,
+            scaleX: scaledObjScaleX,
+            scaleY: scaledObjScaleY
+          });
+          obj.setCoords();
+        });
+
+        self.c_scaleValue = value;
+        self.renderAll();
+      }
+    });
+
+    canvas.c_getObjectById = function(c_id) {
+      var f = null;
+      var objects = this.getObjects();
+      var i = objects.length;
+      while (i--) {
+        var obj = objects[i];
+        if (obj.c_id && obj.c_id == c_id) {
+          f = obj;
+          break;
+        }
+      }
+
+      return f;
+    };
+
+    canvas.findTarget = (function(originalFn) {
+      return function() {
+        var target = originalFn.apply(this, arguments);
+        if (target) {
+          if (this._hoveredTarget !== target) {
+            canvas.fire('object:over', { target: target });
+            if (this._hoveredTarget) {
+              canvas.fire('object:out', { target: this._hoveredTarget });
+            }
+            this._hoveredTarget = target;
+          }
+        } else {
+          if (this._hoveredTarget) {
+            canvas.fire('object:out', { target: this._hoveredTarget });
+            this._hoveredTarget = null;
+          }
+        }
+        return target;
+      };
+    })(canvas.findTarget);
+
+    canvas.on('object:over', function(e) {
+      var obj = e.target;
+
+      obj.setFill('red');
+      canvas.renderAll();
+    });
+
+    canvas.on('object:out', function(e) {
+      var obj = e.target;
+
+      obj.setFill('white');
+      canvas.renderAll();
+    });
+
+    canvas.on('mouse:down', function(e) {
+      if (e.target)
+        return;
+
+      setting.selectItem(null);
+    });
+
+    canvas.on('object:selected', function(e) {
+      var obj = e.target;
+
+      if (!obj)
+        return;
+
+      if (obj.c_id) {
+        setting.selectItem(obj.c_id);
+        return;
+      }
+    });
+  }
+
+  function addItem(c_id, item) {
     var obj = null;
     var center = findCenter(item.x1, item.y1, item.x2, item.y2);
 
@@ -48,14 +201,11 @@ app.Diagram = function(diagram_id, setting) {
     obj.set('hasControls', true);
     obj.set('hasBorders', false);
     obj.set('lockRotation', true);
-
-    obj.uid = item.uid;
-
+    obj.c_id = c_id;
     canvas.add(obj);
   }
 
-  function addBgImage(filename, w, h, name)
-  {
+  function addBgImage(filename, w, h, name) {
     fabric.util.loadImage("test/" + filename, function(data) {
       var obj = new fabric.Image(data, {
         left: parseInt(w) / 2,
@@ -79,6 +229,26 @@ app.Diagram = function(diagram_id, setting) {
     });
   }
 
+  function selectItem(c_id) {
+    var obj = null;
+
+    if (c_id)
+      obj = canvas.c_getObjectById(c_id);
+
+    if (!obj)
+      obj = null;
+
+    if (obj == currentObject)
+      return;
+
+    previousObject = currentObject;
+    currentObject = obj;
+    if (currentObject)
+      canvas.bringToFront(currentObject);
+
+    canvas.renderAll();
+  }
+
   function load() {
     if (!canvas)
       return;
@@ -99,7 +269,11 @@ app.Diagram = function(diagram_id, setting) {
     for (var i = 0; i < items.length; i++)
       {
         if (items[i].alive)
-          addItem(items[i]);
+          {
+            var c_id = "map-" + setting.map_idx + "-item-" + i;
+
+            addItem(c_id, items[i]);
+          }
       }
  
     canvas.renderAll();
@@ -111,115 +285,7 @@ app.Diagram = function(diagram_id, setting) {
     switch(data.name)
       {
       case 'setting.init':
-        var width;
-        var height;
-
-        width = setting.config.maps[setting.map_idx].width;
-        height = setting.config.maps[setting.map_idx].height;
-
-        if (canvas)
-          canvas.clear();
-
-        $('#' + diagram_id).empty();
-        $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
-        $('#app-canvas').attr('width', width);
-        $('#app-canvas').attr('height', height);
-
-        canvas = new fabric.Canvas('app-canvas', {
-          selection: false,
-          perPixelTargetFind: true,
-          c_scaleValue: 1.0,
-          c_scale: function(value) {
-            var self = this;
-            var restoreIt = function(prop) {
-              return parseFloat(prop, 10) * value;
-            };
-            var scaleIt = function(prop) {
-              return parseFloat(prop, 10) / self.c_scaleValue;
-            };
-
-            self.setHeight(self.getHeight() / self.c_scaleValue);
-            self.setWidth(self.getWidth() / self.c_scaleValue);
-            self.forEachObject(function(obj) {
-              var currentObjTop = obj.get('top'),
-                  currentObjLeft = obj.get('left'),
-                  currentObjScaleX = obj.get('scaleX'),
-                  currentObjScaleY = obj.get('scaleY'),
-                  scaledObjTop = restoreIt(currentObjTop),
-                  scaledObjLeft = restoreIt(currentObjLeft),
-                  scaledObjScaleX = restoreIt(currentObjScaleX),
-                  scaledObjScaleY = restoreIt(currentObjScaleY);
-
-              obj.set({
-                top: scaledObjTop,
-                left: scaledObjLeft,
-                scaleX: scaledObjScaleX,
-                scaleY: scaledObjScaleY
-              });
-              obj.setCoords();
-            });
-
-            self.setHeight(self.getHeight() * value);
-            self.setWidth(self.getWidth() * value);
-            self.forEachObject(function(obj) {
-              var currentObjTop = obj.get('top'),
-                  currentObjLeft = obj.get('left'),
-                  currentObjScaleX = obj.get('scaleX'),
-                  currentObjScaleY = obj.get('scaleY'),
-                  scaledObjTop = scaleIt(currentObjTop),
-                  scaledObjLeft = scaleIt(currentObjLeft),
-                  scaledObjScaleX = scaleIt(currentObjScaleX),
-                  scaledObjScaleY = scaleIt(currentObjScaleY);
-
-              obj.set({
-                top: scaledObjTop,
-                left: scaledObjLeft,
-                scaleX: scaledObjScaleX,
-                scaleY: scaledObjScaleY
-              });
-              obj.setCoords();
-            });
-
-            self.c_scaleValue = value;
-            self.renderAll();
-          }
-        });
-
-        canvas.findTarget = (function(originalFn) {
-          return function() {
-            var target = originalFn.apply(this, arguments);
-            if (target) {
-              if (this._hoveredTarget !== target) {
-                canvas.fire('object:over', { target: target });
-                if (this._hoveredTarget) {
-                  canvas.fire('object:out', { target: this._hoveredTarget });
-                }
-                this._hoveredTarget = target;
-              }
-            } else {
-              if (this._hoveredTarget) {
-                canvas.fire('object:out', { target: this._hoveredTarget });
-                this._hoveredTarget = null;
-              }
-            }
-            return target;
-          };
-        })(canvas.findTarget);
-
-        canvas.on('object:over', function(e) {
-          var obj = e.target;
-
-          obj.setFill('red');
-          canvas.renderAll();
-        });
-
-        canvas.on('object:out', function(e) {
-          var obj = e.target;
-
-          obj.setFill('white');
-          canvas.renderAll();
-        });
-
+        init();
         break;
       case 'setting.load':
         load();
@@ -232,6 +298,9 @@ app.Diagram = function(diagram_id, setting) {
             canvas.c_scale(new_scale);
             scale = new_scale;
           }
+        break;
+      case 'item.selected':
+        selectItem(data.value);
         break;
       }
   });
@@ -256,20 +325,15 @@ app.Setting = function() {
   this.config = null;
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
+  this.selectedItem ='';
 
   this.init = function(config) {
     this.config = config;
 
-    var uid;
-    uid = 0;
     for (var m = 0; m < config.maps.length; m++)
       {
         for (var i = 0; i < config.maps[m].items.length; i++)
-          {
-            config.maps[m].items[i].uid = uid;
-            config.maps[m].items[i].alive = true;
-            uid++;
-          }
+          config.maps[m].items[i].alive = true;
       }
 
     this.callbacks.fire({ name: 'setting.init' });
@@ -285,6 +349,13 @@ app.Setting = function() {
   };
   this.zoom = function(scale) {
     this.callbacks.fire({ name: 'setting.zoom', value: scale })
+  };
+  this.selectItem = function(c_id) {
+    if (this.selectedItem == c_id)
+      return;
+
+    this.selectedItem = c_id;
+    this.callbacks.fire({ name: 'item.selected', value: c_id});
   };
 };
 
