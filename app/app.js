@@ -277,12 +277,14 @@ app.Diagram = function(diagram_id, setting) {
     canvas.add(obj);
   }
 
-  function addBgImage(filename, w, h, name) {
-    fabric.util.loadImage("test/" + filename, function(data) {
+  function addBackgroundImage(c_id, path) {
+    fabric.util.loadImage(path, function(data) {
       var obj = new fabric.Image(data, {
-        left: parseInt(w) / 2,
-        top: parseInt(h) / 2
+        left: diagram.width / 2,
+        top: diagram.height / 2
       });
+
+      canvas.c_id = c_id;
 
       obj.set('hasRotatingPoint', false);
       obj.set('hasControls', false);
@@ -321,46 +323,11 @@ app.Diagram = function(diagram_id, setting) {
     canvas.renderAll();
   }
 
-  function load() {
-    if (!canvas)
-      return;
-
-    var t = new Date();
-
-    if (setting.config.maps[setting.map_idx].background_images)
-      {
-        var files = setting.config.maps[setting.map_idx].background_images;
-        for (var i = 0; i < files.length; i++)
-          addBgImage(files[i],
-                     setting.config.maps[setting.map_idx].width,
-                     setting.config.maps[setting.map_idx].height,
-                     setting.config.maps[setting.map_idx].name + '-' + i);
-      }
-
-    var items = setting.config.maps[setting.map_idx].items;
-    for (var i = 0; i < items.length; i++)
-      {
-        if (items[i].alive)
-          {
-            var c_id = "map-" + setting.map_idx + "-item-" + i;
-
-            addItem(c_id, items[i]);
-          }
-      }
- 
-    canvas.renderAll();
-
-    console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
-  }
-
   setting.callbacks.add(function(data) {
-    switch(data.name)
+    switch(data.cmd)
       {
       case 'setting.init':
         init();
-        break;
-      case 'setting.load':
-        load();
         break;
       case 'setting.zoom':
         if (canvas)
@@ -370,8 +337,21 @@ app.Diagram = function(diagram_id, setting) {
               canvas.c_scale(value);
           }
         break;
+      case 'item.addBackground':
+        if (canvas)
+          addBackgroundImage(data.id, data.path);
+        break;
+      case 'item.add':
+        if (canvas)
+          addItem(data.id, data.item);
+        break;
       case 'item.selected':
-        selectItem(data.value);
+        if (canvas)
+          selectItem(data.value);
+        break;
+      case 'item.draw':
+        if (canvas)
+          canvas.renderAll();
         break;
       }
   });
@@ -381,7 +361,7 @@ app.Sidebar = function(sidebar_id, setting) {
   var sidebar = this;
 
   setting.callbacks.add(function(data) {
-    switch(data.name)
+    switch(data.cmd)
       {
       case 'setting.init':
         console.log('sidebar inited');
@@ -393,6 +373,7 @@ app.Sidebar = function(sidebar_id, setting) {
 app.Setting = function() {
   var setting = this;
 
+  this.basedir = "test/";
   this.config = null;
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
@@ -407,26 +388,52 @@ app.Setting = function() {
           config.maps[m].items[i].alive = true;
       }
 
-    this.callbacks.fire({ name: 'setting.init' });
+    this.callbacks.fire({ cmd: 'setting.init' });
   };
   this.load = function() {
-    this.callbacks.fire({ name: 'setting.load' });
-  };
-  this.add = function() {
-  };
-  this.remove = function() {
+    var t = new Date();
+
+    if (setting.config.maps[setting.map_idx].background_images)
+      {
+        var files = setting.config.maps[setting.map_idx].background_images;
+        for (var i = 0; i < files.length; i++)
+          this.callbacks.fire({
+            cmd  : 'item.addBackground',
+            id   : "map-" + setting.map_idx + "-bg-" + i,
+            path : setting.basedir + files[i]
+          });
+      }
+
+    var items = setting.config.maps[setting.map_idx].items;
+    for (var i = 0; i < items.length; i++)
+      {
+        if (items[i].alive)
+          {
+            var c_id = "map-" + setting.map_idx + "-item-" + i;
+
+            this.callbacks.fire({
+              cmd  : 'item.add',
+              id   : "map-" + setting.map_idx + "-item-" + i,
+              item : items[i]
+            });
+          }
+      }
+
+    this.callbacks.fire({ cmd: 'item.draw' });
+
+    console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
   };
   this.save = function() {
   };
   this.zoom = function(scale) {
-    this.callbacks.fire({ name: 'setting.zoom', value: scale })
+    this.callbacks.fire({ cmd: 'setting.zoom', value: scale })
   };
   this.select = function(c_id) {
     if (this.selectId == c_id)
       return;
 
     this.selectId = c_id;
-    this.callbacks.fire({ name: 'item.selected', value: c_id});
+    this.callbacks.fire({ cmd: 'item.selected', value: c_id});
   };
   this.modify = function(c_id, key, value) {
     var k = c_id.split('-');
@@ -445,6 +452,8 @@ app.Setting = function() {
     }
 
     console.log(c_id + '[' + key + '] : ' + value);
+  };
+  this.remove = function() {
   };
 };
 
