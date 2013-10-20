@@ -10,24 +10,24 @@ app.Diagram = function(diagram_id, setting) {
   var currentObject = null;
   var previousObject = null;
 
+  diagram.width = 800;
+  diagram.height = 600;
+
   function findCenter(x1, y1, x2, y2) {
     return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
   }
 
   function init() {
-    var width;
-    var height;
-
-    width = setting.config.maps[setting.map_idx].width;
-    height = setting.config.maps[setting.map_idx].height;
+    diagram.width = setting.config.maps[setting.map_idx].width;
+    diagram.height = setting.config.maps[setting.map_idx].height;
 
     if (canvas)
       canvas.clear();
 
     $('#' + diagram_id).empty();
     $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
-    $('#app-canvas').attr('width', width);
-    $('#app-canvas').attr('height', height);
+    $('#app-canvas').attr('width', diagram.width);
+    $('#app-canvas').attr('height', diagram.height);
 
     /* initialize varialbes */
     scale = 1.0;
@@ -163,6 +163,17 @@ app.Diagram = function(diagram_id, setting) {
         return;
       }
     });
+
+    canvas.on('object:moving', function(e) {
+      var obj = e.target;
+
+      if (!obj)
+        return;
+
+      if (obj.c_dragBoundFunc)
+        obj.c_dragBoundFunc();
+    });
+
   }
 
   function addItem(c_id, item) {
@@ -181,6 +192,7 @@ app.Diagram = function(diagram_id, setting) {
           stroke: 'rgb(0,0,0)',
           strokeWidth: 1
         });
+        obj.c_type = item.type;
         break;
       case 1: // DAI_CIRCLE
         obj = new fabric.Circle({
@@ -191,17 +203,59 @@ app.Diagram = function(diagram_id, setting) {
           stroke: 'rgb(0,0,0)',
           strokeWidth: 1
         });
+        obj.c_type = item.type;
         break;
       }
 
     if (!obj)
       return;
 
+    obj.c_id = c_id;
+
     obj.set('hasRotatingPoint', false);
     obj.set('hasControls', true);
     obj.set('hasBorders', false);
     obj.set('lockRotation', true);
-    obj.c_id = c_id;
+
+    obj.c_dragBoundFunc = function() {
+      var w = diagram.width - 1;
+      var h = diagram.height - 1;
+
+      var xoff = this.getWidth() / 2;
+      var yoff = this.getHeight() / 2;
+
+      var tl = {
+        x: this.left - xoff,
+        y: this.top - yoff
+      };
+
+      var tr = {
+        x: this.left + xoff,
+        y: this.top - yoff
+      };
+
+      var bl = {
+        x: this.left - xoff,
+        y: this.top + yoff
+      };
+
+      if (tl.x < 1) {
+        var diff = 1 - tl.x;
+        this.left += diff;
+      } else if (tr.x > w) {
+        var diff = tr.x - w;
+        this.left -= diff;
+      }
+
+      if (tl.y < 1) {
+        var diff = 1 - tl.y;
+        this.top += diff;
+      } else if (bl.y > h) {
+        var diff = bl.y - h;
+        this.top -= diff;
+      }
+    };
+
     canvas.add(obj);
   }
 
@@ -244,7 +298,10 @@ app.Diagram = function(diagram_id, setting) {
     previousObject = currentObject;
     currentObject = obj;
     if (currentObject)
-      canvas.bringToFront(currentObject);
+      {
+        canvas.bringToFront(currentObject);
+        console.log(currentObject);
+      }
 
     canvas.renderAll();
   }
