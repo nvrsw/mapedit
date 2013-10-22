@@ -16,6 +16,11 @@ app.Diagram = function(diagram_id, setting) {
     return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
   }
 
+  diagram.reflectSizeChaged = function() {
+    if (canvas)
+      canvas.calcOffset();
+  };
+
   function init() {
     diagram.width = setting.config.maps[setting.map_idx].width;
     diagram.height = setting.config.maps[setting.map_idx].height;
@@ -23,6 +28,7 @@ app.Diagram = function(diagram_id, setting) {
     if (canvas)
       canvas.clear();
 
+    $('#' + diagram_id).scrollTop(0).scrollLeft(0);
     $('#' + diagram_id).empty();
     $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
     $('#app-canvas').attr('width', diagram.width);
@@ -525,8 +531,10 @@ $(function() {
     var width = $(window).width() - diff_w;
     var height = $(window).height() - diff_h;
 
+    $('#app-diagram').scrollTop(0).scrollLeft(0);
     $('#app-diagram').css('width', width + 'px');
     $('#app-diagram').css('height', height + 'px');
+    diagram.reflectSizeChaged();
   }
 
   $(window).resize(function() {
