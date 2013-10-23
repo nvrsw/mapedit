@@ -1,3 +1,51 @@
+var LabeledRect = fabric.util.createClass(fabric.Rect, {
+  type: 'labeledRect',
+  initialize: function(options) {
+    options || (options = { });
+    this.callSuper('initialize', options);
+    this.set('label', options.label || '');
+  },
+  toObject: function() {
+    return fabric.util.object.extend(this.callSuper('toObject'), {
+      label: this.get('label')
+    });
+  },
+  _render: function(ctx) {
+    this.callSuper('_render', ctx);
+    if (this.label.length <= 3)
+      ctx.font = '12px Sans Mono';
+    else
+      ctx.font = '10px Sans Mono';
+
+    ctx.fillStyle = '#333';
+    ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 13);
+  }
+});
+
+var LabeledCircle = fabric.util.createClass(fabric.Circle, {
+  type: 'labeledCircle',
+  initialize: function(options) {
+    options || (options = { });
+    this.callSuper('initialize', options);
+    this.set('label', options.label || '');
+  },
+  toObject: function() {
+    return fabric.util.object.extend(this.callSuper('toObject'), {
+      label: this.get('label')
+    });
+  },
+  _render: function(ctx) {
+    this.callSuper('_render', ctx);
+    if (this.label.length <= 3)
+      ctx.font = '12px Sans Mono';
+    else
+      ctx.font = '10px Sans Mono';
+
+    ctx.fillStyle = '#333';
+    ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 18);
+  }
+});
+
 var app_gui = require('nw.gui');
 var app_fs = require('fs');
 var app_window;
@@ -224,25 +272,27 @@ app.Diagram = function(diagram_id, setting) {
     switch (item.type)
       {
       case 0: // DAI_BOX
-        obj = new fabric.Rect({
+        obj = new LabeledRect({
           left: center.x,
           top: center.y,
           width: item.x2 - item.x1,
           height: item.y2 - item.y1,
           fill: 'rgb(255,255,255)',
           stroke: 'rgb(0,0,0)',
-          strokeWidth: 1
+          strokeWidth: 1,
+          label: item.name
         });
         obj.c_type = item.type;
         break;
       case 1: // DAI_CIRCLE
-        obj = new fabric.Circle({
+        obj = new LabeledCircle({
           left: center.x,
           top: center.y,
           radius: (item.x2 - item.x1) / 2,
           fill: 'rgb(255,255,255)',
           stroke: 'rgb(0,0,0)',
-          strokeWidth: 1
+          strokeWidth: 1,
+          label: item.name
         });
         obj.c_type = item.type;
         break;
