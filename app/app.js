@@ -147,41 +147,6 @@ app.Diagram = function(diagram_id, setting) {
           return f;
         };
 
-        canvas.findTarget = (function(originalFn) {
-          return function() {
-            var target = originalFn.apply(this, arguments);
-            if (target) {
-              if (this._hoveredTarget !== target) {
-                canvas.fire('object:over', { target: target });
-                if (this._hoveredTarget) {
-                  canvas.fire('object:out', { target: this._hoveredTarget });
-                }
-                this._hoveredTarget = target;
-              }
-            } else {
-              if (this._hoveredTarget) {
-                canvas.fire('object:out', { target: this._hoveredTarget });
-                this._hoveredTarget = null;
-              }
-            }
-            return target;
-          };
-        })(canvas.findTarget);
-
-        canvas.on('object:over', function(e) {
-          var obj = e.target;
-
-          obj.setFill('red');
-          canvas.renderAll();
-        });
-
-        canvas.on('object:out', function(e) {
-          var obj = e.target;
-
-          obj.setFill('white');
-          canvas.renderAll();
-        });
-
         canvas.on('mouse:down', function(e) {
           if (e.target)
             return;
@@ -277,15 +242,20 @@ app.Diagram = function(diagram_id, setting) {
       return;
 
     obj.c_id = c_id;
-
-    obj.set('hasRotatingPoint', false);
-    obj.set('hasControls', true);
-    obj.set('hasBorders', false);
-    obj.set('lockRotation', true);
+    obj.set({
+      hasRotatingPoint: false,
+      hasControls: true,
+      hasBorders: true,
+      borderColor: 'red',
+      cornerColor: 'green',
+      cornerSize: 6,
+      transparentCorners: false,
+      lockRotation: true
+    });
 
     obj.c_dragBoundFunc = function() {
-      var w = dia.width;
-      var h = dia.height;
+      var max_width = dia.width;
+      var max_height = dia.height;
 
       var xoff = this.getWidth() / 2;
       var yoff = this.getHeight() / 2;
@@ -308,16 +278,16 @@ app.Diagram = function(diagram_id, setting) {
       if (tl.x < 0) {
         var diff = 0 - tl.x;
         this.left += diff;
-      } else if (tr.x > w) {
-        var diff = tr.x - w;
+      } else if (tr.x > max_width) {
+        var diff = tr.x - max_width;
         this.left -= diff;
       }
 
       if (tl.y < 0) {
         var diff = 0 - tl.y;
         this.top += diff;
-      } else if (bl.y > h) {
-        var diff = bl.y - h;
+      } else if (bl.y > max_height) {
+        var diff = bl.y - max_height;
         this.top -= diff;
       }
     };
@@ -539,6 +509,8 @@ app.Setting = function() {
       id   : mapID,
       name : setting.config.maps[setting.map_idx].name
     });
+
+    setting.select(null);
   };
   this.save = function() {
   };
