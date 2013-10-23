@@ -495,16 +495,16 @@ app.Sidebar = function(sidebar_id, setting) {
   function createMapEntry(map, idx, sibling) {
     var c_id = "app-sidebar-map-" + idx;
 
-    var html  = "<div class='accordion-group'>";
+    var html  = "<div class='accordion-group app-sidebar-accordion-group'>";
         html +=   "<div class='accordion-heading'>";
         html +=     "<a class='accordion-toggle' data-toggle='collapse' data-target='#" + c_id + "'";
         html +=        "data-parent='#app-sidebar-map-group'>";
         html +=        "<span id='" + c_id + "-toggle-name'>" + map.name + "</span>";
         html +=     "</a>";
         html +=   "</div> <!-- accordion-heading -->";
-        html +=   "<div id='" + c_id + "' class='accordion-body collapse'>";
+        html +=   "<div id='" + c_id + "' class='accordion-body collapse app-sidebar-accordion-group-body'>";
         html +=     "<div class='accordion-inner'>";
-        html +=       "<table class='table-striped table-condensed'>";
+        html +=       "<table class='table-striped'>";
         html +=         "<tbody id='" + c_id + "-content'>";
         html +=           "<tr>";
         html +=             "<th>";
@@ -516,15 +516,17 @@ app.Sidebar = function(sidebar_id, setting) {
         html +=           "</tr>";
         html +=           "<tr>";
         html +=             "<th>";
-        html +=               "<label for='" + c_id + "-size'>Size</label>";
+        html +=               "<label>Size</label>";
         html +=             "</th>";
         html +=             "<td>";
-        html +=               "<input id='" + c_id + "-size' type='text' value='" + map.width + "x" + map.height +"' class='input-mini'>";
+        html +=               "<label>" + map.width + "x" + map.height +"</label>";
         html +=             "</td>";
         html +=           "</tr>";
         html +=           "<tr>";
+        html +=             "<th>";
+        html +=               "<label>Images</label>";
+        html +=             "</th>";
         html +=             "<td>";
-        html +=               "Backgrounds";
         html +=               "<ol>";
         for (var i = 0; i < map.background_images.length; i++)
           {
