@@ -63,6 +63,11 @@ body {
   display: none;
 }
 
+.accordion-heading .accordion-toggle {
+  padding: 4px 8px;
+  margin: 0;
+}
+
 .app-sidebar-entry-selected {
   background-color: #ccc;
 }

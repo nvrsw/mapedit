@@ -474,6 +474,7 @@ app.Diagram = function(diagram_id, setting) {
 
 app.Sidebar = function(sidebar_id, setting) {
   var sidebar = this;
+  var selectedMap = '';
 
   setting.callbacks.add(function(data) {
     switch(data.cmd)
@@ -483,11 +484,11 @@ app.Sidebar = function(sidebar_id, setting) {
           var sibling = $('#app-sidebar-map-pivot');
 
           $.each(setting.config.maps, function(idx, map) {
-            removeEntry(map, idx, sibling);
+            removeMapEntry(map, idx, sibling);
           });
 
           $.each(setting.config.maps, function(idx, map) {
-            createEntry(map, idx, sibling);
+            createMapEntry(map, idx, sibling);
           });
         }
         break;
@@ -497,18 +498,50 @@ app.Sidebar = function(sidebar_id, setting) {
       }
   });
 
-  function createEntry(e, idx, sibling) {
+  function createMapEntry(map, idx, sibling) {
     var c_id = "app-sidebar-map-" + idx;
 
     var html  = "<div class='accordion-group'>";
         html +=   "<div class='accordion-heading'>";
         html +=     "<a class='accordion-toggle' data-toggle='collapse' data-target='#" + c_id + "'";
-        html +=        "data-parent='#app-sidebar-map-group' href='#" + c_id + "'>";
-        html +=        "<span id='" + c_id + "-toggle-name'>" + e.name + "</span>";
+        html +=        "data-parent='#app-sidebar-map-group'>";
+        html +=        "<span id='" + c_id + "-toggle-name'>" + map.name + "</span>";
         html +=     "</a>";
         html +=   "</div> <!-- accordion-heading -->";
         html +=   "<div id='" + c_id + "' class='accordion-body collapse'>";
-        html +=     "<div class='accordion-inner'>" + e.name + "</div>";
+        html +=     "<div class='accordion-inner'>";
+        html +=       "<table class='table-striped table-condensed'>";
+        html +=         "<tbody id='" + c_id + "-content'>";
+        html +=           "<tr>";
+        html +=             "<th>";
+        html +=               "<label for='" + c_id + "-name'>Name</label>";
+        html +=             "</th>";
+        html +=             "<td>";
+        html +=               "<input id='" + c_id + "-name' type='text' value='" + map.name + "' class='input-mini'>";
+        html +=             "</td>";
+        html +=           "</tr>";
+        html +=           "<tr>";
+        html +=             "<th>";
+        html +=               "<label for='" + c_id + "-size'>Size</label>";
+        html +=             "</th>";
+        html +=             "<td>";
+        html +=               "<input id='" + c_id + "-size' type='text' value='" + map.width + "x" + map.height +"' class='input-mini'>";
+        html +=             "</td>";
+        html +=           "</tr>";
+        html +=           "<tr>";
+        html +=             "<td>";
+        html +=               "Backgrounds";
+        html +=               "<ol>";
+        for (var i = 0; i < map.background_images.length; i++)
+          {
+            html +=             "<li>" + map.background_images[i] + "</li>";
+          }
+        html +=               "</ol>";
+        html +=             "</td>";
+        html +=           "</tr>";
+        html +=         "</tbody>";
+        html +=       "</table>";
+        html +=     "</div>";
         html +=   "</div>";
         html += "</div>";
 
@@ -535,7 +568,7 @@ app.Sidebar = function(sidebar_id, setting) {
     });
   }
 
-  function removeEntry(e, idx) {
+  function removeMapEntry(map, idx) {
     var obj = $('#app-sidebar-map-' + idx);
     if (obj)
       obj.parent().remove();
