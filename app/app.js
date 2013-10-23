@@ -512,6 +512,7 @@ app.Setting = function() {
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
   this.selectId ='';
+  this.path='';
 
   this.init = function(config, path) {
     this.path = path;
@@ -645,6 +646,12 @@ app.Setting = function() {
       loadingObj.hide();
     });
   };
+  this.reloadMap = function() {
+    if (this.path == '')
+      return;
+
+    this.loadMap(this.path);
+  };
 
 };
 
@@ -659,10 +666,10 @@ $(function() {
   diagram = new app.Diagram('app-diagram', setting);
   sidebar = new app.Sidebar('app-sidebar', setting);
 
-  $('#app-menu-new-file').click(function(event) {
+  $('#app-menu-new-file').click(function(e) {
     console.log($(this).attr('id') + " is clicked");
   });
-  $('#app-menu-open-file').click(function(event) {
+  $('#app-menu-open-file').click(function(e) {
     $('#app-map-file').trigger('click');
   });
   $('#app-map-file').on('change', function(e) {
@@ -670,23 +677,27 @@ $(function() {
     setting.loadMap($(this).val());
   });
 
-  $('#app-menu-save').click(function(event) {
-    console.log($(this).attr('id') + " is clicked");
+  $('#app-menu-openrecent').click(function(e) {
+    setting.reloadMap();
   });
 
-  $('#app-view-200').click(function(event) {
+  $('#app-menu-save').click(function(e) {
+    console.log($(this).val());
+  });
+
+  $('#app-view-200').click(function(e) {
     setting.zoom("2.0");
   });
 
-  $('#app-view-100').click(function(event) {
+  $('#app-view-100').click(function(e) {
     setting.zoom("1.0");
   });
 
-  $('#app-view-75').click(function(event) {
+  $('#app-view-75').click(function(e) {
     setting.zoom("0.75");
   });
 
-  $('#app-view-50').click(function(event) {
+  $('#app-view-50').click(function(e) {
     setting.zoom("0.5");
   });
 

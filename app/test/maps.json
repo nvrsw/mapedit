@@ -6,9 +6,7 @@
       "width": 1920,
       "height": 1080,
       "background_images": [
-        "map-background-1.png",
-        "map-background-2.png",
-        "map-background-3.png"
+        "map-background-1.png"
       ],
       "items": [
         {
