@@ -480,21 +480,15 @@ app.Sidebar = function(sidebar_id, setting) {
       {
       case 'setting.init':
         {
-          var rootContainer = $('#app-sidebar-map-list');
+          var sibling = $('#app-sidebar-map-pivot');
 
-          rootContainer.empty();
-          for (var i = 0; i < setting.config.maps.length; i++)
-            {
-              var map = setting.config.maps[i];
-              var id = "app-sidebar-map-" + i;
+          $.each(setting.config.maps, function(idx, map) {
+            removeEntry(map, idx, sibling);
+          });
 
-              rootContainer.append("<button id='" + id + "' type='button' class='btn btn-primary'>" + map.name + "</div>");
-              $('#' + id).on('click', function() {
-                var elms = $(this).attr('id').split('-');
-                var mapID = "map-" + elms[3];
-                setting.showMap(mapID);
-              });
-            }
+          $.each(setting.config.maps, function(idx, map) {
+            createEntry(map, idx, sibling);
+          });
         }
         break;
       case 'map.show':
@@ -502,6 +496,50 @@ app.Sidebar = function(sidebar_id, setting) {
         break;
       }
   });
+
+  function createEntry(e, idx, sibling) {
+    var c_id = "app-sidebar-map-" + idx;
+
+    var html  = "<div class='accordion-group'>";
+        html +=   "<div class='accordion-heading'>";
+        html +=     "<a class='accordion-toggle' data-toggle='collapse' data-target='#" + c_id + "'";
+        html +=        "data-parent='#app-sidebar-map-group' href='#" + c_id + "'>";
+        html +=        "<span id='" + c_id + "-toggle-name'>" + e.name + "</span>";
+        html +=     "</a>";
+        html +=   "</div> <!-- accordion-heading -->";
+        html +=   "<div id='" + c_id + "' class='accordion-body collapse'>";
+        html +=     "<div class='accordion-inner'>" + e.name + "</div>";
+        html +=   "</div>";
+        html += "</div>";
+
+    $(html).insertBefore(sibling);
+
+    var c = $('#' + c_id);
+
+    c.on('hide', function() {
+      $(this).css({ 'overflow': 'hidden' });
+      var id = $(this).attr('id');
+      $('a[data-target="#' + id + '"]').parent().removeClass('app-sidebar-entry-selected');
+    });
+
+    c.on('show', function() {
+      var id = $(this).attr('id');
+      $('a[data-target="#' + id + '"]').parent().addClass('app-sidebar-entry-selected');
+      var elms = id.split('-'); // 'app-sidebar-map-0'
+      var obj_id = 'map-' + elms[3];
+      setting.showMap(obj_id);
+    });
+
+    c.on('shown', function() {
+      $(this).css({ 'overflow': 'visible' });
+    });
+  }
+
+  function removeEntry(e, idx) {
+    var obj = $('#app-sidebar-map-' + idx);
+    if (obj)
+      obj.parent().remove();
+  }
 };
 
 app.Setting = function() {

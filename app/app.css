@@ -62,3 +62,7 @@ body {
 .app-hidden {
   display: none;
 }
+
+.app-sidebar-entry-selected {
+  background-color: #ccc;
+}
