@@ -5,202 +5,246 @@ var app = {};
 
 app.Diagram = function(diagram_id, setting) {
   var diagram = this;
-  var canvas = null;
-  var currentObject = null;
-  var previousObject = null;
+  var rootContainer = $('#' + diagram_id);
+  var diaList = [];
+  var curDiaId = '';
 
-  diagram.width = 800;
-  diagram.height = 600;
+  function lookupDia(dia_id) {
+    var dia = null;
+
+    for (var i = 0; i < diaList.length; i++)
+      {
+        var d = diaList[i];
+
+        if (d.c_id && d.c_id == dia_id)
+          {
+            dia = d;
+            break;
+          }
+      }
+
+    return dia;
+  };
+
+  function diaForeach(callback) {
+    for (var i = 0; i < diaList.length; i++)
+      callback(diaList[i]);
+  }
 
   function findCenter(x1, y1, x2, y2) {
     return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
   }
 
   diagram.reflectSizeChaged = function() {
-    if (canvas)
-      canvas.calcOffset();
+    $('#app-diagram').scrollTop(0).scrollLeft(0);
+    diaForeach(function(dia) {
+      if (dia.canvas)
+        dia.canvas.calcOffset();
+    });
   };
 
   function init() {
-    diagram.width = setting.config.maps[setting.map_idx].width;
-    diagram.height = setting.config.maps[setting.map_idx].height;
-
-    if (canvas)
-      canvas.clear();
-
-    $('#' + diagram_id).scrollTop(0).scrollLeft(0);
-    $('#' + diagram_id).empty();
-    $('#' + diagram_id).append("<canvas id='app-canvas'></canvas>");
-    $('#app-canvas').attr('width', diagram.width);
-    $('#app-canvas').attr('height', diagram.height);
-
-    /* initialize varialbes */
-    currentObject = null;
-    previousObject = null;
-
-    /* initialize canvas */
-    canvas = new fabric.Canvas('app-canvas', {
-      selection: false,
-      perPixelTargetFind: true,
-      c_scaleValue: 1.0,
-      c_scale: function(value) {
-        var self = this;
-        var restoreIt = function(prop) {
-          return parseFloat(prop, 10) / self.c_scaleValue;
-        };
-        var scaleIt = function(prop) {
-          return parseFloat(prop, 10) * value;
-        };
-
-        self.setHeight(self.getHeight() / self.c_scaleValue);
-        self.setWidth(self.getWidth() / self.c_scaleValue);
-        self.forEachObject(function(obj) {
-          var currentObjTop = obj.get('top'),
-              currentObjLeft = obj.get('left'),
-              currentObjScaleX = obj.get('scaleX'),
-              currentObjScaleY = obj.get('scaleY'),
-              scaledObjTop = restoreIt(currentObjTop),
-              scaledObjLeft = restoreIt(currentObjLeft),
-              scaledObjScaleX = restoreIt(currentObjScaleX),
-              scaledObjScaleY = restoreIt(currentObjScaleY);
-
-          obj.set({
-            top: scaledObjTop,
-            left: scaledObjLeft,
-            scaleX: scaledObjScaleX,
-            scaleY: scaledObjScaleY
-          });
-          obj.setCoords();
-        });
-
-        self.setHeight(self.getHeight() * value);
-        self.setWidth(self.getWidth() * value);
-        self.forEachObject(function(obj) {
-          var currentObjTop = obj.get('top'),
-              currentObjLeft = obj.get('left'),
-              currentObjScaleX = obj.get('scaleX'),
-              currentObjScaleY = obj.get('scaleY'),
-              scaledObjTop = scaleIt(currentObjTop),
-              scaledObjLeft = scaleIt(currentObjLeft),
-              scaledObjScaleX = scaleIt(currentObjScaleX),
-              scaledObjScaleY = scaleIt(currentObjScaleY);
-
-          obj.set({
-            top: scaledObjTop,
-            left: scaledObjLeft,
-            scaleX: scaledObjScaleX,
-            scaleY: scaledObjScaleY
-          });
-          obj.setCoords();
-        });
-
-        self.c_scaleValue = value;
-        self.renderAll();
-      }
+    diaForeach(function(dia) {
+      if (dia.canvas)
+        dia.canvas.clear();
     });
 
-    canvas.c_getObjectById = function(c_id) {
-      var f = null;
-      var objects = this.getObjects();
-      var i = objects.length;
-      while (i--) {
-        var obj = objects[i];
-        if (obj.c_id && obj.c_id == c_id) {
-          f = obj;
-          break;
-        }
-      }
+    diaList = [];
+    rootContainer.empty();
+    rootContainer.attr('width', setting.config.maps[0].width);
+    rootContainer.attr('height', setting.config.maps[0].height);
 
-      return f;
-    };
+    for (var i = 0; i < setting.config.maps.length; i++)
+      {
+        var dia = {
+          c_id   : 'app-dia-' + i,
+          width  : setting.config.maps[i].width,
+          height : setting.config.maps[i].height
+        };
+        var canvasID = dia.c_id + '-canvas';
 
-    canvas.findTarget = (function(originalFn) {
-      return function() {
-        var target = originalFn.apply(this, arguments);
-        if (target) {
-          if (this._hoveredTarget !== target) {
-            canvas.fire('object:over', { target: target });
-            if (this._hoveredTarget) {
-              canvas.fire('object:out', { target: this._hoveredTarget });
+        rootContainer.append("<div id='" + dia.c_id + "'></div>");
+        //$('#' + dia.c_id).attr('width', dia.width);
+        //$('#' + dia.c_id).attr('height', dia.height);
+        $('#' + dia.c_id).append("<canvas id='" + canvasID + "' class='app-canvas'></canvas>");
+        $('#' + canvasID).attr('width', dia.width);
+        $('#' + canvasID).attr('height', dia.height);
+
+        dia.currentObject = null;
+        dia.previousObject = null;
+
+        var canvas;
+        canvas = new fabric.Canvas(canvasID, {
+          selection: false,
+          perPixelTargetFind: true,
+          c_scaleValue: 1.0,
+          c_scale: function(value) {
+            var self = this;
+            var restoreIt = function(prop) {
+              return parseFloat(prop, 10) / self.c_scaleValue;
+            };
+            var scaleIt = function(prop) {
+              return parseFloat(prop, 10) * value;
+            };
+
+            self.setHeight(self.getHeight() / self.c_scaleValue);
+            self.setWidth(self.getWidth() / self.c_scaleValue);
+            self.forEachObject(function(obj) {
+              var currentObjTop = obj.get('top'),
+                  currentObjLeft = obj.get('left'),
+                  currentObjScaleX = obj.get('scaleX'),
+                  currentObjScaleY = obj.get('scaleY'),
+                  scaledObjTop = restoreIt(currentObjTop),
+                  scaledObjLeft = restoreIt(currentObjLeft),
+                  scaledObjScaleX = restoreIt(currentObjScaleX),
+                  scaledObjScaleY = restoreIt(currentObjScaleY);
+
+              obj.set({
+                top: scaledObjTop,
+                left: scaledObjLeft,
+                scaleX: scaledObjScaleX,
+                scaleY: scaledObjScaleY
+              });
+              obj.setCoords();
+            });
+
+            self.setHeight(self.getHeight() * value);
+            self.setWidth(self.getWidth() * value);
+            self.forEachObject(function(obj) {
+              var currentObjTop = obj.get('top'),
+                  currentObjLeft = obj.get('left'),
+                  currentObjScaleX = obj.get('scaleX'),
+                  currentObjScaleY = obj.get('scaleY'),
+                  scaledObjTop = scaleIt(currentObjTop),
+                  scaledObjLeft = scaleIt(currentObjLeft),
+                  scaledObjScaleX = scaleIt(currentObjScaleX),
+                  scaledObjScaleY = scaleIt(currentObjScaleY);
+
+              obj.set({
+                top: scaledObjTop,
+                left: scaledObjLeft,
+                scaleX: scaledObjScaleX,
+                scaleY: scaledObjScaleY
+              });
+              obj.setCoords();
+            });
+
+            self.c_scaleValue = value;
+            self.renderAll();
+          }
+        });
+
+        canvas.c_getObjectById = function(c_id) {
+          var f = null;
+          var objects = this.getObjects();
+          var i = objects.length;
+          while (i--) {
+            var obj = objects[i];
+            if (obj.c_id && obj.c_id == c_id) {
+              f = obj;
+              break;
             }
-            this._hoveredTarget = target;
           }
-        } else {
-          if (this._hoveredTarget) {
-            canvas.fire('object:out', { target: this._hoveredTarget });
-            this._hoveredTarget = null;
+
+          return f;
+        };
+
+        canvas.findTarget = (function(originalFn) {
+          return function() {
+            var target = originalFn.apply(this, arguments);
+            if (target) {
+              if (this._hoveredTarget !== target) {
+                canvas.fire('object:over', { target: target });
+                if (this._hoveredTarget) {
+                  canvas.fire('object:out', { target: this._hoveredTarget });
+                }
+                this._hoveredTarget = target;
+              }
+            } else {
+              if (this._hoveredTarget) {
+                canvas.fire('object:out', { target: this._hoveredTarget });
+                this._hoveredTarget = null;
+              }
+            }
+            return target;
+          };
+        })(canvas.findTarget);
+
+        canvas.on('object:over', function(e) {
+          var obj = e.target;
+
+          obj.setFill('red');
+          canvas.renderAll();
+        });
+
+        canvas.on('object:out', function(e) {
+          var obj = e.target;
+
+          obj.setFill('white');
+          canvas.renderAll();
+        });
+
+        canvas.on('mouse:down', function(e) {
+          if (e.target)
+            return;
+
+          setting.select(null);
+        });
+
+        canvas.on('object:selected', function(e) {
+          var obj = e.target;
+
+          if (!obj)
+            return;
+
+          if (obj.c_id) {
+            setting.select(obj.c_id);
+            return;
           }
-        }
-        return target;
-      };
-    })(canvas.findTarget);
+        });
 
-    canvas.on('object:over', function(e) {
-      var obj = e.target;
+        canvas.on('object:moving', function(e) {
+          var obj = e.target;
 
-      obj.setFill('red');
-      canvas.renderAll();
-    });
+          if (!obj)
+            return;
 
-    canvas.on('object:out', function(e) {
-      var obj = e.target;
+          if (obj.c_dragBoundFunc)
+            obj.c_dragBoundFunc();
+        });
 
-      obj.setFill('white');
-      canvas.renderAll();
-    });
+        canvas.on('object:modified', function(e) {
+          var obj = e.target;
 
-    canvas.on('mouse:down', function(e) {
-      if (e.target)
-        return;
+          if (!obj)
+            return;
 
-      setting.select(null);
-    });
+          if (obj.c_id)
+            {
+              var hw = obj.getWidth() / 2;
+              var hh = obj.getHeight() / 2;
+              var points = [];
 
-    canvas.on('object:selected', function(e) {
-      var obj = e.target;
+              points.push(Math.round((obj.left - hw) / canvas.c_scaleValue / 2));
+              points.push(Math.round((obj.top - hh) / canvas.c_scaleValue / 2));
+              points.push(Math.round((obj.left + hw) / canvas.c_scaleValue / 2));
+              points.push(Math.round((obj.top + hh) / canvas.c_scaleValue / 2));
 
-      if (!obj)
-        return;
+              setting.modify(obj.c_id, 'points', points.join(','));
+            }
+        });
 
-      if (obj.c_id) {
-        setting.select(obj.c_id);
-        return;
+        dia.canvas = canvas;
+        diaList.push(dia);
+
+        $('#' + dia.c_id).hide();
       }
-    });
-
-    canvas.on('object:moving', function(e) {
-      var obj = e.target;
-
-      if (!obj)
-        return;
-
-      if (obj.c_dragBoundFunc)
-        obj.c_dragBoundFunc();
-    });
-
-    canvas.on('object:modified', function(e) {
-      var obj = e.target;
-
-      if (!obj)
-        return;
-
-      if (obj.c_id)
-        {
-          var hw = obj.getWidth() / 2;
-          var hh = obj.getHeight() / 2;
-          var points = [];
-
-          points.push(Math.round((obj.left - hw) / canvas.c_scaleValue / 2));
-          points.push(Math.round((obj.top - hh) / canvas.c_scaleValue / 2));
-          points.push(Math.round((obj.left + hw) / canvas.c_scaleValue / 2));
-          points.push(Math.round((obj.top + hh) / canvas.c_scaleValue / 2));
-
-          setting.modify(obj.c_id, 'points', points.join(','));
-        }
-    });
   }
 
-  function addItem(c_id, item) {
+  function addItem(dia, c_id, item) {
+    if (!dia.canvas)
+      return;
+
     var obj = null;
     var center = findCenter(item.x1, item.y1, item.x2, item.y2);
 
@@ -242,8 +286,8 @@ app.Diagram = function(diagram_id, setting) {
     obj.set('lockRotation', true);
 
     obj.c_dragBoundFunc = function() {
-      var w = diagram.width;
-      var h = diagram.height;
+      var w = dia.width;
+      var h = dia.height;
 
       var xoff = this.getWidth() / 2;
       var yoff = this.getHeight() / 2;
@@ -280,17 +324,20 @@ app.Diagram = function(diagram_id, setting) {
       }
     };
 
-    canvas.add(obj);
+    dia.canvas.add(obj);
   }
 
-  function addBackgroundImage(c_id, path) {
-    fabric.util.loadImage(path, function(data) {
-      var obj = new fabric.Image(data, {
-        left: diagram.width / 2,
-        top: diagram.height / 2
+  function addBackgroundImage(dia, c_id, path) {
+    if (!dia.canvas)
+      return;
+
+    fabric.util.loadImage(path, function(img) {
+      var obj = new fabric.Image(img, {
+        left: dia.width / 2,
+        top: dia.height / 2
       });
 
-      canvas.c_id = c_id;
+      dia.canvas.c_id = c_id;
 
       obj.set('hasRotatingPoint', false);
       obj.set('hasControls', false);
@@ -304,29 +351,32 @@ app.Diagram = function(diagram_id, setting) {
       obj.set('disableHover', true);
       obj.set('selectable', false);
 
-      canvas.add(obj);
-      canvas.sendToBack(obj);
+      dia.canvas.add(obj);
+      dia.canvas.sendToBack(obj);
     });
   }
 
-  function selectItem(c_id) {
+  function selectItem(dia, c_id) {
+    if (!dia.canvas)
+      return;
+
     var obj = null;
 
     if (c_id)
-      obj = canvas.c_getObjectById(c_id);
+      obj = dia.canvas.c_getObjectById(c_id);
 
     if (!obj)
       obj = null;
 
-    if (obj == currentObject)
+    if (obj == dia.currentObject)
       return;
 
-    previousObject = currentObject;
-    currentObject = obj;
+    dia.previousObject = dia.currentObject;
+    dia.currentObject = obj;
     if (currentObject)
-      canvas.bringToFront(currentObject);
+      dia.canvas.bringToFront(currentObject);
 
-    canvas.renderAll();
+    dia.canvas.renderAll();
   }
 
   setting.callbacks.add(function(data) {
@@ -336,28 +386,54 @@ app.Diagram = function(diagram_id, setting) {
         init();
         break;
       case 'setting.zoom':
-        if (canvas)
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia && dia.canvas)
           {
             var value = parseFloat (data.value, 10);
-            if (canvas.c_scaleValue != value)
-              canvas.c_scale(value);
+            if (dia.canvas.c_scaleValue != value)
+              dia.canvas.c_scale(value);
           }
         break;
       case 'item.addBackground':
-        if (canvas)
-          addBackgroundImage(data.id, data.path);
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          addBackgroundImage(dia, data.id, data.path);
         break;
       case 'item.add':
-        if (canvas)
-          addItem(data.id, data.item);
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          addItem(dia, data.id, data.item);
         break;
       case 'item.selected':
-        if (canvas)
-          selectItem(data.value);
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          selectItem(dia, data.value);
         break;
-      case 'item.draw':
-        if (canvas)
-          canvas.renderAll();
+      case 'map.show':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+
+        $('#app-diagram').scrollTop(0).scrollLeft(0);
+        diaForeach(function(dia) {
+          if (dia.c_id == dia_id)
+            {
+              $('#' + dia.c_id).show("slow");
+              dia.canvas.calcOffset();
+              dia.canvas.renderAll();
+            }
+          else
+            {
+              $('#' + dia.c_id).hide();
+            }
+        });
         break;
       }
   });
@@ -370,7 +446,26 @@ app.Sidebar = function(sidebar_id, setting) {
     switch(data.cmd)
       {
       case 'setting.init':
-        console.log('sidebar inited');
+        {
+          var rootContainer = $('#app-sidebar-map-list');
+
+          rootContainer.empty();
+          for (var i = 0; i < setting.config.maps.length; i++)
+            {
+              var map = setting.config.maps[i];
+              var id = "app-sidebar-map-" + i;
+
+              rootContainer.append("<button id='" + id + "' type='button' class='btn btn-primary'>" + map.name + "</div>");
+              $('#' + id).on('click', function() {
+                var elms = $(this).attr('id').split('-');
+                var mapID = "map-" + elms[3];
+                setting.showMap(mapID);
+              });
+            }
+        }
+        break;
+      case 'map.show':
+        $('#app-sidebar-map').text(data.id + '[' + data.name + ']');
         break;
       }
   });
@@ -399,47 +494,71 @@ app.Setting = function() {
   this.load = function() {
     var t = new Date();
 
-    if (setting.config.maps[setting.map_idx].background_images)
+    var config = setting.config;
+    for (var m_idx = 0; m_idx < config.maps.length; m_idx++)
       {
-        var files = setting.config.maps[setting.map_idx].background_images;
-        for (var i = 0; i < files.length; i++)
-          this.callbacks.fire({
-            cmd  : 'item.addBackground',
-            id   : "map-" + setting.map_idx + "-bg-" + i,
-            path : setting.basedir + files[i]
-          });
-      }
-
-    var items = setting.config.maps[setting.map_idx].items;
-    for (var i = 0; i < items.length; i++)
-      {
-        if (items[i].alive)
+        if (config.maps[m_idx].background_images)
           {
-            var c_id = "map-" + setting.map_idx + "-item-" + i;
+            var files = config.maps[m_idx].background_images;
+            for (var i = 0; i < files.length; i++)
+              this.callbacks.fire({
+                cmd  : 'item.addBackground',
+                id   : "map-" + m_idx + "-bg-" + i,
+                path : setting.basedir + files[i]
+              });
+          }
 
-            this.callbacks.fire({
-              cmd  : 'item.add',
-              id   : "map-" + setting.map_idx + "-item-" + i,
-              item : items[i]
-            });
+        var items = config.maps[m_idx].items;
+        for (var i = 0; i < items.length; i++)
+          {
+            if (items[i].alive)
+              {
+                var c_id = "map-" + m_idx + "-item-" + i;
+
+                this.callbacks.fire({
+                  cmd  : 'item.add',
+                  id   : "map-" + m_idx + "-item-" + i,
+                  item : items[i]
+                });
+              }
           }
       }
 
-    this.callbacks.fire({ cmd: 'item.draw' });
-
+    this.showMap('map-' + setting.map_idx);
     console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
+  };
+  this.showMap = function(mapID) {
+    var elms = mapID.split('-');
+
+    setting.map_idx = parseInt(elms[1]);
+    this.callbacks.fire({
+      cmd  : 'map.show',
+      id   : mapID,
+      name : setting.config.maps[setting.map_idx].name
+    });
   };
   this.save = function() {
   };
   this.zoom = function(scale) {
-    this.callbacks.fire({ cmd: 'setting.zoom', value: scale })
+    this.callbacks.fire({
+      cmd   : 'setting.zoom',
+      id    : "map-" + setting.map_idx,
+      value : scale
+    })
   };
   this.select = function(c_id) {
-    if (this.selectId == c_id)
+    var id;
+
+    if (c_id)
+      id = c_id;
+    else
+      id = "map-" + setting.map_idx + "-item-null";
+
+    if (this.selectId == id)
       return;
 
-    this.selectId = c_id;
-    this.callbacks.fire({ cmd: 'item.selected', value: c_id});
+    this.selectId = id;
+    this.callbacks.fire({ cmd: 'item.selected', id: id });
   };
   this.modify = function(c_id, key, value) {
     var k = c_id.split('-');
@@ -531,7 +650,6 @@ $(function() {
     var width = $(window).width() - diff_w;
     var height = $(window).height() - diff_h;
 
-    $('#app-diagram').scrollTop(0).scrollLeft(0);
     $('#app-diagram').css('width', width + 'px');
     $('#app-diagram').css('height', height + 'px');
     diagram.reflectSizeChaged();

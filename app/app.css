@@ -21,15 +21,6 @@ body {
   background-color: gray;
 }
 
-#app-diagram {
-  position: fixed;
-  top: 40px;
-  left: 140px;
-  width: 1140px;
-  height: 680px;
-  overflow: auto;
-}
-
 #app-loading-overlay {
   display: none;
   position: fixed;
@@ -51,6 +42,19 @@ body {
   margin-left: -16px; /* half the image width. */
 }
 
-#app-canvas {
+#app-diagram {
+  position: fixed;
+  top: 40px;
+  left: 140px;
+  width: 1140px;
+  height: 680px;
+  overflow: auto;
+}
+
+.app-dia {
+  position: fixed;
+}
+
+.app-canvas {
   border: solid;
 }
