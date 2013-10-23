@@ -129,6 +129,16 @@ app.Diagram = function(diagram_id, setting) {
 
             self.c_scaleValue = value;
             self.renderAll();
+          },
+          c_backgrounds: [],
+          c_addBackground: function(obj) {
+            var self = this;
+
+            self.c_backgrounds.push(obj);
+            self.add(obj);
+
+            for (var i = self.c_backgrounds.length - 1; i >= 0; i--)
+              self.sendToBack(self.c_backgrounds[i]);
           }
         });
 
@@ -319,7 +329,7 @@ app.Diagram = function(diagram_id, setting) {
       obj.set('disableHover', true);
       obj.set('selectable', false);
 
-      dia.canvas.add(obj);
+      dia.canvas.c_addBackground(obj);
       dia.canvas.sendToBack(obj);
     });
   }
