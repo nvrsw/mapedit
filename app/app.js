@@ -64,8 +64,6 @@ app.Diagram = function(diagram_id, setting) {
         var canvasID = dia.c_id + '-canvas';
 
         rootContainer.append("<div id='" + dia.c_id + "'></div>");
-        //$('#' + dia.c_id).attr('width', dia.width);
-        //$('#' + dia.c_id).attr('height', dia.height);
         $('#' + dia.c_id).append("<canvas id='" + canvasID + "' class='app-canvas'></canvas>");
         $('#' + canvasID).attr('width', dia.width);
         $('#' + canvasID).attr('height', dia.height);
@@ -426,8 +424,13 @@ app.Diagram = function(diagram_id, setting) {
           if (dia.c_id == dia_id)
             {
               $('#' + dia.c_id).show("slow");
-              dia.canvas.calcOffset();
-              dia.canvas.renderAll();
+              if (dia.canvas)
+                {
+                  dia.canvas.calcOffset();
+                  dia.canvas._hoveredTarget = null;
+                  dia.canvas.deactivateAll();
+                  dia.canvas.renderAll();
+                }
             }
           else
             {
