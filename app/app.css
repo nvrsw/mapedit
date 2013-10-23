@@ -58,3 +58,7 @@ body {
 .app-canvas {
   border: solid;
 }
+
+.app-hidden {
+  display: none;
+}

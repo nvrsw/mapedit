@@ -463,7 +463,8 @@ app.Setting = function() {
   this.callbacks = $.Callbacks();
   this.selectId ='';
 
-  this.init = function(config) {
+  this.init = function(config, path) {
+    this.path = path;
     this.config = config;
 
     for (var m = 0; m < config.maps.length; m++)
@@ -565,27 +566,36 @@ app.Setting = function() {
   };
   this.remove = function() {
   };
-};
 
-function loadMap(filename, setting) {
-  var loadingObj = $('#app-loading-overlay');
+  this.loadMap = function(path) {
+    var loadingObj = $('#app-loading-overlay');
 
-  loadingObj.show();
+    loadingObj.show();
 
-  app_fs.readFile(filename, function(err, data) {
-    var config = eval("(" + data + ")");
+    app_fs.readFile(path, function(err, data) {
+      var config;
 
-    if (!config.maps || config.maps.length <= 0) {
-      console.log('there is no maps in' + filename);
+      try {
+        config = eval("(" + data + ")");
+      } catch(e) {
+        alert('invalid map file : ' + path);
+        loadingObj.hide();
+        return;
+      }
+
+      if (!config.maps || config.maps.length <= 0) {
+        alert('invalid map format : ' + path);
+        loadingObj.hide();
+        return;
+      }
+
+      setting.init(config, path);
+      setting.load();
+
       loadingObj.hide();
-      return;
-    }
+    });
+  };
 
-    setting.init(config);
-    setting.load();
-
-    loadingObj.hide();
-  });
 };
 
 $(function() {
@@ -603,9 +613,13 @@ $(function() {
     console.log($(this).attr('id') + " is clicked");
   });
   $('#app-menu-open-file').click(function(event) {
-    console.log($(this).attr('id') + " is clicked");
-    loadMap('test/maps.json', setting);
+    $('#app-map-file').trigger('click');
   });
+  $('#app-map-file').on('change', function(e) {
+    console.log($(this).val());
+    setting.loadMap($(this).val());
+  });
+
   $('#app-menu-save').click(function(event) {
     console.log($(this).attr('id') + " is clicked");
   });
