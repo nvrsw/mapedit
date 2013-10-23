@@ -187,23 +187,21 @@ app.Diagram = function(diagram_id, setting) {
 
             for (var i = self.c_backgrounds.length - 1; i >= 0; i--)
               self.sendToBack(self.c_backgrounds[i]);
+          },
+          c_getObjectById: function(c_id) {
+            var f = null;
+            var objects = this.getObjects();
+            var i = objects.length;
+            while (i--) {
+              var obj = objects[i];
+              if (obj.c_id && obj.c_id == c_id) {
+                f = obj;
+                break;
+              }
+            }
+            return f;
           }
         });
-
-        canvas.c_getObjectById = function(c_id) {
-          var f = null;
-          var objects = this.getObjects();
-          var i = objects.length;
-          while (i--) {
-            var obj = objects[i];
-            if (obj.c_id && obj.c_id == c_id) {
-              f = obj;
-              break;
-            }
-          }
-
-          return f;
-        };
 
         canvas.on('mouse:down', function(e) {
           if (e.target)
@@ -389,20 +387,16 @@ app.Diagram = function(diagram_id, setting) {
       return;
 
     var obj = null;
-
     if (c_id)
       obj = dia.canvas.c_getObjectById(c_id);
-
-    if (!obj)
-      obj = null;
 
     if (obj == dia.currentObject)
       return;
 
     dia.previousObject = dia.currentObject;
     dia.currentObject = obj;
-    if (currentObject)
-      dia.canvas.bringToFront(currentObject);
+    if (dia.currentObject)
+      dia.canvas.bringToFront(dia.currentObject);
 
     dia.canvas.renderAll();
   }
@@ -443,7 +437,7 @@ app.Diagram = function(diagram_id, setting) {
         var dia_id = 'app-dia-' + elms[1];
         var dia = lookupDia(dia_id);
         if (dia)
-          selectItem(dia, data.value);
+          selectItem(dia, data.id);
         break;
       case 'map.show':
         var elms = data.id.split('-');
