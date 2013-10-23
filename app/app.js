@@ -188,10 +188,10 @@ app.Diagram = function(diagram_id, setting) {
               var hh = obj.getHeight() / 2;
               var points = [];
 
-              points.push(Math.round((obj.left - hw) / canvas.c_scaleValue / 2));
-              points.push(Math.round((obj.top - hh) / canvas.c_scaleValue / 2));
-              points.push(Math.round((obj.left + hw) / canvas.c_scaleValue / 2));
-              points.push(Math.round((obj.top + hh) / canvas.c_scaleValue / 2));
+              points.push(Math.round((obj.left - hw) / canvas.c_scaleValue));
+              points.push(Math.round((obj.top - hh) / canvas.c_scaleValue));
+              points.push(Math.round((obj.left + hw) / canvas.c_scaleValue));
+              points.push(Math.round((obj.top + hh) / canvas.c_scaleValue));
 
               setting.modify(obj.c_id, 'points', points.join(','));
             }
