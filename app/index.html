@@ -60,6 +60,7 @@
 
   <div class="container app-container">
     <div id="app-sidebar">
+      <div id="app-overlay"></div>
       <div class="app-sidebar-header">Maps
         <button type='button' class='btn btn-mini btn-link btn-group' rel='tooltip' title='Add new map'
                 id='app-sidebar-map-add'>";
@@ -144,6 +145,25 @@
 
   <div class="app-hidden">
     <input id="app-map-file" type="file">
+  </div>
+
+  <div id="app-modal-map" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="app-modal-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="app-modal-label">Add New Map</h3>
+    </div>
+    <div class="modal-body">
+      <label for='app-modal-map-name'>Name</label>
+      <input id='app-modal-map-name' type='text' value='' class='input-medium'>
+      <label for='app-modal-map-width'>Width</label>
+      <input id='app-modal-map-width' type='text' value='' class='input-medium input-numeric'>
+      <label for='app-modal-map-height'>Height</label>
+      <input id='app-modal-map-height' type='text' value='' class='input-medium input-numeric'>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button class="btn btn-primary" id='app-modal-map-ok'>Ok</button>
+    </div>
   </div>
 
   <script src="js/jquery-2.0.2.min.js"></script>

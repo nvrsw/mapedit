@@ -28,6 +28,19 @@ select {
   box-shadow: 0px 0px 20px 3px #d3d3d3;
 }
 
+#app-overlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #000000;
+  opacity: 0.7;
+  filter: alpha(opacity=80);
+}
+
 #app-loading-overlay {
   display: none;
   position: fixed;
@@ -186,4 +199,7 @@ select {
   margin-bottom: 0;
   width: 80%;
   padding: 2px 6px;
+}
+
+#app-modal input {
 }

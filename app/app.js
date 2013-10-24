@@ -798,6 +798,8 @@ app.Setting = function() {
     this.path = path;
     this.config = config;
 
+    $('#app-overlay').hide();
+
     for (var m = 0; m < config.maps.length; m++)
       {
         config.maps[m].valid = true;
@@ -862,7 +864,7 @@ app.Setting = function() {
 
         map.valid = true;
         map.id = 'map-' + i;
-        this.addMap(map);
+        this.addMap(map, {});
       }
 
     for (var m_idx = 0; m_idx < config.maps.length; m_idx++)
@@ -1015,7 +1017,7 @@ app.Setting = function() {
       }
   };
 
-  this.addMap = function(m) {
+  this.addMap = function(m, options) {
     if (!inited)
       return;
 
@@ -1025,9 +1027,9 @@ app.Setting = function() {
         map = {
           'valid'  : true,
           'id'     : 'map-' + this.config.maps.length,
-          'name'   : 'new map',
-          'width'  : 1920,
-          'height' : 1080,
+          'name'   : options.name,
+          'width'  : options.width,
+          'height' : options.height,
           'background_images' : [],
           'items' : []
         };
@@ -1171,6 +1173,13 @@ $(function() {
   var setting;
   var diagram;
   var sidebar;
+  var validateInputValue = function(elem, min, max) {
+    var val = parseInt($(elem).val());
+    if (!val) val = 0;
+    val = Math.max(min, Math.min(max, val));
+    $(elem).val(val);
+    return val;
+  };
 
   app_window = app_gui.Window.get();
 
@@ -1178,6 +1187,7 @@ $(function() {
   diagram = new app.Diagram('app-diagram', setting);
   sidebar = new app.Sidebar('app-sidebar', setting);
   sidebar.setItemEditible(false);
+  $('#app-overlay').show();
 
   $('#app-menu-new-file').click(function(e) {
     setting.newMapFile("test");
@@ -1214,7 +1224,7 @@ $(function() {
   });
 
   $('#app-sidebar-map-add').click(function(e) {
-    setting.addMap(null);
+    $('#app-modal-map').modal('show');
   });
 
   $('#app-sidebar-item-add').click(function(e) {
@@ -1222,6 +1232,27 @@ $(function() {
   });
   $('#app-sidebar-item-remove').click(function(e) {
     setting.removeSelected();
+  });
+
+  $('#app-modal-map-ok').click(function(e) {
+    $('#app-modal-map').modal('hide');
+    var name = $.trim($('#app-modal-map-name').val());
+    if (name == '')
+      return;
+
+    var width = parseInt($('#app-modal-map-width').val());
+    if (width < 100 || width > 9999)
+      return;
+
+    var height = parseInt($('#app-modal-map-height').val());
+    if (width < 100 || width > 9999)
+      return;
+
+    setting.addMap(null, {
+      name   : name,
+      width  : width,
+      height : height
+    });
   });
 
   // window width(1280)/height(720) of package.json
