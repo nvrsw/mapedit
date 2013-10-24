@@ -1135,14 +1135,9 @@ app.Setting = function() {
     setting.init(config, path);
     setting.load();
   };
-  this.saveMapFile = function(path) {
-    if (!inited)
-      return;
 
-    var loadingObj = $('#app-loading-overlay');
+  function extractJSON() {
     var config = {};
-
-    loadingObj.show();
 
     config.format = setting.config.format;
     config.maps = [];
@@ -1183,9 +1178,19 @@ app.Setting = function() {
         config.maps.push(new_map);
       }
 
-    var data = JSON.stringify(config, null, 2);
+    return JSON.stringify(config, null, 2);
+  }
 
-    app_fs.writeFile(path, data, function(err) {
+  this.saveMapFile = function(path) {
+    if (!inited)
+      return;
+
+    var loadingObj = $('#app-loading-overlay');
+    loadingObj.show();
+
+    var config = {};
+    var maps_json = extractJSON();
+    app_fs.writeFile(path, maps_json, function(err) {
       if (err) {
         console.log(err);
       }
@@ -1193,6 +1198,34 @@ app.Setting = function() {
     });
   };
 
+  this.exportToZip = function() {
+    if (!inited)
+      return;
+
+    var loadingObj = $('#app-loading-overlay');
+    loadingObj.show();
+
+    var maps_json = extractJSON();
+    var zip = new require('node-zip')();
+    zip.file('maps.json', maps_json);
+
+    if (app_fs.existsSync('images'))
+      {
+        var files = app_fs.readdirSync('images');
+        var zipImages = zip.folder('images');
+        for (var i = 0; i < files.length; i++)
+          {
+            var path = 'images/' + files[i];
+            zipImages.file(path,
+                           app_fs.readFileSync(path).toString('base64'),
+                           { base64: true, binary: true });
+          }
+      }
+    var data = zip.generate({ base64: false });
+    app_fs.writeFileSync('maps.zip', data, 'binary');
+
+    loadingObj.hide();
+  };
 };
 
 $(function() {
@@ -1231,6 +1264,10 @@ $(function() {
 
   $('#app-menu-save').click(function(e) {
     setting.saveMapFile("test.json");
+  });
+
+  $('#app-menu-export').click(function(e) {
+    setting.exportToZip();
   });
 
   $('#app-view-200').click(function(e) {
