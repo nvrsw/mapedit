@@ -600,6 +600,7 @@ app.Sidebar = function(sidebar_id, setting) {
       {
       case 'setting.init':
         $('#app-sidebar-map-pivot').siblings().remove();
+        sidebar.setItemEditible(false);
         break;
       case 'map.selected':
         if (selectedMap == data.id)
@@ -622,8 +623,44 @@ app.Sidebar = function(sidebar_id, setting) {
             break;
           }
         break;
+      case 'item.selected':
+        var elms = data.id.split('-');
+        if (elms[3] == 'null')
+          {
+            sidebar.setItemEditible(false);
+            break;
+          }
+        var item = setting.config.maps[elms[1]].items[elms[3]];
+        sidebar.setItemEditible(true);
+        $('#app-sidebar-item-info-name').val(item.name);
+        $('#app-sidebar-item-info-type').val(item.type);
+        $('#app-sidebar-item-info-x1').val(item.x1);
+        $('#app-sidebar-item-info-y1').val(item.y1);
+        $('#app-sidebar-item-info-x2').val(item.x2);
+        $('#app-sidebar-item-info-y2').val(item.y2);
+        break;
       }
   });
+
+  this.setItemEditible = function (enable) {
+    if (enable)
+      {
+        $('#app-sidebar-item-info-name').prop('disabled', false);
+        $('#app-sidebar-item-info-type').prop('disabled', false);
+        $('#app-sidebar-item-info-x1').prop('disabled', false);
+        $('#app-sidebar-item-info-y1').prop('disabled', false);
+        $('#app-sidebar-item-info-x2').prop('disabled', false);
+        $('#app-sidebar-item-info-y2').prop('disabled', false);
+        return;
+      }
+
+    $('#app-sidebar-item-info-name').val("").prop('disabled', true);
+    $('#app-sidebar-item-info-type').val("").prop('disabled', true);
+    $('#app-sidebar-item-info-x1').val("").prop('disabled', true);
+    $('#app-sidebar-item-info-y1').val("").prop('disabled', true);
+    $('#app-sidebar-item-info-x2').val("").prop('disabled', true);
+    $('#app-sidebar-item-info-y2').val("").prop('disabled', true);
+  };
 
   function createMapEntry(map, sibling) {
     var c_id = "app-sidebar-" + map.id;
@@ -1043,6 +1080,7 @@ $(function() {
   setting = new app.Setting();
   diagram = new app.Diagram('app-diagram', setting);
   sidebar = new app.Sidebar('app-sidebar', setting);
+  sidebar.setItemEditible(false);
 
   $('#app-menu-new-file').click(function(e) {
     setting.newMapFile("test");
