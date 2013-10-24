@@ -1255,7 +1255,11 @@ $(function() {
     $('#app-map-file').trigger('click');
   });
   $('#app-map-file').on('change', function(e) {
-    setting.openMapFile($(this).val());
+    var path = $.trim($(this).val());
+    if (path == '')
+      return;
+
+    setting.openMapFile(path);
   });
 
   $('#app-menu-openrecent').click(function(e) {
