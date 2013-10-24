@@ -518,6 +518,9 @@ app.Diagram = function(diagram_id, setting) {
       case 'points':
         obj.c_changePoints(value);
         break;
+      case 'name':
+        obj.set('label', value);
+        break;
       }
 
     dia.canvas.renderAll();
@@ -981,6 +984,13 @@ app.Setting = function() {
                 changed = true;
               }
             break;
+          case 'name':
+            if (item.name != value)
+              {
+                item.name = value;
+                changed = true;
+              }
+            break;
           }
 
         if (changed)
@@ -995,6 +1005,22 @@ app.Setting = function() {
           }
       }
   };
+
+  this.modifySelected = function(key, value) {
+    if (!inited)
+      return;
+
+    if (setting.selectedID && setting.selectedID != '')
+      {
+        var elms = setting.selectedID.split('-');
+        if (elms[3] == 'null')
+          return;
+
+        if (setting.config.maps[elms[1]].items[elms[3]])
+          setting.modify(setting.selectedID, key, value);
+      }
+  };
+
   this.removeSelected = function() {
     if (!inited)
       return;
@@ -1256,6 +1282,13 @@ $(function() {
       width  : width,
       height : height
     });
+  });
+
+  $('#app-sidebar-item-info-name').change(function(e) {
+    var name = $.trim($(this).val());
+    if (name == '')
+      return;
+    setting.modifySelected('name', name);
   });
 
   // window width(1280)/height(720) of package.json
