@@ -1,6 +1,5 @@
 body {
   padding-top: 40px;
-  background-color: #f5f5f5;
 }
 
 label,
@@ -142,4 +141,8 @@ select {
   margin-bottom: 0;
   padding: 0px 4px;
   white-space: nowrap;
+}
+
+.app-sidebar-accordion-group-body input {
+  width: 90%;
 }

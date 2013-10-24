@@ -249,6 +249,7 @@ app.Diagram = function(diagram_id, setting) {
               points.push(Math.round((obj.left + hw) / canvas.c_scaleValue));
               points.push(Math.round((obj.top + hh) / canvas.c_scaleValue));
 
+              obj.c_points = points.join(',');
               setting.modify(obj.c_id, 'points', points.join(','));
             }
         });
@@ -278,9 +279,31 @@ app.Diagram = function(diagram_id, setting) {
           fill: 'rgb(255,255,255)',
           stroke: 'rgb(0,0,0)',
           strokeWidth: 1,
-          label: item.name
+          label: item.name,
         });
         obj.c_type = item.type;
+        obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
+        obj.c_changePoints = function(points) {
+          if (this.c_points != points)
+            return;
+
+          this.c_points = points;
+
+          var elms = points.split(',');
+          var x1 = parseInt(elms[0]);
+          var y1 = parseInt(elms[1]);
+          var x2 = parseInt(elms[2]);
+          var y2 = parseInt(elms[3]);
+          var c = findCenter(x1, y1, x2, y2);
+
+          this.left = c.x * dia.canvas.c_scaleValue;
+          this.top = c.y * dia.canvas.c_scaleValue;
+          this.width = (x2 - x1) * dia.canvas.c_scaleValue;
+          this.height = (y2 - y1) * dia.canvas.c_scaleValue;
+
+          dia.canvas.renderAll();
+        };
+
         break;
       case 1: // DAI_CIRCLE
         obj = new LabeledCircle({
@@ -293,6 +316,26 @@ app.Diagram = function(diagram_id, setting) {
           label: item.name
         });
         obj.c_type = item.type;
+        obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
+        obj.c_changePoints = function(points) {
+          if (this.c_points != points)
+            return;
+
+          this.c_points = points;
+
+          var elms = points.split(',');
+          var x1 = parseInt(elms[0]);
+          var y1 = parseInt(elms[1]);
+          var x2 = parseInt(elms[2]);
+          var y2 = parseInt(elms[3]);
+          var c = findCenter(x1, y1, x2, y2);
+
+          this.left = c.x * dia.canvas.c_scaleValue;
+          this.top = c.y * dia.canvas.c_scaleValue;
+          this.radius = (x2 - x1) * dia.canvas.c_scaleValue;
+
+          dia.canvas.renderAll();
+        };
         break;
       }
 
@@ -401,6 +444,24 @@ app.Diagram = function(diagram_id, setting) {
     dia.canvas.renderAll();
   }
 
+  function modifyItem(dia, c_id, key, value) {
+    if (!dia.canvas)
+      return;
+
+    obj = dia.canvas.c_getObjectById(c_id);
+    if (!obj)
+      return;
+
+    switch (key)
+      {
+      case 'points':
+        obj.c_changePoints(value);
+        break;
+      }
+
+    dia.canvas.renderAll();
+  }
+
   setting.callbacks.add(function(data) {
     switch(data.cmd)
       {
@@ -438,6 +499,14 @@ app.Diagram = function(diagram_id, setting) {
         var dia = lookupDia(dia_id);
         if (dia)
           selectItem(dia, data.id);
+        break;
+      case 'item.modified':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          modifyItem(dia, data.id, data.key, data.value);
+
         break;
       case 'map.show':
         var elms = data.id.split('-');
@@ -511,7 +580,7 @@ app.Sidebar = function(sidebar_id, setting) {
         html +=               "<label for='" + c_id + "-name'>Name</label>";
         html +=             "</th>";
         html +=             "<td>";
-        html +=               "<input id='" + c_id + "-name' type='text' value='" + map.name + "' class='input-mini'>";
+        html +=               "<input id='" + c_id + "-name' type='text' value='" + map.name + "' class='input-medium'>";
         html +=             "</td>";
         html +=           "</tr>";
         html +=           "<tr>";
@@ -522,21 +591,15 @@ app.Sidebar = function(sidebar_id, setting) {
         html +=               "<label>" + map.width + "x" + map.height +"</label>";
         html +=             "</td>";
         html +=           "</tr>";
-        html +=           "<tr>";
-        html +=             "<th>";
-        html +=               "<label>Images</label>";
-        html +=             "</th>";
-        html +=             "<td>";
-        html +=               "<ol>";
-        for (var i = 0; i < map.background_images.length; i++)
-          {
-            html +=             "<li>" + map.background_images[i] + "</li>";
-          }
-        html +=               "</ol>";
-        html +=             "</td>";
-        html +=           "</tr>";
         html +=         "</tbody>";
         html +=       "</table>";
+        html +=       "<label>Background Images</label>";
+        html +=       "<ol>";
+        for (var i = 0; i < map.background_images.length; i++)
+          {
+            html +=     "<li>" + map.background_images[i] + "</li>";
+          }
+        html +=       "</ol>";
         html +=     "</div>";
         html +=   "</div>";
         html += "</div>";
@@ -561,6 +624,16 @@ app.Sidebar = function(sidebar_id, setting) {
 
     c.on('shown', function() {
       $(this).css({ 'overflow': 'visible' });
+    });
+
+    $('#' + c_id + '-name').change(function(e) {
+      var name = $.trim($(this).val());
+      if (name == '')
+        return;
+
+      var map_idx = $(this).attr('id').split('-')[3];
+      var oid = 'map-' + map_idx;
+      setting.modify(oid, 'name', name);
     });
   }
 
@@ -666,21 +739,70 @@ app.Setting = function() {
   };
   this.modify = function(c_id, key, value) {
     var k = c_id.split('-');
-    var item;
 
-    item = setting.config.maps[k[1]].items[k[3]];
-    switch (key) {
-      case 'points':
-        var points = value.split(',');
+    var changed = false;
+    if (k.length == 2)  /* map-0 */
+      {
+        var map;
 
-        item.x1 = points[0];
-        item.y1 = points[1];
-        item.x2 = points[2];
-        item.y2 = points[3];
-        break;
-    }
+        map = setting.config.maps[k[1]];
+        switch (key)
+          {
+          case 'name':
+            if (map[key] != value)
+              {
+                map[key] = value;
+                changed = true;
+              }
+            break;
+          }
 
-    console.log(c_id + '[' + key + '] : ' + value);
+        if (changed)
+          {
+            console.log('modify ' + c_id + '-' + key + ' => ' + value);
+            this.callbacks.fire({
+              cmd   : 'map.modified',
+              id    : c_id,
+              key   : key,
+              value : value
+            });
+          }
+      }
+    else if (k.length == 4) /* map-0-item-0 */
+      {
+        var item;
+
+        item = setting.config.maps[k[1]].items[k[3]];
+        switch (key)
+          {
+          case 'points':
+            var points = value.split(',');
+
+            if (item.x1 != points[0]
+                || item.y1 != points[1]
+                || item.x2 != points[2]
+                || item.y2 != points[3])
+              {
+                item.x1 = points[0];
+                item.y1 = points[1];
+                item.x2 = points[2];
+                item.y2 = points[3];
+                changed = true;
+              }
+            break;
+          }
+
+        if (changed)
+          {
+            console.log('modify ' + c_id + '-' + key + ' => ' + value);
+            this.callbacks.fire({
+              cmd   : 'item.modified',
+              id    : c_id,
+              key   : key,
+              value : value
+            });
+          }
+      }
   };
   this.remove = function() {
   };
