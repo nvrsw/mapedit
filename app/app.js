@@ -442,6 +442,17 @@ app.Diagram = function(diagram_id, setting) {
     dia.canvas.add(obj);
   }
 
+  function removeItem(dia, c_id) {
+    if (!dia.canvas)
+      return;
+
+    var obj = dia.canvas.c_getObjectById(c_id);
+    if (!obj)
+      return;
+
+    dia.canvas.remove(obj);
+  }
+
   function addBackgroundImage(dia, c_id, path) {
     if (!dia.canvas)
       return;
@@ -485,7 +496,11 @@ app.Diagram = function(diagram_id, setting) {
     dia.previousObject = dia.currentObject;
     dia.currentObject = obj;
     if (dia.currentObject)
-      dia.canvas.bringToFront(dia.currentObject);
+      {
+        dia.canvas.setActiveObject(dia.currentObject);
+        dia.canvas.bringToFront(dia.currentObject);
+        return;
+      }
 
     dia.canvas.renderAll();
   }
@@ -552,10 +567,25 @@ app.Diagram = function(diagram_id, setting) {
         var dia = lookupDia(dia_id);
         if (dia)
           modifyItem(dia, data.id, data.key, data.value);
-
+        break;
+      case 'item.removed':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          removeItem(dia, data.id);
+        break;
+      case 'map.draw':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia && dia.canvas)
+          dia.canvas.renderAll();
         break;
       case 'map.added':
         addMap(data.map);
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
         break;
       case 'map.removed':
         var elms = data.id.split('-');
@@ -761,7 +791,7 @@ app.Setting = function() {
   this.config = null;
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
-  this.selectId ='';
+  this.selectedID ='';
   this.path='';
 
   this.init = function(config, path) {
@@ -776,6 +806,49 @@ app.Setting = function() {
       }
 
     this.callbacks.fire({ cmd: 'setting.init' });
+  };
+  this.add = function(item) {
+    if (!inited)
+      return;
+
+    var m_idx = setting.map_idx;
+    if (!setting.config || !setting.config.maps[m_idx] || !setting.config.maps[m_idx].items)
+      return;
+
+    var ritem = item;
+    if (!ritem)
+      {
+        ritem = {
+          id : 'map-' + m_idx + '-item-' + setting.config.maps[m_idx].items.length,
+          valid: true,
+          name: 100 + setting.config.maps[m_idx].items.length,
+          type: 0,
+          x1 : 40,
+          y1 : 40,
+          x2 : 70,
+          y2 : 60
+        };
+        setting.config.maps[m_idx].items.push(ritem);
+        setting.callbacks.fire({
+          cmd  : 'item.add',
+          id   : ritem.id,
+          item : ritem
+        });
+        /*
+        setting.callbacks.fire({
+          cmd  : 'map.draw',
+          id   : 'map-' + m_idx
+        });
+        */
+        this.select(ritem.id);
+        return;
+      }
+
+    setting.callbacks.fire({
+      cmd  : 'item.add',
+      id   : ritem.id,
+      item : ritem
+    });
   };
   this.load = function() {
     var t = new Date();
@@ -808,15 +881,10 @@ app.Setting = function() {
         var items = config.maps[m_idx].items;
         for (var i = 0; i < items.length; i++)
           {
-            var c_id = "map-" + m_idx + "-item-" + i;
             var item = items[i];
-
+            item.id = "map-" + m_idx + "-item-" + i;
             item.valid = true;
-            this.callbacks.fire({
-              cmd  : 'item.add',
-              id   : "map-" + m_idx + "-item-" + i,
-              item : items[i]
-            });
+            this.add(item);
           }
       }
 
@@ -852,10 +920,10 @@ app.Setting = function() {
     else
       id = "map-" + setting.map_idx + "-item-null";
 
-    if (this.selectId == id)
+    if (this.selectedID == id)
       return;
 
-    this.selectId = id;
+    this.selectedID = id;
     this.callbacks.fire({ cmd: 'item.selected', id: id });
   };
   this.modify = function(c_id, key, value) {
@@ -925,7 +993,26 @@ app.Setting = function() {
           }
       }
   };
-  this.remove = function() {
+  this.removeSelected = function() {
+    if (!inited)
+      return;
+
+    if (setting.selectedID && setting.selectedID != '')
+      {
+        var elms = setting.selectedID.split('-');
+        if (elms[3] == 'null')
+          return;
+
+        if (setting.config.maps[elms[1]].items[elms[3]])
+          {
+            setting.config.maps[elms[1]].items[elms[3]].valid = false;
+            setting.callbacks.fire({
+              cmd   : 'item.removed',
+              id    : setting.selectedID
+            });
+            setting.select(null);
+          }
+      }
   };
 
   this.addMap = function(m) {
@@ -945,9 +1032,19 @@ app.Setting = function() {
           'items' : []
         };
         this.config.maps.push(map);
+
+        this.callbacks.fire({
+          cmd : 'map.added',
+          id  : map.id,
+          map : map
+        });
+        this.selectMap(map.id);
+        return;
       }
+
     this.callbacks.fire({
       cmd : 'map.added',
+      id  : map.id,
       map : map
     });
   };
@@ -1117,7 +1214,14 @@ $(function() {
   });
 
   $('#app-sidebar-map-add').click(function(e) {
-    setting.addMap();
+    setting.addMap(null);
+  });
+
+  $('#app-sidebar-item-add').click(function(e) {
+    setting.add(null);
+  });
+  $('#app-sidebar-item-remove').click(function(e) {
+    setting.removeSelected();
   });
 
   // window width(1280)/height(720) of package.json

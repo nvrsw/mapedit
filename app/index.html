@@ -69,7 +69,17 @@
       <div class="accordion" id="app-sidebar-map-group">
         <div class="app-sidebar-map-bottom" id="app-sidebar-map-pivot"></div>
       </div> <!-- accordion -->
-      <div class="app-sidebar-header">Item</div>
+      <div class="app-sidebar-header">
+        Item
+        <button type='button' class='btn btn-mini btn-link btn-group'
+           rel='tooltip' title='Add new item' id='app-sidebar-item-add'>
+          <i class='icon-plus'></i>
+        </button>
+        <button type='button' class='btn btn-mini btn-link btn-group'
+           rel='tooltip' title='Remove this item' id='app-sidebar-item-remove'>
+          <i class='icon-trash'></i>
+        </button>
+      </div>
       <div id="app-sidebar-item-info" class="accordion-group">
         <table class="table-striped">
           <tbody>
