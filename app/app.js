@@ -201,6 +201,37 @@ app.Diagram = function(diagram_id, setting) {
       }
     });
 
+    if (map.background_color)
+      {
+        var color = '';
+        if (map.background_color[0] == '#')
+          {
+            if (map.background_color.length == 9) // rgba
+              {
+                var hr = map.background_color.substring(1, 3);
+                var hg = map.background_color.substring(3, 5);
+                var hb = map.background_color.substring(5, 7);
+                var ha = map.background_color.substring(7, 9);
+                color  = 'rgba(';
+                color += parseInt(hr, 16) + ',';
+                color += parseInt(hg, 16) + ',';
+                color += parseInt(hb, 16) + ',';
+                color += parseInt(ha, 16) + ')';
+              }
+            else if (map.background_color.length == 7) // rgb
+              {
+                var hr = map.background_color.substring(1, 3);
+                var hg = map.background_color.substring(3, 5);
+                var hb = map.background_color.substring(5, 7);
+                color  = 'rgb(';
+                color += parseInt(hr, 16) + ',';
+                color += parseInt(hg, 16) + ',';
+                color += parseInt(hb, 16) + ')';
+              }
+          }
+        canvas.backgroundColor = color;
+      }
+
     canvas.on('mouse:down', function(e) {
       if (e.target)
         return;
