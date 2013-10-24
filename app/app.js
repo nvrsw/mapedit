@@ -99,165 +99,180 @@ app.Diagram = function(diagram_id, setting) {
 
     diaList = [];
     rootContainer.empty();
-    rootContainer.attr('width', setting.config.maps[0].width);
-    rootContainer.attr('height', setting.config.maps[0].height);
+  }
 
-    for (var i = 0; i < setting.config.maps.length; i++)
-      {
-        var dia = {
-          c_id   : 'app-dia-' + i,
-          width  : setting.config.maps[i].width,
-          height : setting.config.maps[i].height
+  function addMap(map) {
+    var dia = {
+      c_id   : 'app-dia-' + map.id.split('-')[1],
+      width  : map.width,
+      height : map.height
+    };
+    var canvasID = dia.c_id + '-canvas';
+
+    rootContainer.append("<div id='" + dia.c_id + "'></div>");
+    $('#' + dia.c_id).append("<canvas id='" + canvasID + "' class='app-canvas'></canvas>");
+    $('#' + canvasID).attr('width', dia.width);
+    $('#' + canvasID).attr('height', dia.height);
+
+    dia.currentObject = null;
+    dia.previousObject = null;
+
+    var canvas;
+    canvas = new fabric.Canvas(canvasID, {
+      selection: false,
+      perPixelTargetFind: true,
+      c_scaleValue: 1.0,
+      c_scale: function(value) {
+        var self = this;
+        var restoreIt = function(prop) {
+          return parseFloat(prop, 10) / self.c_scaleValue;
         };
-        var canvasID = dia.c_id + '-canvas';
+        var scaleIt = function(prop) {
+          return parseFloat(prop, 10) * value;
+        };
 
-        rootContainer.append("<div id='" + dia.c_id + "'></div>");
-        $('#' + dia.c_id).append("<canvas id='" + canvasID + "' class='app-canvas'></canvas>");
-        $('#' + canvasID).attr('width', dia.width);
-        $('#' + canvasID).attr('height', dia.height);
+        self.setHeight(self.getHeight() / self.c_scaleValue);
+        self.setWidth(self.getWidth() / self.c_scaleValue);
+        self.forEachObject(function(obj) {
+          var currentObjTop = obj.get('top'),
+              currentObjLeft = obj.get('left'),
+              currentObjScaleX = obj.get('scaleX'),
+              currentObjScaleY = obj.get('scaleY'),
+              scaledObjTop = restoreIt(currentObjTop),
+              scaledObjLeft = restoreIt(currentObjLeft),
+              scaledObjScaleX = restoreIt(currentObjScaleX),
+              scaledObjScaleY = restoreIt(currentObjScaleY);
 
-        dia.currentObject = null;
-        dia.previousObject = null;
+          obj.set({
+            top: scaledObjTop,
+            left: scaledObjLeft,
+            scaleX: scaledObjScaleX,
+            scaleY: scaledObjScaleY
+          });
+          obj.setCoords();
+        });
 
-        var canvas;
-        canvas = new fabric.Canvas(canvasID, {
-          selection: false,
-          perPixelTargetFind: true,
-          c_scaleValue: 1.0,
-          c_scale: function(value) {
-            var self = this;
-            var restoreIt = function(prop) {
-              return parseFloat(prop, 10) / self.c_scaleValue;
-            };
-            var scaleIt = function(prop) {
-              return parseFloat(prop, 10) * value;
-            };
+        self.setHeight(self.getHeight() * value);
+        self.setWidth(self.getWidth() * value);
+        self.forEachObject(function(obj) {
+          var currentObjTop = obj.get('top'),
+              currentObjLeft = obj.get('left'),
+              currentObjScaleX = obj.get('scaleX'),
+              currentObjScaleY = obj.get('scaleY'),
+              scaledObjTop = scaleIt(currentObjTop),
+              scaledObjLeft = scaleIt(currentObjLeft),
+              scaledObjScaleX = scaleIt(currentObjScaleX),
+              scaledObjScaleY = scaleIt(currentObjScaleY);
 
-            self.setHeight(self.getHeight() / self.c_scaleValue);
-            self.setWidth(self.getWidth() / self.c_scaleValue);
-            self.forEachObject(function(obj) {
-              var currentObjTop = obj.get('top'),
-                  currentObjLeft = obj.get('left'),
-                  currentObjScaleX = obj.get('scaleX'),
-                  currentObjScaleY = obj.get('scaleY'),
-                  scaledObjTop = restoreIt(currentObjTop),
-                  scaledObjLeft = restoreIt(currentObjLeft),
-                  scaledObjScaleX = restoreIt(currentObjScaleX),
-                  scaledObjScaleY = restoreIt(currentObjScaleY);
+          obj.set({
+            top: scaledObjTop,
+            left: scaledObjLeft,
+            scaleX: scaledObjScaleX,
+            scaleY: scaledObjScaleY
+          });
+          obj.setCoords();
+        });
 
-              obj.set({
-                top: scaledObjTop,
-                left: scaledObjLeft,
-                scaleX: scaledObjScaleX,
-                scaleY: scaledObjScaleY
-              });
-              obj.setCoords();
-            });
+        self.c_scaleValue = value;
+        self.renderAll();
+      },
+      c_backgrounds: [],
+      c_addBackground: function(obj) {
+        var self = this;
 
-            self.setHeight(self.getHeight() * value);
-            self.setWidth(self.getWidth() * value);
-            self.forEachObject(function(obj) {
-              var currentObjTop = obj.get('top'),
-                  currentObjLeft = obj.get('left'),
-                  currentObjScaleX = obj.get('scaleX'),
-                  currentObjScaleY = obj.get('scaleY'),
-                  scaledObjTop = scaleIt(currentObjTop),
-                  scaledObjLeft = scaleIt(currentObjLeft),
-                  scaledObjScaleX = scaleIt(currentObjScaleX),
-                  scaledObjScaleY = scaleIt(currentObjScaleY);
+        self.c_backgrounds.push(obj);
+        self.add(obj);
 
-              obj.set({
-                top: scaledObjTop,
-                left: scaledObjLeft,
-                scaleX: scaledObjScaleX,
-                scaleY: scaledObjScaleY
-              });
-              obj.setCoords();
-            });
-
-            self.c_scaleValue = value;
-            self.renderAll();
-          },
-          c_backgrounds: [],
-          c_addBackground: function(obj) {
-            var self = this;
-
-            self.c_backgrounds.push(obj);
-            self.add(obj);
-
-            for (var i = self.c_backgrounds.length - 1; i >= 0; i--)
-              self.sendToBack(self.c_backgrounds[i]);
-          },
-          c_getObjectById: function(c_id) {
-            var f = null;
-            var objects = this.getObjects();
-            var i = objects.length;
-            while (i--) {
-              var obj = objects[i];
-              if (obj.c_id && obj.c_id == c_id) {
-                f = obj;
-                break;
-              }
-            }
-            return f;
+        for (var i = self.c_backgrounds.length - 1; i >= 0; i--)
+          self.sendToBack(self.c_backgrounds[i]);
+      },
+      c_getObjectById: function(c_id) {
+        var f = null;
+        var objects = this.getObjects();
+        var i = objects.length;
+        while (i--) {
+          var obj = objects[i];
+          if (obj.c_id && obj.c_id == c_id) {
+            f = obj;
+            break;
           }
-        });
+        }
+        return f;
+      }
+    });
 
-        canvas.on('mouse:down', function(e) {
-          if (e.target)
-            return;
+    canvas.on('mouse:down', function(e) {
+      if (e.target)
+        return;
 
-          setting.select(null);
-        });
+      setting.select(null);
+    });
 
-        canvas.on('object:selected', function(e) {
-          var obj = e.target;
+    canvas.on('object:selected', function(e) {
+      var obj = e.target;
 
-          if (!obj)
-            return;
+      if (!obj)
+        return;
 
-          if (obj.c_id) {
-            setting.select(obj.c_id);
-            return;
+      if (obj.c_id) {
+        setting.select(obj.c_id);
+        return;
+      }
+    });
+
+    canvas.on('object:moving', function(e) {
+      var obj = e.target;
+
+      if (!obj)
+        return;
+
+      if (obj.c_dragBoundFunc)
+        obj.c_dragBoundFunc();
+    });
+
+    canvas.on('object:modified', function(e) {
+      var obj = e.target;
+
+      if (!obj)
+        return;
+
+      if (obj.c_id)
+        {
+          var hw = obj.getWidth() / 2;
+          var hh = obj.getHeight() / 2;
+          var points = [];
+
+          points.push(Math.round((obj.left - hw) / canvas.c_scaleValue));
+          points.push(Math.round((obj.top - hh) / canvas.c_scaleValue));
+          points.push(Math.round((obj.left + hw) / canvas.c_scaleValue));
+          points.push(Math.round((obj.top + hh) / canvas.c_scaleValue));
+
+          obj.c_points = points.join(',');
+          setting.modify(obj.c_id, 'points', points.join(','));
+        }
+    });
+
+    dia.canvas = canvas;
+    diaList.push(dia);
+
+    $('#' + dia.c_id).hide();
+  }
+
+  function removeMap(dia) {
+    var idx = -1;
+
+    for (var i = 0; i < diaList.length; i++)
+      {
+        if (diaList[i].c_id == dia.c_id)
+          {
+            idx = i;
+            break;
           }
-        });
-
-        canvas.on('object:moving', function(e) {
-          var obj = e.target;
-
-          if (!obj)
-            return;
-
-          if (obj.c_dragBoundFunc)
-            obj.c_dragBoundFunc();
-        });
-
-        canvas.on('object:modified', function(e) {
-          var obj = e.target;
-
-          if (!obj)
-            return;
-
-          if (obj.c_id)
-            {
-              var hw = obj.getWidth() / 2;
-              var hh = obj.getHeight() / 2;
-              var points = [];
-
-              points.push(Math.round((obj.left - hw) / canvas.c_scaleValue));
-              points.push(Math.round((obj.top - hh) / canvas.c_scaleValue));
-              points.push(Math.round((obj.left + hw) / canvas.c_scaleValue));
-              points.push(Math.round((obj.top + hh) / canvas.c_scaleValue));
-
-              obj.c_points = points.join(',');
-              setting.modify(obj.c_id, 'points', points.join(','));
-            }
-        });
-
-        dia.canvas = canvas;
-        diaList.push(dia);
-
-        $('#' + dia.c_id).hide();
+      }
+    if (idx >= 0)
+      {
+        $('#' + dia.c_id).remove();
+        diaList.splice(i, 1);
       }
   }
 
@@ -508,6 +523,16 @@ app.Diagram = function(diagram_id, setting) {
           modifyItem(dia, data.id, data.key, data.value);
 
         break;
+      case 'map.added':
+        addMap(data.map);
+        break;
+      case 'map.removed':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          removeMap(dia);
+        break;
       case 'map.selected':
         var elms = data.id.split('-');
         var dia_id = 'app-dia-' + elms[1];
@@ -543,18 +568,7 @@ app.Sidebar = function(sidebar_id, setting) {
     switch(data.cmd)
       {
       case 'setting.init':
-        {
-          var sibling = $('#app-sidebar-map-pivot');
-          var selectedMap = '';
-
-          $.each(setting.config.maps, function(idx, map) {
-            removeMapEntry(map, idx, sibling);
-          });
-
-          $.each(setting.config.maps, function(idx, map) {
-            createMapEntry(map, idx, sibling);
-          });
-        }
+        $('#app-sidebar-map-pivot').siblings().remove();
         break;
       case 'map.selected':
         if (selectedMap == data.id)
@@ -562,6 +576,12 @@ app.Sidebar = function(sidebar_id, setting) {
 
         selectedMap = data.id;
         $('a[data-target="#app-sidebar-' + data.id + '"]').click();
+        break;
+      case 'map.added':
+        createMapEntry(data.map, $('#app-sidebar-map-pivot'));
+        break;
+      case 'map.removed':
+        removeMapEntry(data.id);
         break;
       case 'map.modified':
         switch(data.key)
@@ -574,14 +594,14 @@ app.Sidebar = function(sidebar_id, setting) {
       }
   });
 
-  function createMapEntry(map, idx, sibling) {
-    var c_id = "app-sidebar-map-" + idx;
+  function createMapEntry(map, sibling) {
+    var c_id = "app-sidebar-" + map.id;
 
     var html  = "<div class='accordion-group app-sidebar-accordion-group'>";
         html +=   "<div class='accordion-heading'>";
         html +=     "<button type='button' class='btn btn-mini btn-link btn-group' rel='tooltip' title='Remove this map' id='" + c_id + "-remove'>";
         html +=       "<i class='icon-trash'></i>";
-        html +=         "</button>";
+        html +=     "</button>";
         html +=     "<a class='accordion-toggle' data-toggle='collapse' data-target='#" + c_id + "'";
         html +=        "data-parent='#app-sidebar-map-group'>";
         html +=        "<span id='" + c_id + "-toggle-name'>" + map.name + "</span>";
@@ -652,12 +672,14 @@ app.Sidebar = function(sidebar_id, setting) {
       setting.modify(oid, 'name', name);
     });
     $('#' + c_id + '-remove').click(function(e) {
-      console.log($(this).attr('id'));
+      var elms = $(this).attr('id').split('-');
+      var mapID = [elms[2], elms[3]].join('-');
+      setting.removeMap(mapID);
     });
   }
 
-  function removeMapEntry(map, idx) {
-    var obj = $('#app-sidebar-map-' + idx);
+  function removeMapEntry(mapID) {
+    var obj = $('#app-sidebar-' + mapID);
     if (obj)
       obj.parent().remove();
   }
@@ -665,6 +687,7 @@ app.Sidebar = function(sidebar_id, setting) {
 
 app.Setting = function() {
   var setting = this;
+  var inited = false;
 
   this.basedir = "test/";
   this.config = null;
@@ -688,7 +711,18 @@ app.Setting = function() {
   this.load = function() {
     var t = new Date();
 
+    inited = true;
+
     var config = setting.config;
+    for (var i = 0; i < config.maps.length; i++)
+      {
+        var map = config.maps[i];
+
+        map.valid = true;
+        map.id = 'map-' + i;
+        this.addMap(map);
+      }
+
     for (var m_idx = 0; m_idx < config.maps.length; m_idx++)
       {
         if (config.maps[m_idx].background_images)
@@ -718,7 +752,9 @@ app.Setting = function() {
           }
       }
 
-    this.selectMap('map-' + setting.map_idx);
+    if (config.maps.length > 0)
+      this.selectMap('map-' + setting.map_idx);
+
     console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
   };
   this.selectMap = function(mapID) {
@@ -826,7 +862,46 @@ app.Setting = function() {
   this.remove = function() {
   };
 
-  this.loadMap = function(path) {
+  this.addMap = function(m) {
+    if (!inited)
+      return;
+
+    var map = m;
+    if (!map)
+      {
+        map = {
+          'valid'  : true,
+          'id'     : 'map-' + this.config.maps.length,
+          'name'   : 'new map',
+          'width'  : 1920,
+          'height' : 1080,
+          'background_images' : [],
+          'items' : []
+        };
+        this.config.maps.push(map);
+      }
+    this.callbacks.fire({
+      cmd : 'map.added',
+      map : map
+    });
+  };
+
+  this.removeMap = function(mapID) {
+    for (var i = 0; i < this.config.maps.length; i++)
+      {
+        if (this.config.maps[i].id == mapID)
+          {
+            this.config.maps[i].valid = false;
+            this.callbacks.fire({
+              cmd : 'map.removed',
+              id : mapID
+            });
+            break;
+          }
+      }
+  };
+
+  this.openMapFile = function(path) {
     var loadingObj = $('#app-loading-overlay');
 
     loadingObj.show();
@@ -854,13 +929,21 @@ app.Setting = function() {
       loadingObj.hide();
     });
   };
-  this.reloadMap = function() {
+  this.reopenMapFile = function() {
     if (this.path == '')
       return;
 
-    this.loadMap(this.path);
+    this.openMapFile(this.path);
   };
+  this.newMapFile = function(path) {
+    var config = {
+      'format' : 1,
+      'maps' : []
+    };
 
+    setting.init(config, path);
+    setting.load();
+  };
 };
 
 $(function() {
@@ -875,18 +958,17 @@ $(function() {
   sidebar = new app.Sidebar('app-sidebar', setting);
 
   $('#app-menu-new-file').click(function(e) {
-    console.log($(this).attr('id') + " is clicked");
+    setting.newMapFile("test");
   });
   $('#app-menu-open-file').click(function(e) {
     $('#app-map-file').trigger('click');
   });
   $('#app-map-file').on('change', function(e) {
-    console.log($(this).val());
-    setting.loadMap($(this).val());
+    setting.openMapFile($(this).val());
   });
 
   $('#app-menu-openrecent').click(function(e) {
-    setting.reloadMap();
+    setting.reopenMapFile();
   });
 
   $('#app-menu-save').click(function(e) {
@@ -907,6 +989,10 @@ $(function() {
 
   $('#app-view-50').click(function(e) {
     setting.zoom("0.5");
+  });
+
+  $('#app-sidebar-map-add').click(function(e) {
+    setting.addMap();
   });
 
   // window width(1280)/height(720) of package.json

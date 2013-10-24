@@ -158,6 +158,16 @@ select {
   border-radius: 5px 5px 0 0;
 }
 
+.app-sidebar-header .btn-grup {
+  float: right;
+  padding-top: 1px;
+  padding-right: 1px;
+}
+
+.app-sidebar-header .btn-mini {
+  margin-top: -8px;
+}
+
 .accordion-heading .btn-group {
   float: right;
   padding-top: 1px;
