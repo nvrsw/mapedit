@@ -733,8 +733,9 @@ app.Setting = function() {
 
     for (var m = 0; m < config.maps.length; m++)
       {
+        config.maps[m].valid = true;
         for (var i = 0; i < config.maps[m].items.length; i++)
-          config.maps[m].items[i].alive = true;
+          config.maps[m].items[i].valid = true;
       }
 
     this.callbacks.fire({ cmd: 'setting.init' });
@@ -770,16 +771,15 @@ app.Setting = function() {
         var items = config.maps[m_idx].items;
         for (var i = 0; i < items.length; i++)
           {
-            if (items[i].alive)
-              {
-                var c_id = "map-" + m_idx + "-item-" + i;
+            var c_id = "map-" + m_idx + "-item-" + i;
+            var item = items[i];
 
-                this.callbacks.fire({
-                  cmd  : 'item.add',
-                  id   : "map-" + m_idx + "-item-" + i,
-                  item : items[i]
-                });
-              }
+            item.valid = true;
+            this.callbacks.fire({
+              cmd  : 'item.add',
+              id   : "map-" + m_idx + "-item-" + i,
+              item : items[i]
+            });
           }
       }
 
@@ -799,8 +799,6 @@ app.Setting = function() {
     });
 
     setting.select(null);
-  };
-  this.save = function() {
   };
   this.zoom = function(scale) {
     this.callbacks.fire({
@@ -975,6 +973,64 @@ app.Setting = function() {
     setting.init(config, path);
     setting.load();
   };
+  this.saveMapFile = function(path) {
+    if (!inited)
+      return;
+
+    var loadingObj = $('#app-loading-overlay');
+    var config = {};
+
+    loadingObj.show();
+
+    config.format = setting.config.format;
+    config.maps = [];
+    for (var m = 0; m < setting.config.maps.length; m++)
+      {
+        var map = setting.config.maps[m];
+        if (!map.valid)
+          continue;
+
+        var new_map = {};
+        new_map.name = map.name;
+        new_map.width = map.width;
+        new_map.height = map.height;
+        if (map.background_color)
+          new_map.background_color = map.background_color;
+
+        new_map.background_images = [];
+        for (var i = 0; i < map.background_images.length; i++)
+          new_map.background_images.push(map.background_images[i]);
+
+        new_map.items = [];
+        for (var i = 0; i < map.items.length; i++)
+          {
+            var item = map.items[i];
+            if (!item.valid)
+              continue;
+
+            var new_item = {};
+            new_item.name = item.name;
+            new_item.type = item.type;
+            new_item.x1 = item.x1;
+            new_item.y1 = item.y1;
+            new_item.x2 = item.x2;
+            new_item.y2 = item.y2;
+            new_map.items.push(new_item);
+          }
+
+        config.maps.push(new_map);
+      }
+
+    var data = JSON.stringify(config, null, 2);
+
+    app_fs.writeFile(path, data, function(err) {
+      if (err) {
+        console.log(err);
+      }
+      loadingObj.hide();
+    });
+  };
+
 };
 
 $(function() {
@@ -1003,7 +1059,7 @@ $(function() {
   });
 
   $('#app-menu-save').click(function(e) {
-    console.log($(this).val());
+    setting.saveMapFile("test.json");
   });
 
   $('#app-view-200').click(function(e) {
