@@ -146,3 +146,20 @@ select {
 .app-sidebar-accordion-group-body input {
   width: 90%;
 }
+
+.app-sidebar-header {
+  padding: 8px 8px 8px 2px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #ebebeb;
+  border-radius: 5px 5px 0 0;
+}
+
+.accordion-heading .btn-group {
+  float: right;
+  padding-top: 1px;
+  padding-right: 1px;
+}

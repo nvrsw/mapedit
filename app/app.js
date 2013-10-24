@@ -545,6 +545,7 @@ app.Sidebar = function(sidebar_id, setting) {
       case 'setting.init':
         {
           var sibling = $('#app-sidebar-map-pivot');
+          var selectedMap = '';
 
           $.each(setting.config.maps, function(idx, map) {
             removeMapEntry(map, idx, sibling);
@@ -556,7 +557,11 @@ app.Sidebar = function(sidebar_id, setting) {
         }
         break;
       case 'map.selected':
-        $('#app-sidebar-map').text(data.id + '[' + data.name + ']');
+        if (selectedMap == data.id)
+          break;
+
+        selectedMap = data.id;
+        $('a[data-target="#app-sidebar-' + data.id + '"]').click();
         break;
       case 'map.modified':
         switch(data.key)
@@ -574,6 +579,9 @@ app.Sidebar = function(sidebar_id, setting) {
 
     var html  = "<div class='accordion-group app-sidebar-accordion-group'>";
         html +=   "<div class='accordion-heading'>";
+        html +=     "<button type='button' class='btn btn-mini btn-link btn-group' rel='tooltip' title='Remove this map' id='" + c_id + "-remove'>";
+        html +=       "<i class='icon-trash'></i>";
+        html +=         "</button>";
         html +=     "<a class='accordion-toggle' data-toggle='collapse' data-target='#" + c_id + "'";
         html +=        "data-parent='#app-sidebar-map-group'>";
         html +=        "<span id='" + c_id + "-toggle-name'>" + map.name + "</span>";
@@ -642,6 +650,9 @@ app.Sidebar = function(sidebar_id, setting) {
       var map_idx = $(this).attr('id').split('-')[3];
       var oid = 'map-' + map_idx;
       setting.modify(oid, 'name', name);
+    });
+    $('#' + c_id + '-remove').click(function(e) {
+      console.log($(this).attr('id'));
     });
   }
 
