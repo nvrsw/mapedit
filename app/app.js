@@ -378,7 +378,7 @@ app.Diagram = function(diagram_id, setting) {
 
           this.left = c.x * dia.canvas.c_scaleValue;
           this.top = c.y * dia.canvas.c_scaleValue;
-          this.radius = (x2 - x1) * dia.canvas.c_scaleValue;
+          this.radius = (x2 - x1) * dia.canvas.c_scaleValue / 2;
 
           dia.canvas.renderAll();
         };
@@ -809,7 +809,7 @@ app.Setting = function() {
 
     this.callbacks.fire({ cmd: 'setting.init' });
   };
-  this.add = function(item) {
+  this.add = function(item, options) {
     if (!inited)
       return;
 
@@ -824,7 +824,7 @@ app.Setting = function() {
           id : 'map-' + m_idx + '-item-' + setting.config.maps[m_idx].items.length,
           valid: true,
           name: 100 + setting.config.maps[m_idx].items.length,
-          type: 0,
+          type: options.type,
           x1 : 40,
           y1 : 40,
           x2 : 70,
@@ -886,7 +886,7 @@ app.Setting = function() {
             var item = items[i];
             item.id = "map-" + m_idx + "-item-" + i;
             item.valid = true;
-            this.add(item);
+            this.add(item, {});
           }
       }
 
@@ -1227,8 +1227,11 @@ $(function() {
     $('#app-modal-map').modal('show');
   });
 
-  $('#app-sidebar-item-add').click(function(e) {
-    setting.add(null);
+  $('#app-sidebar-item-add-rect').click(function(e) {
+    setting.add(null, { type: 0 });
+  });
+  $('#app-sidebar-item-add-circle').click(function(e) {
+    setting.add(null, { type: 1 });
   });
   $('#app-sidebar-item-remove').click(function(e) {
     setting.removeSelected();

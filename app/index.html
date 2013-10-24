@@ -62,8 +62,7 @@
     <div id="app-sidebar">
       <div id="app-overlay"></div>
       <div class="app-sidebar-header">Maps
-        <button type='button' class='btn btn-mini btn-link btn-group' rel='tooltip' title='Add new map'
-                id='app-sidebar-map-add'>";
+        <button type='button' class='btn btn-mini btn-link btn-group' rel='tooltip' title='Add new map'id='app-sidebar-map-add'>";
           <i class='icon-plus'></i>";
         </button>
       </div>
@@ -72,10 +71,15 @@
       </div> <!-- accordion -->
       <div class="app-sidebar-header">
         Item
-        <button type='button' class='btn btn-mini btn-link btn-group'
-           rel='tooltip' title='Add new item' id='app-sidebar-item-add'>
-          <i class='icon-plus'></i>
-        </button>
+        <div class="btn-group">
+          <button type='button' class='btn btn-mini btn-link dropdown-toggle' data-toggle='dropdown' rel='tooltip' title='Add new item' id='app-sidebar-item-add'>
+            <i class='icon-plus'></i>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a id="app-sidebar-item-add-rect"><i class="icon-plus"></i>DAI Box</a></li>
+            <li><a id="app-sidebar-item-add-circle"><i class="icon-plus"></i>DAI Circle</a></li>
+          </ul>
+        </div>
         <button type='button' class='btn btn-mini btn-link btn-group'
            rel='tooltip' title='Remove this item' id='app-sidebar-item-remove'>
           <i class='icon-trash'></i>
