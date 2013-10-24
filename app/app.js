@@ -508,7 +508,7 @@ app.Diagram = function(diagram_id, setting) {
           modifyItem(dia, data.id, data.key, data.value);
 
         break;
-      case 'map.show':
+      case 'map.selected':
         var elms = data.id.split('-');
         var dia_id = 'app-dia-' + elms[1];
 
@@ -555,8 +555,16 @@ app.Sidebar = function(sidebar_id, setting) {
           });
         }
         break;
-      case 'map.show':
+      case 'map.selected':
         $('#app-sidebar-map').text(data.id + '[' + data.name + ']');
+        break;
+      case 'map.modified':
+        switch(data.key)
+          {
+          case 'name':
+            $('#app-sidebar-' + data.id + '-toggle-name').text(data.value);
+            break;
+          }
         break;
       }
   });
@@ -619,7 +627,7 @@ app.Sidebar = function(sidebar_id, setting) {
       $('a[data-target="#' + id + '"]').parent().addClass('app-sidebar-entry-selected');
       var elms = id.split('-'); // 'app-sidebar-map-0'
       var obj_id = 'map-' + elms[3];
-      setting.showMap(obj_id);
+      setting.selectMap(obj_id);
     });
 
     c.on('shown', function() {
@@ -699,15 +707,15 @@ app.Setting = function() {
           }
       }
 
-    this.showMap('map-' + setting.map_idx);
+    this.selectMap('map-' + setting.map_idx);
     console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
   };
-  this.showMap = function(mapID) {
+  this.selectMap = function(mapID) {
     var elms = mapID.split('-');
 
     setting.map_idx = parseInt(elms[1]);
     this.callbacks.fire({
-      cmd  : 'map.show',
+      cmd  : 'map.selected',
       id   : mapID,
       name : setting.config.maps[setting.map_idx].name
     });
