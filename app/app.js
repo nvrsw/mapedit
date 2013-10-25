@@ -183,8 +183,27 @@ app.Diagram = function(diagram_id, setting) {
         self.c_backgrounds.push(obj);
         self.add(obj);
 
+        self.c_backgrounds.sort(function(a, b) {
+          return b.c_id - a.c_id;
+        });
         for (var i = self.c_backgrounds.length - 1; i >= 0; i--)
           self.sendToBack(self.c_backgrounds[i]);
+
+        self.renderAll();
+      },
+      c_removeBackground: function(obj) {
+        var self = this;
+
+        for (var i = 0; i < self.c_backgrounds.length; i++)
+          {
+            if (self.c_backgrounds[i] == obj)
+              {
+                self.c_backgrounds.splice(i, 1);
+                break;
+              }
+          }
+        self.remove(obj);
+        self.renderAll();
       },
       c_getObjectById: function(c_id) {
         var f = null;
@@ -453,17 +472,24 @@ app.Diagram = function(diagram_id, setting) {
     dia.canvas.remove(obj);
   }
 
-  function addBackgroundImage(dia, c_id, path) {
+  function addBackgroundImage(dia, c_id, filename) {
     if (!dia.canvas)
       return;
 
+    var iObj = dia.canvas.c_getObjectById(c_id);
+    if (iObj)
+      {
+        dia.canvas.c_removeBackground(iObj);
+      }
+
+    var path = setting.imagedir + '/' + filename;
     fabric.util.loadImage(path, function(img) {
       var obj = new fabric.Image(img, {
         left: dia.width / 2,
         top: dia.height / 2
       });
 
-      dia.canvas.c_id = c_id;
+      obj.c_id = c_id;
 
       obj.set('hasRotatingPoint', false);
       obj.set('hasControls', false);
@@ -478,9 +504,14 @@ app.Diagram = function(diagram_id, setting) {
       obj.set('selectable', false);
 
       dia.canvas.c_addBackground(obj);
-      dia.canvas.sendToBack(obj);
     });
   }
+
+  function removeBackgroundImage(dia, c_id) {
+    var obj = dia.canvas.c_getObjectById(c_id);
+    if (obj)
+      dia.canvas.c_removeBackground(obj);
+  };
 
   function selectItem(dia, c_id) {
     if (!dia.canvas)
@@ -548,7 +579,15 @@ app.Diagram = function(diagram_id, setting) {
         var dia_id = 'app-dia-' + elms[1];
         var dia = lookupDia(dia_id);
         if (dia)
-          addBackgroundImage(dia, data.id, data.path);
+          addBackgroundImage(dia, data.id, data.file);
+        break;
+      case 'item.removeBackground':
+        $('#app-sidebar-' + data.id).text('empty');
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          removeBackgroundImage(dia, data.id);
         break;
       case 'item.add':
         var elms = data.id.split('-');
@@ -672,6 +711,12 @@ app.Sidebar = function(sidebar_id, setting) {
         $('#app-sidebar-item-info-x2').val(item.x2);
         $('#app-sidebar-item-info-y2').val(item.y2);
         break;
+      case 'item.addBackground':
+        $('#app-sidebar-' + data.id).text(data.file);
+        break;
+      case 'item.removeBackground':
+        $('#app-sidebar-' + data.id).text('empty');
+        break;
       }
   });
 
@@ -731,12 +776,19 @@ app.Sidebar = function(sidebar_id, setting) {
         html +=         "</tbody>";
         html +=       "</table>";
         html +=       "<label>Background Images</label>";
-        html +=       "<ol>";
-        for (var i = 0; i < map.background_images.length; i++)
-          {
-            html +=     "<li>" + map.background_images[i] + "</li>";
-          }
-        html +=       "</ol>";
+        html +=       "<div class='app-sidebar-bg-container'>";
+        html +=         "<ul>"
+        for (var i = 0; i < map.backgrounds.length; i++) {
+          html +=         "<li>";
+          html +=           "<div id='" + c_id + "-bg-" + i + "'>empty</div>";
+          html +=           "<button type='button' class='btn btn-mini btn-link'";
+          html +=                    "rel='tooltip' title='Remove this background' id='" + c_id + "-bg-" + i + "-remove'>";
+          html +=           "<i class='icon-trash'></i>";
+          html +=           "</button>";
+          html +=         "</li>";
+        }
+        html +=         "</ul>"
+        html +=       "<div>";
         html +=     "</div>";
         html +=   "</div>";
         html += "</div>";
@@ -777,6 +829,28 @@ app.Sidebar = function(sidebar_id, setting) {
       var mapID = [elms[2], elms[3]].join('-');
       setting.removeMap(mapID);
     });
+
+    for (var i = 0; i < map.backgrounds.length; i++) {
+      if (map.backgrounds[i] == "")
+        {
+          $('#' + c_id + "-bg-" + i).text("empty");
+        }
+      else
+        {
+          $('#' + c_id + "-bg-" + i).text(map.backgrounds[i]);
+        }
+    }
+
+    for (var i = 0; i < map.backgrounds.length; i++) {
+      $('#' + c_id + "-bg-" + i).click(function(e) {
+        app.curBgTarget=$(this).attr('id');
+        $('#app-sidebar-bg-file').trigger('click');
+      });
+      $('#' + c_id + "-bg-" + i + "-remove").click(function(e) {
+        var elms = $(this).attr('id').split('-');
+        setting.removeBackground(elms[5]);
+      });
+    }
   }
 
   function removeMapEntry(mapID) {
@@ -790,7 +864,7 @@ app.Setting = function() {
   var setting = this;
   var inited = false;
 
-  this.basedir = "test/";
+  this.imagedir = "images";
   this.config = null;
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
@@ -808,6 +882,13 @@ app.Setting = function() {
         config.maps[m].valid = true;
         for (var i = 0; i < config.maps[m].items.length; i++)
           config.maps[m].items[i].valid = true;
+
+        config.maps[m].backgrounds = [];
+        for (var i = 0; i < 5; i++)
+          config.maps[m].backgrounds.push("empty");
+
+        for (var i = 0; i < config.maps[m].background_images.length && i < 5; i++)
+          config.maps[m].backgrounds[i] = config.maps[m].background_images[i];
       }
 
     this.callbacks.fire({ cmd: 'setting.init' });
@@ -855,6 +936,7 @@ app.Setting = function() {
       item : ritem
     });
   };
+
   this.load = function() {
     var t = new Date();
 
@@ -872,15 +954,21 @@ app.Setting = function() {
 
     for (var m_idx = 0; m_idx < config.maps.length; m_idx++)
       {
-        if (config.maps[m_idx].background_images)
+        if (config.maps[m_idx].backgrounds)
           {
-            var files = config.maps[m_idx].background_images;
-            for (var i = 0; i < files.length; i++)
+            var files = config.maps[m_idx].backgrounds;
+            for (var i = 0; i < files.length; i++) {
+              if (!files[i]
+                  || files[i] == ""
+                  || files[i] == "empty")
+                continue;
+
               this.callbacks.fire({
                 cmd  : 'item.addBackground',
                 id   : "map-" + m_idx + "-bg-" + i,
-                path : setting.basedir + files[i]
+                file : files[i]
               });
+            }
           }
 
         var items = config.maps[m_idx].items;
@@ -1043,6 +1131,43 @@ app.Setting = function() {
       }
   };
 
+  this.addBackground = function(bgIndex, filename) {
+    if (!inited)
+      return;
+
+    var m_idx = setting.map_idx;
+    if (!setting.config
+        || !setting.config.maps[m_idx]
+        || !setting.config.maps[m_idx].items)
+      return;
+
+    setting.config.maps[m_idx].backgrounds[bgIndex] = filename;
+
+    this.callbacks.fire({
+      cmd  : 'item.addBackground',
+      id   : "map-" + m_idx + "-bg-" + bgIndex,
+      file : filename
+    });
+  };
+
+  this.removeBackground = function(bgIndex) {
+    if (!inited)
+      return;
+
+    var m_idx = setting.map_idx;
+    if (!setting.config
+        || !setting.config.maps[m_idx]
+        || !setting.config.maps[m_idx].items)
+      return;
+
+    setting.config.maps[m_idx].backgrounds[bgIndex] = "empty";
+
+    this.callbacks.fire({
+      cmd  : 'item.removeBackground',
+      id   : "map-" + m_idx + "-bg-" + bgIndex
+    });
+  };
+
   this.addMap = function(m, options) {
     if (!inited)
       return;
@@ -1057,6 +1182,7 @@ app.Setting = function() {
           'width'  : options.width,
           'height' : options.height,
           'background_images' : [],
+          'backgrounds' : ["", "", "", "", ""],
           'items' : []
         };
         this.config.maps.push(map);
@@ -1108,6 +1234,13 @@ app.Setting = function() {
         return;
       }
 
+      if (!config)
+        {
+          alert('invalid map file : ' + path);
+          loadingObj.hide();
+          return;
+        }
+
       if (!config.maps || config.maps.length <= 0) {
         alert('invalid map format : ' + path);
         loadingObj.hide();
@@ -1155,8 +1288,15 @@ app.Setting = function() {
           new_map.background_color = map.background_color;
 
         new_map.background_images = [];
-        for (var i = 0; i < map.background_images.length; i++)
-          new_map.background_images.push(map.background_images[i]);
+        for (var i = 0; i < map.backgrounds.length; i++)
+          {
+            if (!map.backgrounds[i] 
+                || map.backgrounds[i] == ""
+                || map.backgrounds[i] == "empty")
+              continue;
+
+            new_map.background_images.push(map.backgrounds[i]);
+          }
 
         new_map.items = [];
         for (var i = 0; i < map.items.length; i++)
@@ -1190,6 +1330,7 @@ app.Setting = function() {
 
     var config = {};
     var maps_json = extractJSON();
+
     app_fs.writeFile(path, maps_json, function(err) {
       if (err) {
         console.log(err);
@@ -1209,13 +1350,13 @@ app.Setting = function() {
     var zip = new require('node-zip')();
     zip.file('maps.json', maps_json);
 
-    if (app_fs.existsSync('images'))
+    if (app_fs.existsSync(setting.imagedir))
       {
-        var files = app_fs.readdirSync('images');
-        var zipImages = zip.folder('images');
+        var files = app_fs.readdirSync(setting.imagedir);
+        var zipImages = zip.folder(setting.imagedir);
         for (var i = 0; i < files.length; i++)
           {
-            var path = 'images/' + files[i];
+            var path = setting.imagedir + '/' + files[i];
             zipImages.file(path,
                            app_fs.readFileSync(path).toString('base64'),
                            { base64: true, binary: true });
@@ -1227,6 +1368,14 @@ app.Setting = function() {
     loadingObj.hide();
   };
 };
+
+function basename(path) {
+    return path.replace(/\\/g,'/').replace( /.*\//, '' );
+}
+
+function dirname(path) {
+    return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
+}
 
 $(function() {
   var setting;
@@ -1260,6 +1409,24 @@ $(function() {
       return;
 
     setting.openMapFile(path);
+  });
+
+  $('#app-sidebar-bg-file').on('change', function(e) {
+    var path = $.trim($(this).val());
+    if (path == '')
+      return;
+    $(this).val('');
+
+    var filename = basename(path);
+    var ext = filename.substr(filename.lastIndexOf('.') + 1);
+    if (ext != 'png' && ext != 'PNG')
+      {
+        console.log(path + ' is not a png file');
+        return;
+      }
+    var bgIndex = app.curBgTarget.split('-')[5];
+    app_fs.writeFileSync(setting.imagedir + '/' + filename, app_fs.readFileSync(path), 'binary');
+    setting.addBackground(bgIndex, filename);
   });
 
   $('#app-menu-openrecent').click(function(e) {
@@ -1350,6 +1517,9 @@ $(function() {
     clearTimeout(this.rtid);
     this.rtid = setTimeout(resize_real, 100);
   });
+
+  if (!app_fs.existsSync(setting.imagedir))
+    app_fs.mkdirSync(setting.imagedir);
 
   app_window.showDevTools();
   app_window.show();
