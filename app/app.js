@@ -10,6 +10,7 @@ var LabeledRect = fabric.util.createClass(fabric.Rect, {
       label: this.get('label')
     });
   },
+
   _render: function(ctx) {
     this.callSuper('_render', ctx);
     if (this.label.length <= 3)
@@ -270,6 +271,24 @@ app.Diagram = function(diagram_id, setting) {
       }
     });
 
+    canvas.on('object:scaling', function(e) {
+      var obj = e.target;
+
+      if (!obj)
+        return;
+
+      if (obj.c_id)
+        {
+          obj.setLeft(obj.getLeft());
+          obj.setTop(obj.getTop());
+          obj.setWidth(obj.getWidth());
+          obj.setHeight(obj.getHeight());
+          obj.setScaleX(1.0);
+          obj.setScaleY(1.0);
+          obj.setCoords();
+        }
+    });
+
     canvas.on('object:moving', function(e) {
       var obj = e.target;
 
@@ -361,14 +380,16 @@ app.Diagram = function(diagram_id, setting) {
           var y2 = parseInt(elms[3]);
           var c = findCenter(x1, y1, x2, y2);
 
-          this.left = c.x * dia.canvas.c_scaleValue;
-          this.top = c.y * dia.canvas.c_scaleValue;
-          this.width = (x2 - x1) * dia.canvas.c_scaleValue;
-          this.height = (y2 - y1) * dia.canvas.c_scaleValue;
+          this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
+          this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
+          this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue));
+          this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue));
+          //this.setScaleX(1.0);
+          //this.setScaleY(1.0);
+          this.setCoords();
 
           dia.canvas.renderAll();
         };
-
         break;
       case 1: // DAI_CIRCLE
         obj = new LabeledCircle({
@@ -395,9 +416,12 @@ app.Diagram = function(diagram_id, setting) {
           var y2 = parseInt(elms[3]);
           var c = findCenter(x1, y1, x2, y2);
 
-          this.left = c.x * dia.canvas.c_scaleValue;
-          this.top = c.y * dia.canvas.c_scaleValue;
-          this.radius = (x2 - x1) * dia.canvas.c_scaleValue / 2;
+          this.setLeft(c.x * dia.canvas.c_scaleValue);
+          this.setTop(c.y * dia.canvas.c_scaleValue);
+          this.setRadius((x2 - x1) * dia.canvas.c_scaleValue / 2);
+          this.setScaleX(1.0);
+          this.setScaleY(1.0);
+          this.setCoords();
 
           dia.canvas.renderAll();
         };
@@ -907,7 +931,7 @@ app.Setting = function() {
         ritem = {
           id : 'map-' + m_idx + '-item-' + setting.config.maps[m_idx].items.length,
           valid: true,
-          name: 100 + setting.config.maps[m_idx].items.length,
+          name: 100 + setting.config.maps[m_idx].items.length + "",
           type: options.type,
           x1 : 40,
           y1 : 40,
@@ -1059,16 +1083,20 @@ app.Setting = function() {
           {
           case 'points':
             var points = value.split(',');
+            var x1 = parseInt(points[0]);
+            var y1 = parseInt(points[1]);
+            var x2 = parseInt(points[2]);
+            var y2 = parseInt(points[3]);
 
-            if (item.x1 != points[0]
-                || item.y1 != points[1]
-                || item.x2 != points[2]
-                || item.y2 != points[3])
+            if (item.x1 != x1
+                || item.y1 != y1
+                || item.x2 != x2
+                || item.y2 != y2)
               {
-                item.x1 = points[0];
-                item.y1 = points[1];
-                item.x2 = points[2];
-                item.y2 = points[3];
+                item.x1 = x1;
+                item.y1 = y1;
+                item.x2 = x2;
+                item.y2 = y2;
                 changed = true;
               }
             break;
