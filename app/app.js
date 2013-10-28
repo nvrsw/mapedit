@@ -1349,7 +1349,7 @@ app.Setting = function() {
     return JSON.stringify(config, null, 2);
   }
 
-  this.saveMapFile = function(path) {
+  this.saveMapFile = function() {
     if (!inited)
       return;
 
@@ -1359,7 +1359,7 @@ app.Setting = function() {
     var config = {};
     var maps_json = extractJSON();
 
-    app_fs.writeFile(path, maps_json, function(err) {
+    app_fs.writeFile(setting.path, maps_json, function(err) {
       if (err) {
         console.log(err);
       }
@@ -1462,7 +1462,7 @@ $(function() {
   });
 
   $('#app-menu-save').click(function(e) {
-    setting.saveMapFile("test.json");
+    setting.saveMapFile();
   });
 
   $('#app-menu-export').click(function(e) {
