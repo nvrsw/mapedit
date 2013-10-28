@@ -18,7 +18,7 @@ var LabeledRect = fabric.util.createClass(fabric.Rect, {
     else
       ctx.font = '10px Sans Mono';
 
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = this.stroke;
     ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 13);
   }
 });
@@ -42,7 +42,7 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
     else
       ctx.font = '10px Sans Mono';
 
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = this.stroke;
     ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 18);
   }
 });
@@ -50,7 +50,12 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
 var app_gui = require('nw.gui');
 var app_fs = require('fs');
 var app_window;
-var app = {};
+var app = {
+  defaultBackgroundColor: "#2e3436",
+  defaultLineColor: "#ffffff",
+  defaultFillColor: "#2e343640"
+
+};
 
 app.Diagram = function(diagram_id, setting) {
   var diagram = this;
@@ -82,6 +87,42 @@ app.Diagram = function(diagram_id, setting) {
 
   function findCenter(x1, y1, x2, y2) {
     return {x: (x1 + x2) / 2, y: (y1 + y2) / 2};
+  }
+
+  function colorCSS(hexString) {  // #ffffffff
+    var color;
+
+    if (hexString && hexString[0] == '#')
+      {
+        if (hexString.length == 9) // rgba
+          {
+            var hr = hexString.substring(1, 3);
+            var hg = hexString.substring(3, 5);
+            var hb = hexString.substring(5, 7);
+            var ha = hexString.substring(7, 9);
+            color  = 'rgba(';
+            color += parseInt(hr, 16) + ',';
+            color += parseInt(hg, 16) + ',';
+            color += parseInt(hb, 16) + ',';
+            color += (parseInt(ha, 16) / 255) + ')';
+          }
+        else if (hexString.length == 7) // rgb
+          {
+            var hr = hexString.substring(1, 3);
+            var hg = hexString.substring(3, 5);
+            var hb = hexString.substring(5, 7);
+            color  = 'rgb(';
+            color += parseInt(hr, 16) + ',';
+            color += parseInt(hg, 16) + ',';
+            color += parseInt(hb, 16) + ')';
+          }
+      }
+    else
+      {
+        color = app.defaultBackgroundColor;
+      }
+
+    return color;
   }
 
   diagram.reflectSizeChaged = function() {
@@ -222,35 +263,9 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     if (map.background_color)
-      {
-        var color = '';
-        if (map.background_color[0] == '#')
-          {
-            if (map.background_color.length == 9) // rgba
-              {
-                var hr = map.background_color.substring(1, 3);
-                var hg = map.background_color.substring(3, 5);
-                var hb = map.background_color.substring(5, 7);
-                var ha = map.background_color.substring(7, 9);
-                color  = 'rgba(';
-                color += parseInt(hr, 16) + ',';
-                color += parseInt(hg, 16) + ',';
-                color += parseInt(hb, 16) + ',';
-                color += parseInt(ha, 16) + ')';
-              }
-            else if (map.background_color.length == 7) // rgb
-              {
-                var hr = map.background_color.substring(1, 3);
-                var hg = map.background_color.substring(3, 5);
-                var hb = map.background_color.substring(5, 7);
-                color  = 'rgb(';
-                color += parseInt(hr, 16) + ',';
-                color += parseInt(hg, 16) + ',';
-                color += parseInt(hb, 16) + ')';
-              }
-          }
-        canvas.backgroundColor = color;
-      }
+      canvas.backgroundColor = colorCSS(map.background_color);
+    else
+      canvas.backgroundColor = colorCSS(app.defaultBackgroundColor);
 
     canvas.on('mouse:down', function(e) {
       if (e.target)
@@ -360,8 +375,8 @@ app.Diagram = function(diagram_id, setting) {
           top: center.y,
           width: item.x2 - item.x1,
           height: item.y2 - item.y1,
-          fill: 'rgb(255,255,255)',
-          stroke: 'rgb(0,0,0)',
+          fill: colorCSS(app.defaultFillColor),
+          stroke: colorCSS(app.defaultLineColor),
           strokeWidth: 1,
           label: item.name,
         });
@@ -396,8 +411,8 @@ app.Diagram = function(diagram_id, setting) {
           left: center.x,
           top: center.y,
           radius: (item.x2 - item.x1) / 2,
-          fill: 'rgb(255,255,255)',
-          stroke: 'rgb(0,0,0)',
+          fill: colorCSS(app.defaultFillColor),
+          stroke: colorCSS(app.defaultLineColor),
           strokeWidth: 1,
           label: item.name
         });
