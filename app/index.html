@@ -23,8 +23,7 @@
               <li><a href="#" id="app-menu-new-file">New File</a></li>
               <li><a href="#" id="app-menu-open-file">Open File</a></li>
               <li><a href="#" id="app-menu-openrecent">Open Recent</a></li>
-              <li><a href="#" id="app-menu-save">Save</a></li>
-              <li><a href="#" id="app-menu-export">Export</a></li>
+              <li><a href="#" id="app-menu-save-file">Save File</a></li>
             </ul>
           </li>
         </ul>
@@ -142,10 +141,10 @@
     <input id="app-sidebar-bg-file" type="file">
   </div>
 
-  <div id="app-modal-map" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="app-modal-label" aria-hidden="true">
+  <div id="app-modal-map" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="app-modal-map-label" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="app-modal-label">Add New Map</h3>
+      <h3 id="app-modal-map-label">Add New Map</h3>
     </div>
     <div class="modal-body">
       <label for='app-modal-map-name'>Name</label>
@@ -158,6 +157,21 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
       <button class="btn btn-primary" id='app-modal-map-ok'>Ok</button>
+    </div>
+  </div>
+
+  <div id="app-modal-newfile" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="app-modal-newfile-label" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="app-modal-newfile-label">Add New File</h3>
+    </div>
+    <div class="modal-body">
+      <label for='app-modal-newfile-name'>Name</label>
+      <input id='app-modal-newfile-name' type='text' value='' class='input-large'>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button class="btn btn-primary" id='app-modal-newfile-ok'>Ok</button>
     </div>
   </div>
 

@@ -50,13 +50,15 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
 var app = {
   window: null,
   gui: require('nw.gui'),
+  os: require('os'),
   fs: require('fs'),
   path: require('path'),
-  os: require('os'),
+  mapFilename: 'maps.json',
   defaultBackgroundColor: "#2e3436",
   defaultLineColor: "#ffffff",
   defaultFillColor: "#2e343640",
-  getTemporaryDir: function() {
+  tmpDir: null,
+  requestTemporaryDir: function() {
     var osTmp = this.os.tmpdir();
     var count = 65535;
     while (true) {
@@ -64,7 +66,11 @@ var app = {
       var r2 = Math.floor(Math.random() * 65535);
       var dir = this.path.join(osTmp, "emap-" + r1 + "-" + r2);
       if (!app.fs.existsSync(dir))
-        return dir;
+        {
+          app.fs.mkdirSync(dir);
+          this.tmpDir = dir;
+          return dir;
+        }
 
       count--;
       if (count <= 0)
@@ -73,6 +79,27 @@ var app = {
 
     console.log("failed to get temporary directory");
     return "emap-unknown-" + Math.floor(Math.random() * 65535);
+  },
+  rmdir: function(dir) {
+    var files = this.fs.readdirSync(dir);
+    for(var i = 0; i < files.length; i++) {
+      var filename = this.path.join(dir, files[i]);
+      var stat = this.fs.statSync(filename);
+      
+      if(filename == "." || filename == "..") {
+        // nothing to do
+      } else if(stat.isDirectory()) {
+        // rmdir recursively
+        this.rmdir(filename);
+      } else {
+        // remove file
+        this.fs.unlinkSync(filename);
+      }
+    }
+    this.fs.rmdirSync(dir);
+  },
+  releaseTemporaryDir: function(tmpDir) {
+    this.rmdir(tmpDir);
   }
 };
 
@@ -540,7 +567,7 @@ app.Diagram = function(diagram_id, setting) {
         dia.canvas.c_removeBackground(iObj);
       }
 
-    var path = setting.imagedir + '/' + filename;
+    var path = setting.imageDir + '/' + filename;
     fabric.util.loadImage(path, function(img) {
       var obj = new fabric.Image(img, {
         left: dia.width / 2,
@@ -922,16 +949,24 @@ app.Setting = function() {
   var setting = this;
   var inited = false;
 
-  this.imagedir = "images";
   this.config = null;
+  this.zipPath = null;
+  this.tmpDir = null;
+  this.imageDir = null;
+
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
   this.selectedID ='';
-  this.path='';
 
-  this.init = function(config, path) {
-    this.path = path;
+  this.init = function(config, zipPath, tmpDir) {
     this.config = config;
+    this.zipPath = zipPath;
+
+    if (this.tmpDir)
+      app.releaseTemporaryDir(this.tmpDir);
+
+    this.tmpDir = tmpDir;
+    this.imageDir = app.path.join(tmpDir, 'images');
 
     $('#app-overlay').hide();
 
@@ -1280,152 +1315,199 @@ app.Setting = function() {
       }
   };
 
-  this.openMapFile = function(path) {
+  this.openZipFile = function(zipPath) {
     var loadingObj = $('#app-loading-overlay');
+
+    var ext = zipPath.substr(zipPath.lastIndexOf('.') + 1);
+    if (!ext || (ext != 'zip' && ext != 'ZIP'))
+      {
+        alert ("'" + zipPath + "' is not a E-MAP file.");
+        return;
+      }
+
+    if (!app.fs.existsSync(zipPath)) {
+      console.log("there is no '" + zipPath + "'");
+      return;
+    }
 
     loadingObj.show();
 
-    app.fs.readFile(path, function(err, data) {
-      var config;
-
-      try {
-        config = eval("(" + data + ")");
-      } catch(e) {
-        alert('invalid map file : ' + path);
-        loadingObj.hide();
-        return;
-      }
-
-      if (!config)
-        {
-          alert('invalid map file : ' + path);
-          loadingObj.hide();
-          return;
-        }
-
-      if (!config.maps || config.maps.length <= 0) {
-        alert('invalid map format : ' + path);
-        loadingObj.hide();
-        return;
-      }
-
-      setting.init(config, path);
-      setting.load();
-
-      loadingObj.hide();
+    var rdata = app.fs.readFileSync(zipPath, 'binary');
+    var unzip = new require('node-zip')(rdata, {
+      base64: false, checkCRC32: true
     });
+
+    var tmpDir = app.requestTemporaryDir();
+    $.each(unzip.files, function (index, entry) {
+      var tmpPath = app.path.join(tmpDir, entry.name);
+      if (entry.options.dir)
+        app.fs.mkdirSync(tmpPath);
+      else
+        app.fs.writeFileSync(tmpPath, entry.data, 'binary');
+    });
+
+    var mapPath = app.path.join(tmpDir, app.mapFilename);
+    if (!app.fs.existsSync(mapPath))
+      {
+        alert("there is no '" + app.mapFilename + "' file");
+        app.releaseTemporaryDir(tmpDir);
+        loadingObj.hide();
+        return;
+      }
+
+    var rdata = app.fs.readFileSync(mapPath);
+    var config;
+    try {
+      config = eval("(" + rdata + ")");
+      if (!config) {
+        alert('invalid map file1 : ' + zipPath);
+        app.releaseTemporaryDir(tmpDir);
+        loadingObj.hide();
+        return;
+      }
+    } catch(e) {
+      alert('invalid map file2 : ' + zipPath);
+      app.releaseTemporaryDir(tmpDir);
+      loadingObj.hide();
+      return;
+    }
+
+    if (!config.maps) {
+      alert('invalid map format : ' + zipPath);
+      app.releaseTemporaryDir(tmpDir);
+      loadingObj.hide();
+      return;
+    }
+
+    var imageDir = app.path.join(tmpDir, 'images');
+    if (!app.fs.existsSync(imageDir))
+      app.fs.mkdirSync(imageDir);
+
+    setting.init(config, zipPath, tmpDir);
+    setting.load();
+    loadingObj.hide();
   };
-  this.reopenMapFile = function() {
-    if (this.path == '')
+  this.reopenZipFile = function() {
+    if (!this.zipPath)
       return;
 
-    this.openMapFile(this.path);
+    this.openZipFile(this.zipPath);
   };
-  this.newMapFile = function(path) {
-    var config = {
+  this.newZipFile = function(zipPath) {
+    var mapData = {
       'format' : 1,
       'maps' : []
     };
 
-    setting.init(config, path);
-    setting.load();
+    var mapJson = JSON.stringify(mapData, null, 2);
+    var zip = new require('node-zip')();
+    zip.file(app.mapFilename, mapJson);
+    var zipFolder = zip.folder('images');
+    var data = zip.generate( { base64: false } );
+    app.fs.writeFileSync(zipPath, data, 'binary');
+
+    this.openZipFile(zipPath);
   };
 
-  function extractJSON() {
+  function generateMap() {
     var config = {};
 
     config.format = setting.config.format;
     config.maps = [];
-    for (var m = 0; m < setting.config.maps.length; m++)
-      {
-        var map = setting.config.maps[m];
-        if (!map.valid)
-          continue;
+    for (var m = 0; m < setting.config.maps.length; m++) {
+      var map = setting.config.maps[m];
+      if (!map.valid)
+        continue;
 
-        var new_map = {};
-        new_map.name = map.name;
-        new_map.width = map.width;
-        new_map.height = map.height;
-        if (map.background_color)
-          new_map.background_color = map.background_color;
+      var new_map = {};
+      new_map.name = map.name;
+      new_map.width = map.width;
+      new_map.height = map.height;
+      if (map.background_color)
+        new_map.background_color = map.background_color;
 
-        new_map.background_images = [];
-        for (var i = 0; i < map.backgrounds.length; i++)
-          {
-            if (!map.backgrounds[i] 
-                || map.backgrounds[i] == ""
-                || map.backgrounds[i] == "empty")
-              continue;
+      new_map.background_images = [];
+      for (var i = 0; i < map.backgrounds.length; i++)
+        {
+          if (!map.backgrounds[i] 
+              || map.backgrounds[i] == ""
+              || map.backgrounds[i] == "empty")
+            continue;
 
-            new_map.background_images.push(map.backgrounds[i]);
-          }
+          new_map.background_images.push(map.backgrounds[i]);
+        }
 
-        new_map.items = [];
-        for (var i = 0; i < map.items.length; i++)
-          {
-            var item = map.items[i];
-            if (!item.valid)
-              continue;
+      new_map.items = [];
+      for (var i = 0; i < map.items.length; i++) {
+          var item = map.items[i];
+          if (!item.valid)
+            continue;
 
-            var new_item = {};
-            new_item.name = item.name;
-            new_item.type = item.type;
-            new_item.x1 = item.x1;
-            new_item.y1 = item.y1;
-            new_item.x2 = item.x2;
-            new_item.y2 = item.y2;
-            new_map.items.push(new_item);
-          }
-
-        config.maps.push(new_map);
+          var new_item = {};
+          new_item.name = item.name;
+          new_item.type = item.type;
+          new_item.x1 = item.x1;
+          new_item.y1 = item.y1;
+          new_item.x2 = item.x2;
+          new_item.y2 = item.y2;
+          new_map.items.push(new_item);
       }
 
-    return JSON.stringify(config, null, 2);
+      config.maps.push(new_map);
+    }
+
+    return config;
   }
 
-  this.saveMapFile = function() {
+  this.saveZipFile = function() {
     if (!inited)
       return;
 
     var loadingObj = $('#app-loading-overlay');
     loadingObj.show();
 
-    var config = {};
-    var maps_json = extractJSON();
-
-    app.fs.writeFile(setting.path, maps_json, function(err) {
-      if (err) {
-        console.log(err);
-      }
-      loadingObj.hide();
-    });
-  };
-
-  this.exportToZip = function() {
-    if (!inited)
-      return;
-
-    var loadingObj = $('#app-loading-overlay');
-    loadingObj.show();
-
-    var maps_json = extractJSON();
+    var mapData = generateMap();
+    var mapJson = JSON.stringify(mapData, null, 2);
     var zip = new require('node-zip')();
-    zip.file('maps.json', maps_json);
+    zip.file(app.mapFilename, mapJson);
 
-    if (app.fs.existsSync(setting.imagedir))
+    var images = [];
+    for (m = 0; m < mapData.maps.length; m++) {
+      var map = mapData.maps[m];
+
+      for (var i = 0; i < map.background_images.length; i++)
+        images.push(map.background_images[i]);
+    }
+
+    var lookupImage = function(filename) {
+      if (images.length <= 0)
+        return false;
+
+      for (var i = 0; i < images.length; i++) {
+        if (images[i] == filename)
+          return true;
+      }
+
+      return false;
+    };
+
+    if (app.fs.existsSync(setting.imageDir))
       {
-        var files = app.fs.readdirSync(setting.imagedir);
-        var zipImages = zip.folder(setting.imagedir);
+        var files = app.fs.readdirSync(setting.imageDir);
+        var zipFolder = zip.folder('images');
         for (var i = 0; i < files.length; i++)
           {
-            var path = setting.imagedir + '/' + files[i];
-            zipImages.file(files[i],
-                           app.fs.readFileSync(path).toString('base64'),
+            if (!lookupImage(files[i]))
+              continue;
+
+            var imageFile = app.path.join(setting.imageDir, files[i]);
+            zipFolder.file(files[i],
+                           app.fs.readFileSync(imageFile).toString('base64'),
                            { base64: true, binary: true });
           }
       }
     var data = zip.generate({ base64: false });
-    app.fs.writeFileSync('maps.zip', data, 'binary');
+    app.fs.writeFileSync(setting.zipPath, data, 'binary');
 
     loadingObj.hide();
   };
@@ -1452,8 +1534,25 @@ $(function() {
   $('#app-overlay').show();
 
   $('#app-menu-new-file').click(function(e) {
-    setting.newMapFile("test");
+    $('#app-modal-newfile').modal('show');
   });
+  $('#app-modal-newfile-ok').click(function(e) {
+    $('#app-modal-newfile').modal('hide');
+    var name = $.trim($('#app-modal-newfile-name').val());
+    if (name == '')
+      return;
+
+    var zipPath = app.path.join(process.cwd(), name + ".zip");
+    if (app.fs.existsSync(zipPath))
+      {
+        alert("'" + name + "' is already exist.");
+        $('#app-menu-new-file').trigger('click');
+        return;
+      }
+
+    setting.newZipFile(zipPath);
+  });
+
   $('#app-menu-open-file').click(function(e) {
     $('#app-map-file').trigger('click');
   });
@@ -1462,7 +1561,7 @@ $(function() {
     if (path == '')
       return;
 
-    setting.openMapFile(path);
+    setting.openZipFile(path);
   });
 
   $('#app-sidebar-bg-file').on('change', function(e) {
@@ -1473,26 +1572,23 @@ $(function() {
 
     var filename = app.path.basename(path);
     var ext = filename.substr(filename.lastIndexOf('.') + 1);
-    if (ext && ext != 'png' && ext != 'PNG')
+    if (!ext || (ext != 'png' && ext != 'PNG'))
       {
         console.log(path + ' is not a png file');
         return;
       }
     var bgIndex = app.curBgTarget.split('-')[5];
-    app.fs.writeFileSync(setting.imagedir + '/' + filename, app.fs.readFileSync(path), 'binary');
+    var imagePath = app.path.join(setting.imageDir, filename);
+    app.fs.writeFileSync(imagePath, app.fs.readFileSync(path), 'binary');
     setting.addBackground(bgIndex, filename);
   });
 
   $('#app-menu-openrecent').click(function(e) {
-    setting.reopenMapFile();
+    setting.reopenZipFile();
   });
 
-  $('#app-menu-save').click(function(e) {
-    setting.saveMapFile();
-  });
-
-  $('#app-menu-export').click(function(e) {
-    setting.exportToZip();
+  $('#app-menu-save-file').click(function(e) {
+    setting.saveZipFile();
   });
 
   $('#app-view-200').click(function(e) {
@@ -1574,8 +1670,18 @@ $(function() {
     this.rtid = setTimeout(resize_real, 100);
   });
 
-  if (!app.fs.existsSync(setting.imagedir))
-    app.fs.mkdirSync(setting.imagedir);
+  app.window.on('close', function() {
+    // cleanup temporary directories
+    if (setting.tmpDir && app.fs.existsSync(setting.tmpDir))
+      app.releaseTemporaryDir(setting.tmpDir);
+    setting.tmpDir = null;
+
+    if (app.tmpDir && app.fs.existsSync(app.tmpDir))
+      app.releaseTemporaryDir(app.tmpDir);
+    app.tmpDir = null;
+
+    this.close(true);
+  });
 
   app.window.showDevTools();
   app.window.show();
