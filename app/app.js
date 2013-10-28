@@ -1385,7 +1385,7 @@ app.Setting = function() {
         for (var i = 0; i < files.length; i++)
           {
             var path = setting.imagedir + '/' + files[i];
-            zipImages.file(path,
+            zipImages.file(files[i],
                            app_fs.readFileSync(path).toString('base64'),
                            { base64: true, binary: true });
           }
