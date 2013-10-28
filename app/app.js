@@ -790,7 +790,15 @@ app.Sidebar = function(sidebar_id, setting) {
         var item = setting.config.maps[elms[1]].items[elms[3]];
         sidebar.setItemEditible(true);
         $('#app-sidebar-item-info-name').val(item.name);
-        $('#app-sidebar-item-info-type').val(item.type);
+
+        var typeObj = $('#app-sidebar-item-info-type');
+        if (item.type == 0)
+          typeObj.val('DAI Box');
+        else if (item.type == 1)
+          typeObj.val('DAI Circle');
+        else
+          typeObj.val('Unknown');
+
         $('#app-sidebar-item-info-x1').val(item.x1);
         $('#app-sidebar-item-info-y1').val(item.y1);
         $('#app-sidebar-item-info-x2').val(item.x2);
@@ -809,7 +817,7 @@ app.Sidebar = function(sidebar_id, setting) {
     if (enable)
       {
         $('#app-sidebar-item-info-name').prop('disabled', false);
-        $('#app-sidebar-item-info-type').prop('disabled', false);
+        //$('#app-sidebar-item-info-type').prop('disabled', false);
         $('#app-sidebar-item-info-x1').prop('disabled', false);
         $('#app-sidebar-item-info-y1').prop('disabled', false);
         $('#app-sidebar-item-info-x2').prop('disabled', false);
