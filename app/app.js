@@ -49,12 +49,12 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
 
 var app_gui = require('nw.gui');
 var app_fs = require('fs');
+var app_path = require('path');
 var app_window;
 var app = {
   defaultBackgroundColor: "#2e3436",
   defaultLineColor: "#ffffff",
   defaultFillColor: "#2e343640"
-
 };
 
 app.Diagram = function(diagram_id, setting) {
@@ -1412,14 +1412,6 @@ app.Setting = function() {
   };
 };
 
-function basename(path) {
-    return path.replace(/\\/g,'/').replace( /.*\//, '' );
-}
-
-function dirname(path) {
-    return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');
-}
-
 $(function() {
   var setting;
   var diagram;
@@ -1460,7 +1452,7 @@ $(function() {
       return;
     $(this).val('');
 
-    var filename = basename(path);
+    var filename = app_path.basename(path);
     var ext = filename.substr(filename.lastIndexOf('.') + 1);
     if (ext != 'png' && ext != 'PNG')
       {
