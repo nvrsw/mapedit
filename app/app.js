@@ -47,14 +47,33 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
   }
 });
 
-var app_gui = require('nw.gui');
-var app_fs = require('fs');
-var app_path = require('path');
-var app_window;
 var app = {
+  window: null,
+  gui: require('nw.gui'),
+  fs: require('fs'),
+  path: require('path'),
+  os: require('os'),
   defaultBackgroundColor: "#2e3436",
   defaultLineColor: "#ffffff",
-  defaultFillColor: "#2e343640"
+  defaultFillColor: "#2e343640",
+  getTemporaryDir: function() {
+    var osTmp = this.os.tmpdir();
+    var count = 65535;
+    while (true) {
+      var r1 = Math.floor(Math.random() * 65535);
+      var r2 = Math.floor(Math.random() * 65535);
+      var dir = this.path.join(osTmp, "emap-" + r1 + "-" + r2);
+      if (!app.fs.existsSync(dir))
+        return dir;
+
+      count--;
+      if (count <= 0)
+        break;
+    }
+
+    console.log("failed to get temporary directory");
+    return "emap-unknown-" + Math.floor(Math.random() * 65535);
+  }
 };
 
 app.Diagram = function(diagram_id, setting) {
@@ -104,7 +123,7 @@ app.Diagram = function(diagram_id, setting) {
             color += parseInt(hr, 16) + ',';
             color += parseInt(hg, 16) + ',';
             color += parseInt(hb, 16) + ',';
-            color += (1.0 - (parseInt(ha, 16) / 0xff).toFixed(2)) + ')';
+            color += (parseInt(ha, 16) / 255).toFixed(2) + ')';
           }
         else if (hexString.length == 7) // rgb
           {
@@ -1266,7 +1285,7 @@ app.Setting = function() {
 
     loadingObj.show();
 
-    app_fs.readFile(path, function(err, data) {
+    app.fs.readFile(path, function(err, data) {
       var config;
 
       try {
@@ -1374,7 +1393,7 @@ app.Setting = function() {
     var config = {};
     var maps_json = extractJSON();
 
-    app_fs.writeFile(setting.path, maps_json, function(err) {
+    app.fs.writeFile(setting.path, maps_json, function(err) {
       if (err) {
         console.log(err);
       }
@@ -1393,20 +1412,20 @@ app.Setting = function() {
     var zip = new require('node-zip')();
     zip.file('maps.json', maps_json);
 
-    if (app_fs.existsSync(setting.imagedir))
+    if (app.fs.existsSync(setting.imagedir))
       {
-        var files = app_fs.readdirSync(setting.imagedir);
+        var files = app.fs.readdirSync(setting.imagedir);
         var zipImages = zip.folder(setting.imagedir);
         for (var i = 0; i < files.length; i++)
           {
             var path = setting.imagedir + '/' + files[i];
             zipImages.file(files[i],
-                           app_fs.readFileSync(path).toString('base64'),
+                           app.fs.readFileSync(path).toString('base64'),
                            { base64: true, binary: true });
           }
       }
     var data = zip.generate({ base64: false });
-    app_fs.writeFileSync('maps.zip', data, 'binary');
+    app.fs.writeFileSync('maps.zip', data, 'binary');
 
     loadingObj.hide();
   };
@@ -1424,7 +1443,7 @@ $(function() {
     return val;
   };
 
-  app_window = app_gui.Window.get();
+  app.window = app.gui.Window.get();
 
   setting = new app.Setting();
   diagram = new app.Diagram('app-diagram', setting);
@@ -1452,15 +1471,15 @@ $(function() {
       return;
     $(this).val('');
 
-    var filename = app_path.basename(path);
+    var filename = app.path.basename(path);
     var ext = filename.substr(filename.lastIndexOf('.') + 1);
-    if (ext != 'png' && ext != 'PNG')
+    if (ext && ext != 'png' && ext != 'PNG')
       {
         console.log(path + ' is not a png file');
         return;
       }
     var bgIndex = app.curBgTarget.split('-')[5];
-    app_fs.writeFileSync(setting.imagedir + '/' + filename, app_fs.readFileSync(path), 'binary');
+    app.fs.writeFileSync(setting.imagedir + '/' + filename, app.fs.readFileSync(path), 'binary');
     setting.addBackground(bgIndex, filename);
   });
 
@@ -1543,6 +1562,8 @@ $(function() {
     var width = $(window).width() - diff_w;
     var height = $(window).height() - diff_h;
 
+    $('#app-diagram-container').css('width', width + 'px');
+    $('#app-diagram-container').css('height', height + 'px');
     $('#app-diagram').css('width', width + 'px');
     $('#app-diagram').css('height', height + 'px');
     diagram.reflectSizeChaged();
@@ -1553,9 +1574,9 @@ $(function() {
     this.rtid = setTimeout(resize_real, 100);
   });
 
-  if (!app_fs.existsSync(setting.imagedir))
-    app_fs.mkdirSync(setting.imagedir);
+  if (!app.fs.existsSync(setting.imagedir))
+    app.fs.mkdirSync(setting.imagedir);
 
-  app_window.showDevTools();
-  app_window.show();
+  app.window.showDevTools();
+  app.window.show();
 });
