@@ -104,7 +104,7 @@ app.Diagram = function(diagram_id, setting) {
             color += parseInt(hr, 16) + ',';
             color += parseInt(hg, 16) + ',';
             color += parseInt(hb, 16) + ',';
-            color += (parseInt(ha, 16) / 255) + ')';
+            color += (1.0 - (parseInt(ha, 16) / 0xff).toFixed(2)) + ')';
           }
         else if (hexString.length == 7) // rgb
           {
