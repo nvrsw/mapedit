@@ -799,10 +799,8 @@ app.Sidebar = function(sidebar_id, setting) {
         else
           typeObj.val('Unknown');
 
-        $('#app-sidebar-item-info-x1').val(item.x1);
-        $('#app-sidebar-item-info-y1').val(item.y1);
-        $('#app-sidebar-item-info-x2').val(item.x2);
-        $('#app-sidebar-item-info-y2').val(item.y2);
+        var coord = [item.x1, item.y1, item.x2, item.y2].join(',');
+        $('#app-sidebar-item-info-coordinate').val(coord);
         break;
       case 'item.addBackground':
         $('#app-sidebar-' + data.id).text(data.file);
@@ -817,20 +815,13 @@ app.Sidebar = function(sidebar_id, setting) {
     if (enable)
       {
         $('#app-sidebar-item-info-name').prop('disabled', false);
-        //$('#app-sidebar-item-info-type').prop('disabled', false);
-        $('#app-sidebar-item-info-x1').prop('disabled', false);
-        $('#app-sidebar-item-info-y1').prop('disabled', false);
-        $('#app-sidebar-item-info-x2').prop('disabled', false);
-        $('#app-sidebar-item-info-y2').prop('disabled', false);
-        return;
       }
-
-    $('#app-sidebar-item-info-name').val("").prop('disabled', true);
-    $('#app-sidebar-item-info-type').val("").prop('disabled', true);
-    $('#app-sidebar-item-info-x1').val("").prop('disabled', true);
-    $('#app-sidebar-item-info-y1').val("").prop('disabled', true);
-    $('#app-sidebar-item-info-x2').val("").prop('disabled', true);
-    $('#app-sidebar-item-info-y2').val("").prop('disabled', true);
+    else
+      {
+        $('#app-sidebar-item-info-name').val("").prop('disabled', true);
+        $('#app-sidebar-item-info-type').val("").prop('disabled', true);
+        $('#app-sidebar-item-info-coordinate').val("").prop('disabled', true);
+      }
   };
 
   function createMapEntry(map, sibling) {
@@ -1539,6 +1530,13 @@ $(function() {
   diagram = new app.Diagram('app-diagram', setting);
   sidebar = new app.Sidebar('app-sidebar', setting);
   sidebar.setItemEditible(false);
+
+  var app_sidebar_width = parseInt($('#app-sidebar').css('width'));
+  $('#app-diagram-container').css('width', (1280 - app_sidebar_width) + "px");
+  $('#app-diagram-container').css('left', app_sidebar_width + "px");
+  $('#app-diagram').css('width', (1280 - app_sidebar_width) + "px");
+  $('#app-diagram').css('left', app_sidebar_width + "px");
+
   $('#app-overlay').show();
 
   $('#app-menu-new-file').click(function(e) {
