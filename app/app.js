@@ -13,6 +13,9 @@ var LabeledRect = fabric.util.createClass(fabric.Rect, {
 
   _render: function(ctx) {
     this.callSuper('_render', ctx);
+
+    var fs;
+
     if (this.label.length <= 3)
       ctx.font = '12px Sans Mono';
     else
@@ -332,24 +335,6 @@ app.Diagram = function(diagram_id, setting) {
       }
     });
 
-    canvas.on('object:scaling', function(e) {
-      var obj = e.target;
-
-      if (!obj)
-        return;
-
-      if (obj.c_id)
-        {
-          obj.setLeft(obj.getLeft());
-          obj.setTop(obj.getTop());
-          obj.setWidth(obj.getWidth());
-          obj.setHeight(obj.getHeight());
-          obj.setScaleX(1.0);
-          obj.setScaleY(1.0);
-          obj.setCoords();
-        }
-    });
-
     canvas.on('object:moving', function(e) {
       var obj = e.target;
 
@@ -368,16 +353,14 @@ app.Diagram = function(diagram_id, setting) {
 
       if (obj.c_id)
         {
-          var hw = obj.getWidth() / 2;
-          var hh = obj.getHeight() / 2;
           var points = [];
 
-          points.push(Math.round((obj.left - hw) / canvas.c_scaleValue));
-          points.push(Math.round((obj.top - hh) / canvas.c_scaleValue));
-          points.push(Math.round((obj.left + hw) / canvas.c_scaleValue));
-          points.push(Math.round((obj.top + hh) / canvas.c_scaleValue));
-
+          points.push(Math.round(obj.oCoords.tl.x / dia.canvas.c_scaleValue));
+          points.push(Math.round(obj.oCoords.tl.y / dia.canvas.c_scaleValue));
+          points.push(Math.round(obj.oCoords.br.x / dia.canvas.c_scaleValue));
+          points.push(Math.round(obj.oCoords.br.y / dia.canvas.c_scaleValue));
           obj.c_points = points.join(',');
+
           setting.modify(obj.c_id, 'points', points.join(','));
         }
     });
@@ -411,16 +394,28 @@ app.Diagram = function(diagram_id, setting) {
       return;
 
     var obj = null;
+
     var center = findCenter(item.x1, item.y1, item.x2, item.y2);
+    var left = center.x * dia.canvas.c_scaleValue;
+    var top = center.y * dia.canvas.c_scaleValue;
 
     switch (item.type)
       {
       case 0: // DAI_BOX
+        var baseWidth = 30;
+        var baseHeight = 20;
+        var width = (item.x2 - item.x1) * dia.canvas.c_scaleValue;
+        var height = (item.y2 - item.y1) * dia.canvas.c_scaleValue;
+        var scaleX = width / baseWidth;
+        var scaleY = height / baseHeight;
+
         obj = new LabeledRect({
-          left: center.x,
-          top: center.y,
-          width: item.x2 - item.x1,
-          height: item.y2 - item.y1,
+          left: left,
+          top: top,
+          width: baseWidth,
+          height: baseHeight,
+          scaleX: scaleX,
+          scaleY: scaleY,
           fill: colorCSS(app.defaultFillColor),
           stroke: colorCSS(app.defaultLineColor),
           strokeWidth: 1,
@@ -443,20 +438,28 @@ app.Diagram = function(diagram_id, setting) {
 
           this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
           this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
-          this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue));
-          this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue));
-          //this.setScaleX(1.0);
-          //this.setScaleY(1.0);
+          this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue / this.scaleX));
+          this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue / this.scaleY));
           this.setCoords();
 
           dia.canvas.renderAll();
         };
         break;
       case 1: // DAI_CIRCLE
+        var baseWidth = 30;
+        var baseHeight = 30;
+        var width = (item.x2 - item.x1) * dia.canvas.c_scaleValue;
+        var height = (item.y2 - item.y1) * dia.canvas.c_scaleValue;
+        var scaleX = width / baseWidth;
+        var scaleY = height / baseHeight;
+        var baseRadius = 15;
+
         obj = new LabeledCircle({
-          left: center.x,
-          top: center.y,
-          radius: (item.x2 - item.x1) / 2,
+          left: left,
+          top: top,
+          radius: baseRadius,
+          scaleX: scaleX,
+          scaleY: scaleY,
           fill: colorCSS(app.defaultFillColor),
           stroke: colorCSS(app.defaultLineColor),
           strokeWidth: 1,
@@ -477,11 +480,9 @@ app.Diagram = function(diagram_id, setting) {
           var y2 = parseInt(elms[3]);
           var c = findCenter(x1, y1, x2, y2);
 
-          this.setLeft(c.x * dia.canvas.c_scaleValue);
-          this.setTop(c.y * dia.canvas.c_scaleValue);
-          this.setRadius((x2 - x1) * dia.canvas.c_scaleValue / 2);
-          this.setScaleX(1.0);
-          this.setScaleY(1.0);
+          this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
+          this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
+          this.setRadius(Math.round((x2 - x1) * dia.canvas.c_scaleValue / 2 / this.scaleX));
           this.setCoords();
 
           dia.canvas.renderAll();
@@ -996,15 +997,36 @@ app.Setting = function() {
     var ritem = item;
     if (!ritem)
       {
+        var x1, y1, x2, y2;
+
+        switch (options.type)
+          {
+          case 0:
+            x1 = 40;
+            y1 = 40;
+            x2 = 70;
+            y2 = 60;
+            break;
+          case 1:
+            x1 = 40;
+            y1 = 40;
+            x2 = 70;
+            y2 = 70;
+            break;
+          default:
+            console.log ("failed to add item (unknown item type:" + options.type + ")");
+            return;
+          }
+
         ritem = {
           id : 'map-' + m_idx + '-item-' + setting.config.maps[m_idx].items.length,
           valid: true,
           name: 100 + setting.config.maps[m_idx].items.length + "",
           type: options.type,
-          x1 : 40,
-          y1 : 40,
-          x2 : 70,
-          y2 : 60
+          x1 : x1,
+          y1 : y1,
+          x2 : x2,
+          y2 : y2
         };
         setting.config.maps[m_idx].items.push(ritem);
         setting.callbacks.fire({
@@ -1012,13 +1034,8 @@ app.Setting = function() {
           id   : ritem.id,
           item : ritem
         });
-        /*
-        setting.callbacks.fire({
-          cmd  : 'map.draw',
-          id   : 'map-' + m_idx
-        });
-        */
-        this.select(ritem.id);
+
+        this.select(ritem.id);  /* drawing event is occurred */
         return;
       }
 
