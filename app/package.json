@@ -1,6 +1,6 @@
 {
   "name": "emap-editor",
-  "main": "index.html",
+  "main": "app.html",
   "window": {
     "show": false,
     "width": 1280,
