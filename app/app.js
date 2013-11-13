@@ -1566,14 +1566,8 @@ $(function() {
       return;
 
     var zipPath = app.path.join(process.cwd(), name + ".zip");
-    if (app.fs.existsSync(zipPath))
-      {
-        alert("'" + name + "' is already exist.");
-        $('#app-menu-new-file').trigger('click');
-        return;
-      }
-
     setting.newZipFile(zipPath);
+    $('#app-modal-newfile-name').val("");
   });
 
   $('#app-menu-open-file').click(function(e) {
