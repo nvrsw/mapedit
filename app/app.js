@@ -781,6 +781,27 @@ app.Sidebar = function(sidebar_id, setting) {
             break;
           }
         break;
+      case 'item.modified':
+        var elms = data.id.split('-');
+        if (elms[3] == 'null')
+          {
+            sidebar.setItemEditible(false);
+            break;
+          }
+        var item = setting.config.maps[elms[1]].items[elms[3]];
+        $('#app-sidebar-item-info-name').val(item.name);
+
+        var typeObj = $('#app-sidebar-item-info-type');
+        if (item.type == 0)
+          typeObj.val('DAI Box');
+        else if (item.type == 1)
+          typeObj.val('DAI Circle');
+        else
+          typeObj.val('Unknown');
+
+        var coord = [item.x1, item.y1, item.x2, item.y2].join(',');
+        $('#app-sidebar-item-info-coordinate').val(coord);
+        break;
       case 'item.selected':
         var elms = data.id.split('-');
         if (elms[3] == 'null')
