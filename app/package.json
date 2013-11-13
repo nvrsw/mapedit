@@ -2,10 +2,13 @@
   "name": "emap-editor",
   "main": "app.html",
   "window": {
+    "icon": "icon.png",
     "show": false,
     "width": 1280,
     "height": 720,
     "toolbar": false,
+    "min_width": 800,
+    "min_height": 400,
     "position": "center"
   }
 }
