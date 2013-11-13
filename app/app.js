@@ -1557,23 +1557,20 @@ $(function() {
   $('#app-overlay').show();
 
   $('#app-menu-new-file').click(function(e) {
-    $('#app-modal-newfile').modal('show');
+    $('#app-map-new-file').trigger('click');
   });
-  $('#app-modal-newfile-ok').click(function(e) {
-    $('#app-modal-newfile').modal('hide');
-    var name = $.trim($('#app-modal-newfile-name').val());
-    if (name == '')
+  $('#app-map-new-file').on('change', function(e) {
+    var path = $.trim($(this).val());
+    if (path == '')
       return;
 
-    var zipPath = app.path.join(process.cwd(), name + ".zip");
-    if (app.fs.existsSync(zipPath))
-      {
-        alert("'" + name + "' is already exist.");
-        $('#app-menu-new-file').trigger('click');
-        return;
-      }
+    var zipPath = path;
+    var ext = zipPath.substr(zipPath.lastIndexOf('.') + 1);
+    if (!ext || zipPath == ext)
+      zipPath += ".zip";
 
     setting.newZipFile(zipPath);
+    $(this).val("");
   });
 
   $('#app-menu-open-file').click(function(e) {
@@ -1585,6 +1582,7 @@ $(function() {
       return;
 
     setting.openZipFile(path);
+    $(this).val("");
   });
 
   $('#app-sidebar-bg-file').on('change', function(e) {
