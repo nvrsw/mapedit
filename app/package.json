@@ -1,5 +1,5 @@
 {
-  "name": "emap-editor",
+  "name": "ip-vms-emap-editor",
   "main": "app.html",
   "window": {
     "icon": "icon.png",
