@@ -206,7 +206,7 @@ select {
 #app-sidebar-item-info input {
   margin-top: 0;
   margin-bottom: 0;
-  width: 100%;
+  width: 90%;
   padding: 1px 6px;
   font-size: 11px;
 }
