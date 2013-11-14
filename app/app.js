@@ -57,7 +57,7 @@ var app = {
   fs: require('fs'),
   path: require('path'),
   mapFilename: 'maps.json',
-  defaultBackgroundColor: "#2e3436",
+  defaultBackgroundColor: "#2e3436ff",
   defaultLineColor: "#ffffff",
   defaultFillColor: "#2e343640",
   tmpDir: null,
@@ -712,8 +712,16 @@ app.Diagram = function(diagram_id, setting) {
         break;
       case 'map.added':
         addMap(data.map);
+        break;
+      case 'map.modified':
         var elms = data.id.split('-');
         var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia && dia.canvas)
+          {
+            dia.canvas.backgroundColor = colorCSS(data.value);
+            dia.canvas.renderAll();
+          }
         break;
       case 'map.removed':
         var elms = data.id.split('-');
@@ -778,6 +786,9 @@ app.Sidebar = function(sidebar_id, setting) {
           {
           case 'name':
             $('#app-sidebar-' + data.id + '-toggle-name').text(data.value);
+            break;
+          case 'background_color':
+            $('#app-sidebar-' + data.id + '-' + data.key).val(data.value);
             break;
           }
         break;
@@ -879,6 +890,14 @@ app.Sidebar = function(sidebar_id, setting) {
         html +=               "<label>" + map.width + "x" + map.height +"</label>";
         html +=             "</td>";
         html +=           "</tr>";
+        html +=           "<tr>";
+        html +=             "<th>";
+        html +=               "<label for='" + c_id + "-background_color'>Color</label>";
+        html +=             "</th>";
+        html +=             "<td>";
+        html +=               "<input id='" + c_id + "-background_color' type='text' value='" + map.background_color + "' class='input-medium'>";
+        html +=             "</td>";
+        html +=           "</tr>";
         html +=         "</tbody>";
         html +=       "</table>";
         html +=       "<label>Background Images</label>";
@@ -930,6 +949,17 @@ app.Sidebar = function(sidebar_id, setting) {
       var oid = 'map-' + map_idx;
       setting.modify(oid, 'name', name);
     });
+
+    $('#' + c_id + '-background_color').change(function(e) {
+      var color = $.trim($(this).val());
+      if (color == '')
+        return;
+
+      var map_idx = $(this).attr('id').split('-')[3];
+      var oid = 'map-' + map_idx;
+      setting.modify(oid, 'background_color', color);
+    });
+
     $('#' + c_id + '-remove').click(function(e) {
       var elms = $(this).attr('id').split('-');
       var mapID = [elms[2], elms[3]].join('-');
@@ -1079,6 +1109,10 @@ app.Setting = function() {
 
         map.valid = true;
         map.id = 'map-' + i;
+
+        if (!map.background_color)
+          map.background_color = app.defaultBackgroundColor;
+
         this.addMap(map, {});
       }
 
@@ -1164,6 +1198,18 @@ app.Setting = function() {
             if (map[key] != value)
               {
                 map[key] = value;
+                changed = true;
+              }
+            break;
+          case 'background_color':
+            if (map[key] != value)
+              {
+                if ((value.length == 7 || value.length == 9) && value[0] == '#') {
+                  map[key] = value;
+                } else {
+                  value = map[key];
+                }
+
                 changed = true;
               }
             break;
@@ -1315,6 +1361,7 @@ app.Setting = function() {
           'name'   : options.name,
           'width'  : options.width,
           'height' : options.height,
+          'background_color' : app.defaultBackgroundColor,
           'background_images' : [],
           'backgrounds' : ["", "", "", "", ""],
           'items' : []
