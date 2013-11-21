@@ -1521,6 +1521,12 @@ app.Setting = function() {
           new_map.background_images.push(map.backgrounds[i]);
         }
 
+      if (map.text_font)
+        new_map.text_font = map.text_font;
+
+      if (map.text_color)
+        new_map.text_color = map.text_color;
+
       new_map.items = [];
       for (var i = 0; i < map.items.length; i++) {
           var item = map.items[i];
