@@ -424,7 +424,7 @@ app.Diagram = function(diagram_id, setting) {
         obj.c_type = item.type;
         obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
         obj.c_changePoints = function(points) {
-          if (this.c_points != points)
+          if (this.c_points == points)
             return;
 
           this.c_points = points;
@@ -468,7 +468,7 @@ app.Diagram = function(diagram_id, setting) {
         obj.c_type = item.type;
         obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
         obj.c_changePoints = function(points) {
-          if (this.c_points != points)
+          if (this.c_points == points)
             return;
 
           this.c_points = points;
@@ -848,6 +848,7 @@ app.Sidebar = function(sidebar_id, setting) {
     if (enable)
       {
         $('#app-sidebar-item-info-name').prop('disabled', false);
+        $('#app-sidebar-item-info-coordinate').prop('disabled', false);
       }
     else
       {
@@ -1045,6 +1046,9 @@ app.Setting = function() {
     if (!setting.config || !setting.config.maps[m_idx] || !setting.config.maps[m_idx].items)
       return;
 
+    var map = setting.config.maps[m_idx];
+    var baseX = map.width / 2;
+    var baseY = map.height / 2;
     var ritem = item;
     if (!ritem)
       {
@@ -1052,17 +1056,17 @@ app.Setting = function() {
 
         switch (options.type)
           {
-          case 0:
-            x1 = 40;
-            y1 = 40;
-            x2 = 70;
-            y2 = 60;
+          case 0: // box
+            x1 = options.x1 ? options.x1 : baseX + 40;
+            y1 = options.y1 ? options.y1 : baseY + 40;
+            x2 = options.x2 ? options.x2 : baseX + 79;
+            y2 = options.y2 ? options.y2 : baseY + 65;
             break;
-          case 1:
-            x1 = 40;
-            y1 = 40;
-            x2 = 70;
-            y2 = 70;
+          case 1: // circle
+            x1 = options.x1 ? options.x1 : baseX + 40;
+            y1 = options.y1 ? options.y1 : baseY + 40;
+            x2 = options.x2 ? options.x2 : baseX + 70;
+            y2 = options.y2 ? options.y2 : baseY + 70;
             break;
           default:
             console.log ("failed to add item (unknown item type:" + options.type + ")");
@@ -1072,7 +1076,7 @@ app.Setting = function() {
         ritem = {
           id : 'map-' + m_idx + '-item-' + setting.config.maps[m_idx].items.length,
           valid: true,
-          name: 100 + setting.config.maps[m_idx].items.length + "",
+          name: options.name ? options.name : 100 + setting.config.maps[m_idx].items.length + "",
           type: options.type,
           x1 : x1,
           y1 : y1,
@@ -1086,7 +1090,9 @@ app.Setting = function() {
           item : ritem
         });
 
-        this.select(ritem.id);  /* drawing event is occurred */
+        if (options.select)
+          this.select(ritem.id);  /* drawing event is occurred */
+
         return;
       }
 
@@ -1707,10 +1713,10 @@ $(function() {
   });
 
   $('#app-sidebar-item-add-rect').click(function(e) {
-    setting.add(null, { type: 0 });
+    setting.add(null, { type: 0, select: true });
   });
   $('#app-sidebar-item-add-circle').click(function(e) {
-    setting.add(null, { type: 1 });
+    setting.add(null, { type: 1, select: true });
   });
   $('#app-sidebar-item-remove').click(function(e) {
     setting.removeSelected();
@@ -1742,6 +1748,18 @@ $(function() {
     if (name == '')
       return;
     setting.modifySelected('name', name);
+  });
+
+  $('#app-sidebar-item-info-coordinate').change(function(e) {
+    var coords = $.trim($(this).val());
+    if (coords == '')
+      return;
+
+    var length = coords.split(',').length;
+    if (length != 4)
+      return;
+
+    setting.modifySelected('points', coords);
   });
 
   // window width(1280)/height(720) of package.json
@@ -1777,6 +1795,45 @@ $(function() {
 
     this.close(true);
   });
+
+  if (0) {
+    $("body").keydown(function(e) {
+      var elms = setting.selectedID.split('-');
+      if (elms.length != 4 || elms[3] == 'null')
+        return;
+
+      var item = setting.config.maps[elms[1]].items[elms[3]];
+      if (!item)
+        return;
+
+      var x1 = item.x1;
+      var y1 = item.y1;
+      var x2 = item.x2;
+      var y2 = item.y2;
+
+      if (e.keyCode == 37) {
+        e.preventDefault();
+        x1 -= 1;
+        x2 -= 1;
+      } else if (e.keyCode == 38) {
+        e.preventDefault();
+        y1 -= 1;
+        y2 -= 1;
+      } else if (e.keyCode == 39) {
+        e.preventDefault();
+        x1 += 1;
+        x2 += 1;
+      } else if (e.keyCode == 40) {
+        e.preventDefault();
+        y1 += 1;
+        y2 += 1;
+      } else {
+        return;
+      }
+
+      setting.modifySelected('points', [x1,y1,x2,y2].join(','));
+    });
+  }
 
   if (0) app.window.showDevTools();
   app.window.show();
