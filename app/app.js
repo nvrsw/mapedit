@@ -2067,6 +2067,6 @@ $(function() {
 
   });
 
-  if (1) app.window.showDevTools();
+  if (0) app.window.showDevTools();
   app.window.show();
 });
