@@ -49,13 +49,13 @@
       <div id="app-overlay"></div>
       <div class="app-sidebar-header">Maps
         <button type='button' class='btn btn-mini btn-link btn-group' rel='tooltip' title='Add new map'id='app-sidebar-map-add'>";
-          <i class='icon-plus'></i>";
+          <i class='icon-plus'></i>"
         </button>
       </div>
       <div class="accordion" id="app-sidebar-map-group">
         <div class="app-sidebar-map-bottom" id="app-sidebar-map-pivot"></div>
       </div> <!-- accordion -->
-      <div class="app-sidebar-header">
+      <div id="app-sidebar-item-header" class="app-sidebar-header">
         Item
         <div class="btn-group">
           <button type='button' class='btn btn-mini btn-link dropdown-toggle' data-toggle='dropdown' rel='tooltip' title='Add new item' id='app-sidebar-item-add'>
@@ -101,6 +101,44 @@
           </tbody>
         </table>
       </div>
+      <div class="app-sidebar-header">
+        Repeat
+      </div>
+      <div id="app-sidebar-repeat">
+        <table class="table-striped">
+          <tbody>
+            <tr>
+              <th>
+                <label for="app-sidebar-repeat-count">Count</label>
+              </th>
+              <td>
+                <input id="app-sidebar-repeat-count" type="text" value="5" class="input-small">
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label>Action</label>
+              </th>
+              <td>
+                <button id="app-sidebar-repeat-add-left" class="btn btn-mini btn-link btn-group" rel="tooltip" title="Repeat Left">
+                  <i class="icon-chevron-left"></i>
+                </button>
+                <button id="app-sidebar-repeat-add-right" class="btn btn-mini btn-link btn-group" rel="tooltip" title="Repeat Right">
+                  <i class="icon-chevron-right"></i>
+                </button>
+                <button id="app-sidebar-repeat-add-up" class="btn btn-mini btn-link btn-group" rel="tooltip" title="Repeat Up">
+                  <i class="icon-chevron-up"></i>
+                </button>
+                <button id="app-sidebar-repeat-add-down" class="btn btn-mini btn-link btn-group" rel="tooltip" title="Repeat Down">
+                  <i class="icon-chevron-down"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+      </div>
     </div>
     <div id='app-diagram-container'>
       <div id="app-diagram"></div>
@@ -119,7 +157,7 @@
 
   <div id="app-modal-map" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="app-modal-map-label" aria-hidden="true">
     <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
       <h3 id="app-modal-map-label">Add New Map</h3>
     </div>
     <div class="modal-body">

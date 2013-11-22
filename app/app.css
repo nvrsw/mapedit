@@ -241,3 +241,24 @@ select {
   float: right;
   margin-top: -20px;
 }
+
+#app-sidebar-item-header .icon-plus {
+  margin-top: 2px;
+}
+#app-sidebar-repeat label {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 2px 6px;
+}
+
+#app-sidebar-repeat input {
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 90%;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+
+#app-sidebar-repeat .btn-mini {
+  margin-top: -12px;
+}
