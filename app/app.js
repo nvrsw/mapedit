@@ -506,8 +506,8 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     obj.c_dragBoundFunc = function() {
-      var max_width = dia.width;
-      var max_height = dia.height;
+      var max_width = dia.width * dia.canvas.c_scaleValue;
+      var max_height = dia.height * dia.canvas.c_scaleValue;
 
       var xoff = this.getWidth() / 2;
       var yoff = this.getHeight() / 2;
@@ -571,8 +571,8 @@ app.Diagram = function(diagram_id, setting) {
     var path = setting.imageDir + '/' + filename;
     fabric.util.loadImage(path, function(img) {
       var obj = new fabric.Image(img, {
-        left: dia.width / 2,
-        top: dia.height / 2
+        left: (dia.width * dia.canvas.c_scaleValue) / 2,
+        top: (dia.height * dia.canvas.c_scaleValue) / 2
       });
 
       obj.c_id = c_id;
