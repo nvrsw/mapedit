@@ -1149,11 +1149,7 @@ app.Setting = function() {
                   || files[i] == "empty")
                 continue;
 
-              this.callbacks.fire({
-                cmd  : 'item.addBackground',
-                id   : "map-" + m_idx + "-bg-" + i,
-                file : files[i]
-              });
+              this.addBackground(i, files[i]);
             }
           }
 
@@ -1343,13 +1339,50 @@ app.Setting = function() {
         || !setting.config.maps[m_idx].items)
       return;
 
-    setting.config.maps[m_idx].backgrounds[bgIndex] = filename;
+    var valid = true;
+    var ext = filename.substr(filename.lastIndexOf('.') + 1);
+    if (!ext || (ext != "png" && ext != "jpg")) {
+      valid = false;
+      ext = "png";
+    }
+
+    var elms = filename.split('-');
+    if (elms.length != 4 || elms[0] != "map" || elms[2] != "bg")
+      valid = false;
+
+    var fname = "";
+    if (valid)
+      fname = filename;
+    else {
+      fname = "map-" + setting.map_idx + "-bg-" + bgIndex + "." + ext;
+
+      var oldPath = app.path.join(setting.imageDir, filename);
+      var newPath = app.path.join(setting.imageDir, fname);
+      app.fs.renameSync(oldPath, newPath);
+    }
+
+    setting.config.maps[m_idx].backgrounds[bgIndex] = fname;
 
     this.callbacks.fire({
       cmd  : 'item.addBackground',
       id   : "map-" + m_idx + "-bg-" + bgIndex,
-      file : filename
+      file : fname
     });
+  };
+  this.genBackgroundName = function(bgIndex, ext) {
+    if (!inited)
+      return;
+
+    var m_idx = setting.map_idx;
+    if (!setting.config
+        || !setting.config.maps[m_idx]
+        || !setting.config.maps[m_idx].items)
+      return;
+
+    if (!ext)
+      ext = "png";
+
+    return "map-" + setting.map_idx + "-bg-" + bgIndex + "." + ext;
   };
 
   this.removeBackground = function(bgIndex) {
@@ -1688,16 +1721,20 @@ $(function() {
     $(this).val('');
 
     var filename = app.path.basename(path);
-    var ext = filename.substr(filename.lastIndexOf('.') + 1);
-    if (!ext || (ext != 'png' && ext != 'PNG'))
+    if (!filename || filename == "")
+      return;
+
+    var ext = filename.toLowerCase().substr(filename.lastIndexOf('.') + 1);
+    if (!ext || (ext != "png" && ext != "jpg"))
       {
-        console.log(path + ' is not a png file');
+        console.log(path + " is not supported image file");
         return;
       }
     var bgIndex = app.curBgTarget.split('-')[5];
-    var imagePath = app.path.join(setting.imageDir, filename);
+    var fname = setting.genBackgroundName(bgIndex, ext);
+    var imagePath = app.path.join(setting.imageDir, fname);
     app.fs.writeFileSync(imagePath, app.fs.readFileSync(path), 'binary');
-    setting.addBackground(bgIndex, filename);
+    setting.addBackground(bgIndex, fname);
   });
 
   $('#app-menu-openrecent').click(function(e) {
