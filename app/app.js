@@ -1347,18 +1347,35 @@ app.Setting = function() {
     }
 
     var elms = filename.split('-');
-    if (elms.length != 4 || elms[0] != "map" || elms[2] != "bg")
+    if (elms.length != 3 || elms[0] != "map")
+      valid = false;
+
+    if (isNaN(parseInt(elms[1]), 10))
+      valid = false;
+
+    if (isNaN(parseInt(elms[2]), 10))
       valid = false;
 
     var fname = "";
     if (valid)
       fname = filename;
     else {
-      fname = "map-" + setting.map_idx + "-bg-" + bgIndex + "." + ext;
+      fname = "map-" + setting.map_idx + "-" + bgIndex + "." + ext;
 
       var oldPath = app.path.join(setting.imageDir, filename);
+      if (!app.fs.existsSync(oldPath))
+        return;
+
       var newPath = app.path.join(setting.imageDir, fname);
-      app.fs.renameSync(oldPath, newPath);
+
+      try {
+        app.fs.renameSync(oldPath, newPath);
+      } catch(e) {
+        console.log("there is no '" + filename + "'");
+        return;
+      }
+
+      console.log("change name: " + filename + " to " + fname);
     }
 
     setting.config.maps[m_idx].backgrounds[bgIndex] = fname;
@@ -1382,7 +1399,7 @@ app.Setting = function() {
     if (!ext)
       ext = "png";
 
-    return "map-" + setting.map_idx + "-bg-" + bgIndex + "." + ext;
+    return "map-" + setting.map_idx + "-" + bgIndex + "." + ext;
   };
 
   this.removeBackground = function(bgIndex) {
