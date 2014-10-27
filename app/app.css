@@ -67,7 +67,7 @@ select {
   top: 40px;
   height: 680px;
   overflow: auto;
-  background-color: #2e3436; /* kakudai2 background color */
+  background-color: #2e3436; /* screen2 background color */
 }
 
 #app-diagram {
@@ -75,8 +75,8 @@ select {
   top: 40px;
   height: 680px;
   overflow: auto;
-  background-color: rgba(16,16,16, 0.25); /* kakudai2 map_background_color #10101040 */
-  background-image: url('img/background-noisy.png'); /* kakudai2 background_image */
+  background-color: rgba(16,16,16, 0.25); /* screen2 map_background_color #10101040 */
+  background-image: url('img/background-noisy.png'); /* screen2 background_image */
   background-repeat: repeat;
 }
 
