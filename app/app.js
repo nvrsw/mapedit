@@ -1869,44 +1869,57 @@ $(function() {
     this.close(true);
   });
 
-  if (0) {
-    $("body").keydown(function(e) {
-      var elms = setting.selectedID.split('-');
-      if (elms.length != 4 || elms[3] == 'null')
-        return;
+  //if (0) {
+  // Check the focus in sidebar and navbar.
+  var checkFocusSidebar = false;
 
-      var item = setting.config.maps[elms[1]].items[elms[3]];
-      if (!item)
-        return;
+  $('.app-container').focusin(function() {
+    checkFocusSidebar = true;
+  });
+  $('.app-container').focusout(function() {
+    checkFocusSidebar = false;
+  });
 
-      var x1 = item.x1;
-      var y1 = item.y1;
-      var x2 = item.x2;
-      var y2 = item.y2;
+  // Move item of canvas by key event
+  $('body').keydown(function(e) {
+    if (checkFocusSidebar)
+      return;
+    var elms = setting.selectedID.split('-');
+    if (elms.length != 4 || elms[3] == 'null')
+      return;
 
-      if (e.keyCode == 37) {
-        e.preventDefault();
-        x1 -= 1;
-        x2 -= 1;
-      } else if (e.keyCode == 38) {
-        e.preventDefault();
-        y1 -= 1;
-        y2 -= 1;
-      } else if (e.keyCode == 39) {
-        e.preventDefault();
-        x1 += 1;
-        x2 += 1;
-      } else if (e.keyCode == 40) {
-        e.preventDefault();
-        y1 += 1;
-        y2 += 1;
-      } else {
-        return;
-      }
+    var item = setting.config.maps[elms[1]].items[elms[3]];
+    if (!item)
+      return;
 
-      setting.modifySelected('points', [x1,y1,x2,y2].join(','));
-    });
-  }
+    var x1 = item.x1;
+    var y1 = item.y1;
+    var x2 = item.x2;
+    var y2 = item.y2;
+
+    if (e.keyCode == 37) {
+      e.preventDefault();
+      x1 -= 1;
+      x2 -= 1;
+    } else if (e.keyCode == 38) {
+      e.preventDefault();
+      y1 -= 1;
+      y2 -= 1;
+    } else if (e.keyCode == 39) {
+      e.preventDefault();
+      x1 += 1;
+      x2 += 1;
+    } else if (e.keyCode == 40) {
+      e.preventDefault();
+      y1 += 1;
+      y2 += 1;
+    } else {
+      return;
+    }
+
+    setting.modifySelected('points', [x1,y1,x2,y2].join(','));
+  });
+  //}
 
   $('#app-sidebar-repeat-count').change(function(e) {
     var v = $.trim($(this).val());
