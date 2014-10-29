@@ -1913,6 +1913,10 @@ $(function() {
       e.preventDefault();
       y1 += 1;
       y2 += 1;
+    } else if (e.keyCode == 46) {
+      e.preventDefault();
+      setting.removeSelected();
+      return;
     } else {
       return;
     }
