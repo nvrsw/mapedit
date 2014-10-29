@@ -838,6 +838,9 @@ app.Sidebar = function(sidebar_id, setting) {
 
         var coord = [item.x1, item.y1, item.x2, item.y2].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
+
+        // Set autofocus to name text by selected item
+        setTimeout(function() {$('#app-sidebar-item-info-name').focus();},0);
         break;
       case 'item.addBackground':
         $('#app-sidebar-' + data.id).text(data.file);
