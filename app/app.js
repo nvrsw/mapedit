@@ -210,7 +210,6 @@ app.Diagram = function(diagram_id, setting) {
 
     var canvas;
     canvas = new fabric.Canvas(canvasID, {
-      selection: false,
       perPixelTargetFind: true,
       c_scaleValue: 1.0,
       c_scale: function(value) {
