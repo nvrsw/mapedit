@@ -322,6 +322,12 @@ app.Diagram = function(diagram_id, setting) {
       setting.select(null);
     });
 
+    // Event of group to canvas
+    canvas.on('selection:created', function (e) {
+      if (e.target.type === 'group')
+        setting.groupSelect(e.target);
+    });
+
     canvas.on('object:selected', function(e) {
       var obj = e.target;
 
@@ -1202,6 +1208,19 @@ app.Setting = function() {
 
     this.selectedID = id;
     this.callbacks.fire({ cmd: 'item.selected', id: id });
+  };
+
+  // Save object data of group to canvas
+  this.groupSelect = function(groupObject) {
+    if (!groupObject)
+      return;
+
+    groupObject.forEachObject(function (e) {
+      if (e.c_id) {
+
+        return;
+      }
+    });
   };
   this.modify = function(c_id, key, value) {
     var k = c_id.split('-');
