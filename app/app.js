@@ -316,18 +316,24 @@ app.Diagram = function(diagram_id, setting) {
       canvas.backgroundColor = colorCSS(app.defaultBackgroundColor);
 
     canvas.on('mouse:down', function(e) {
-      console.log('mouse:down');
-      if (e.target)
-        return;
+      if (e.target) {
 
-      console.log('mouse:down null');
+        // Initial to selected group ID.
+        if (e.target.type !== 'group')
+          setting.groupSelectedID = '';
+        return;
+      }
+
+      setting.groupSelectedID = '';
       setting.select(null);
     });
 
     // Event of group to canvas
     canvas.on('selection:created', function (e) {
-      if (e.target.type === 'group')
+      if (e.target.type === 'group') {
         setting.groupSelect(e.target);
+        setting.select(null);
+      }
     });
 
     canvas.on('object:selected', function(e) {
@@ -626,11 +632,13 @@ app.Diagram = function(diagram_id, setting) {
       {
         dia.canvas.setActiveObject(dia.currentObject);
         dia.canvas.bringToFront(dia.currentObject);
+        console.log('sel');
         return;
       }
     else
       {
         dia.canvas.discardActiveObject();
+        console.log('dis');
       }
 
     dia.canvas.renderAll();
@@ -716,6 +724,16 @@ app.Diagram = function(diagram_id, setting) {
         var dia = lookupDia(dia_id);
         if (dia)
           removeItem(dia, data.id);
+        break;
+      // remove the active group on canvas
+      case 'group.removed':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia && dia.canvas) {
+          dia.canvas.discardActiveGroup();
+          dia.canvas.renderAll();
+        }
         break;
       case 'map.draw':
         var elms = data.id.split('-');
@@ -1209,7 +1227,6 @@ app.Setting = function() {
     else
       id = "map-" + setting.map_idx + "-item-null";
 
-    setting.groupSelectedID = '';
     if (this.selectedID == id)
       return;
 
@@ -1230,7 +1247,7 @@ app.Setting = function() {
       i++;
     });
     this.groupSelectedID = id;
-    console.log(this.groupSelectedID.length);
+    this.selectedID = "map-" + setting.map_idx + "-item-group";
   };
   this.modify = function(c_id, key, value) {
     var k = c_id.split('-');
@@ -1342,28 +1359,34 @@ app.Setting = function() {
     if (!inited)
       return;
 
-    console.log(setting.groupSelectedID.length);
     if (setting.groupSelectedID.length) {
-      console.log(setting.groupSelectedID);
+      var i = 0;
+      var id = setting.groupSelectedID;
+      for (i; i < id.length ; i++)
+        removeItemData(id[i]);
+      setting.callbacks.fire({ cmd: 'group.removed', id: id[0] });
     } else {
-    if (setting.selectedID && setting.selectedID != '')
-      {
-        var elms = setting.selectedID.split('-');
-        if (elms[3] == 'null')
-          return;
-
-        if (setting.config.maps[elms[1]].items[elms[3]])
-          {
-            setting.config.maps[elms[1]].items[elms[3]].valid = false;
-            setting.callbacks.fire({
-              cmd   : 'item.removed',
-              id    : setting.selectedID
-            });
-            setting.select(null);
-          }
-      }
+      removeItemData(setting.selectedID);
     }
   };
+
+  // Remove data to selected item on canvas
+  removeItemData = function(id) {
+    if (id && id != '') {
+      var elms = id.split('-');
+      if (elms[3] == 'null')
+        return;
+
+      if (setting.config.maps[elms[1]].items[elms[3]]) {
+        setting.config.maps[elms[1]].items[elms[3]].valid = false;
+        setting.callbacks.fire({
+          cmd   : 'item.removed',
+          id    : id
+        });
+        setting.select(null);
+      }
+    }
+  }
 
   this.addBackground = function(bgIndex, filename) {
     if (!inited)
