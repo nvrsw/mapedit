@@ -316,9 +316,11 @@ app.Diagram = function(diagram_id, setting) {
       canvas.backgroundColor = colorCSS(app.defaultBackgroundColor);
 
     canvas.on('mouse:down', function(e) {
+      console.log('mouse:down');
       if (e.target)
         return;
 
+      console.log('mouse:down null');
       setting.select(null);
     });
 
@@ -329,6 +331,7 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     canvas.on('object:selected', function(e) {
+      console.log('object:selected');
       var obj = e.target;
 
       if (!obj)
@@ -341,6 +344,7 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     canvas.on('object:moving', function(e) {
+      console.log('object:moving');
       var obj = e.target;
 
       if (!obj)
@@ -351,6 +355,7 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     canvas.on('object:modified', function(e) {
+      console.log('object:modified');
       var obj = e.target;
 
       if (!obj)
@@ -1032,7 +1037,8 @@ app.Setting = function() {
 
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
-  this.selectedID ='';
+  this.selectedID = '';
+  this.groupSelectedID = '';
 
   this.init = function(config, zipPath, tmpDir) {
     this.config = config;
@@ -1203,6 +1209,7 @@ app.Setting = function() {
     else
       id = "map-" + setting.map_idx + "-item-null";
 
+    setting.groupSelectedID = '';
     if (this.selectedID == id)
       return;
 
@@ -1210,17 +1217,20 @@ app.Setting = function() {
     this.callbacks.fire({ cmd: 'item.selected', id: id });
   };
 
-  // Save object data of group to canvas
+  // Save group objects of canvas
   this.groupSelect = function(groupObject) {
     if (!groupObject)
       return;
 
+    var id = [];
+    var i = 0;
     groupObject.forEachObject(function (e) {
-      if (e.c_id) {
-
-        return;
-      }
+      if (e.c_id)
+        id[i] = e.c_id;
+      i++;
     });
+    this.groupSelectedID = id;
+    console.log(this.groupSelectedID.length);
   };
   this.modify = function(c_id, key, value) {
     var k = c_id.split('-');
@@ -1332,6 +1342,10 @@ app.Setting = function() {
     if (!inited)
       return;
 
+    console.log(setting.groupSelectedID.length);
+    if (setting.groupSelectedID.length) {
+      console.log(setting.groupSelectedID);
+    } else {
     if (setting.selectedID && setting.selectedID != '')
       {
         var elms = setting.selectedID.split('-');
@@ -1348,6 +1362,7 @@ app.Setting = function() {
             setting.select(null);
           }
       }
+    }
   };
 
   this.addBackground = function(bgIndex, filename) {
