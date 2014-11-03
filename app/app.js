@@ -2194,13 +2194,12 @@ $(function() {
 
   // Set double click event for item on canvas.
   $('#app-diagram').on('dblclick', function() {
-    console.log(setting.selectedID);
     var elms = setting.selectedID.split('-');
     if (elms[3] == 'null')
       return;
 
     // Set autofocus to name text by selected item.
-    setTimeout(function() {$('#app-sidebar-item-info-name').focus();}, 0);
+    $('#app-sidebar-item-info-name').focus();
   });
 
   if (0) app.window.showDevTools();
