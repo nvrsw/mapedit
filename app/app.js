@@ -632,13 +632,11 @@ app.Diagram = function(diagram_id, setting) {
       {
         dia.canvas.setActiveObject(dia.currentObject);
         dia.canvas.bringToFront(dia.currentObject);
-        console.log('sel');
         return;
       }
     else
       {
         dia.canvas.discardActiveObject();
-        console.log('dis');
       }
 
     dia.canvas.renderAll();
@@ -866,9 +864,6 @@ app.Sidebar = function(sidebar_id, setting) {
 
         var coord = [item.x1, item.y1, item.x2, item.y2].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
-
-        // Set autofocus to name text by selected item
-        setTimeout(function() {$('#app-sidebar-item-info-name').focus();},0);
         break;
       case 'item.addBackground':
         $('#app-sidebar-' + data.id).text(data.file);
@@ -2195,6 +2190,17 @@ $(function() {
     if (change)
       setting.select(null);
 
+  });
+
+  // Set double click event for item on canvas.
+  $('#app-diagram').on('dblclick', function() {
+    console.log(setting.selectedID);
+    var elms = setting.selectedID.split('-');
+    if (elms[3] == 'null')
+      return;
+
+    // Set autofocus to name text by selected item.
+    setTimeout(function() {$('#app-sidebar-item-info-name').focus();}, 0);
   });
 
   if (0) app.window.showDevTools();
