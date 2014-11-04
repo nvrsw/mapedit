@@ -331,8 +331,8 @@ app.Diagram = function(diagram_id, setting) {
     // Event of group to canvas
     canvas.on('selection:created', function (e) {
       if (e.target.type === 'group') {
-        setting.groupSelect(e.target);
         setting.select(null);
+        setting.groupSelect(e.target);
       }
     });
 
@@ -823,6 +823,8 @@ app.Sidebar = function(sidebar_id, setting) {
           }
         break;
       case 'item.modified':
+        if (setting.groupSelectedID.length)
+          return;
         var elms = data.id.split('-');
         if (elms[3] == 'null')
           {
@@ -1366,7 +1368,7 @@ app.Setting = function() {
   };
 
   // Remove data to selected item on canvas
-  removeItemData = function(id) {
+  function removeItemData(id) {
     if (id && id != '') {
       var elms = id.split('-');
       if (elms[3] == 'null')
@@ -1920,7 +1922,6 @@ $(function() {
     this.close(true);
   });
 
-  //if (0) {
   // Check the focus in sidebar and navbar.
   var checkFocusSidebar = false;
 
@@ -1939,33 +1940,51 @@ $(function() {
     if (elms.length != 4 || elms[3] == 'null')
       return;
 
-    var item = setting.config.maps[elms[1]].items[elms[3]];
-    if (!item)
-      return;
+    var item;
+    var i = 0;
+    var groupIdElms;
 
+    // Set keybord event for group
+    e.preventDefault();
+    if (elms[3] == 'group') {
+      var groupItemID = setting.groupSelectedID;
+      for (i = 0; i < groupItemID.length; i++) {
+        groupIdElms = groupItemID[i].split('-');
+        item = setting.config.maps[groupIdElms[1]].items[groupIdElms[3]];
+        setting.selectedID = groupItemID[i];
+        modifyItemCoordinate(item, e.keyCode);
+        // One Action for remove function
+        if (e.keyCode == 46)
+          return;
+      }
+    } else {
+      item = setting.config.maps[elms[1]].items[elms[3]];
+      if (!item)
+        return;
+      modifyItemCoordinate(item, e.keyCode);
+    }
+  });
+
+  // Change coordinate for item on canvas.
+  function modifyItemCoordinate(item, keyCode) {
     var x1 = item.x1;
     var y1 = item.y1;
     var x2 = item.x2;
     var y2 = item.y2;
 
-    if (e.keyCode == 37) {
-      e.preventDefault();
+    if (keyCode == 37) {
       x1 -= 1;
       x2 -= 1;
-    } else if (e.keyCode == 38) {
-      e.preventDefault();
+    } else if (keyCode == 38) {
       y1 -= 1;
       y2 -= 1;
-    } else if (e.keyCode == 39) {
-      e.preventDefault();
+    } else if (keyCode == 39) {
       x1 += 1;
       x2 += 1;
-    } else if (e.keyCode == 40) {
-      e.preventDefault();
+    } else if (keyCode == 40) {
       y1 += 1;
       y2 += 1;
-    } else if (e.keyCode == 46) {
-      e.preventDefault();
+    } else if (keyCode == 46) {
       setting.removeSelected();
       return;
     } else {
@@ -1973,8 +1992,7 @@ $(function() {
     }
 
     setting.modifySelected('points', [x1,y1,x2,y2].join(','));
-  });
-  //}
+  }
 
   $('#app-sidebar-repeat-count').change(function(e) {
     var v = $.trim($(this).val());
