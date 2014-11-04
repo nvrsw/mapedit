@@ -713,8 +713,13 @@ app.Diagram = function(diagram_id, setting) {
         var elms = data.id.split('-');
         var dia_id = 'app-dia-' + elms[1];
         var dia = lookupDia(dia_id);
-        if (dia)
+        if (dia) {
+          if (setting.groupSelectedID.length) {
+            dia.canvas.renderAll();
+            break;
+          }
           modifyItem(dia, data.id, data.key, data.value);
+        }
         break;
       case 'item.removed':
         var elms = data.id.split('-');
@@ -824,7 +829,7 @@ app.Sidebar = function(sidebar_id, setting) {
         break;
       case 'item.modified':
         if (setting.groupSelectedID.length)
-          return;
+          break;
         var elms = data.id.split('-');
         if (elms[3] == 'null')
           {
@@ -1054,6 +1059,7 @@ app.Setting = function() {
   this.callbacks = $.Callbacks();
   this.selectedID = '';
   this.groupSelectedID = '';
+  this.groupObject = '';
 
   this.init = function(config, zipPath, tmpDir) {
     this.config = config;
@@ -1232,17 +1238,19 @@ app.Setting = function() {
   };
 
   // Save group objects of canvas
-  this.groupSelect = function(groupObject) {
-    if (!groupObject)
+  this.groupSelect = function(group) {
+    if (!group)
       return;
 
     var id = [];
     var i = 0;
-    groupObject.forEachObject(function (e) {
+    console.log('gleft: ' + group.left + ' gtop: ' + group.top);
+    group.forEachObject(function (e) {
       if (e.c_id)
         id[i] = e.c_id;
       i++;
     });
+    this.groupObject = group;
     this.groupSelectedID = id;
     this.selectedID = "map-" + setting.map_idx + "-item-group";
   };
@@ -1946,16 +1954,31 @@ $(function() {
 
     // Set keybord event for group
     e.preventDefault();
-    if (elms[3] == 'group') {
+    if (setting.groupSelectedID.length) {
+
+      // Set coordinate of group.
+      if (e.keyCode == 37) {
+        setting.groupObject.left -= 1;
+      } else if (e.keyCode == 38) {
+        setting.groupObject.top -= 1;
+      } else if (e.keyCode == 39) {
+        setting.groupObject.left += 1;
+      } else if (e.keyCode == 40) {
+        setting.groupObject.top += 1;
+      } else if (e.keyCode == 46) {
+        setting.removeSelected();
+        return;
+      } else {
+        return;
+      }
+
+      // Set coordinate of item in the group.
       var groupItemID = setting.groupSelectedID;
       for (i = 0; i < groupItemID.length; i++) {
         groupIdElms = groupItemID[i].split('-');
         item = setting.config.maps[groupIdElms[1]].items[groupIdElms[3]];
         setting.selectedID = groupItemID[i];
         modifyItemCoordinate(item, e.keyCode);
-        // One Action for remove function
-        if (e.keyCode == 46)
-          return;
       }
     } else {
       item = setting.config.maps[elms[1]].items[elms[3]];
