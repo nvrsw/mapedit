@@ -337,7 +337,6 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     canvas.on('object:selected', function(e) {
-      console.log('object:selected');
       var obj = e.target;
 
       if (!obj)
@@ -350,7 +349,6 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     canvas.on('object:moving', function(e) {
-      console.log('object:moving');
       var obj = e.target;
 
       if (!obj)
@@ -360,7 +358,6 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     canvas.on('object:modified', function(e) {
-      console.log('object:modified');
       var obj = e.target;
 
       if (!obj)
@@ -1256,7 +1253,7 @@ app.Setting = function() {
 
     var id = [];
     var i = 0;
-    console.log('gleft: ' + group.left + ' gtop: ' + group.top);
+
     group.forEachObject(function (e) {
       if (e.c_id)
         id[i] = e.c_id;
