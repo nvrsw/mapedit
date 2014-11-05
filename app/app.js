@@ -367,18 +367,36 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
-      if (obj.c_id)
-        {
-          var points = [];
+      if (obj.type == 'group') {
+        var moveLeft = obj.left - obj.originleft;
+        var moveTop = obj.top - obj.origintop;
 
-          points.push(Math.round(obj.oCoords.tl.x / dia.canvas.c_scaleValue));
-          points.push(Math.round(obj.oCoords.tl.y / dia.canvas.c_scaleValue));
-          points.push(Math.round(obj.oCoords.br.x / dia.canvas.c_scaleValue));
-          points.push(Math.round(obj.oCoords.br.y / dia.canvas.c_scaleValue));
-          obj.c_points = points.join(',');
+        obj.originleft = obj.left;
+        obj.origintop = obj.top;
 
-          setting.modify(obj.c_id, 'points', points.join(','));
+        obj.forEachObject(function (item) {
+          var elms = item.c_points.split(',');
+          var x1 = Math.round((parseInt(elms[0]) + moveLeft) / dia.canvas.c_scaleValue);
+          var y1 = Math.round((parseInt(elms[1]) + moveTop) / dia.canvas.c_scaleValue);
+          var x2 = Math.round((parseInt(elms[2]) + moveLeft) / dia.canvas.c_scaleValue);
+          var y2 = Math.round((parseInt(elms[3]) + moveTop) / dia.canvas.c_scaleValue);
+          item.c_points = [x1, y1, x2, y2].join(',');
+
+          setting.modify(item.c_id, 'points', item.c_points);
+        });
+      } else {
+        if (obj.c_id) {
+            var points = [];
+
+            points.push(Math.round(obj.oCoords.tl.x / dia.canvas.c_scaleValue));
+            points.push(Math.round(obj.oCoords.tl.y / dia.canvas.c_scaleValue));
+            points.push(Math.round(obj.oCoords.br.x / dia.canvas.c_scaleValue));
+            points.push(Math.round(obj.oCoords.br.y / dia.canvas.c_scaleValue));
+            obj.c_points = points.join(',');
+
+            setting.modify(obj.c_id, 'points', points.join(','));
         }
+      }
     });
 
     dia.canvas = canvas;
@@ -1251,6 +1269,8 @@ app.Setting = function() {
       i++;
     });
     this.groupObject = group;
+    this.groupObject.originleft = group.left;
+    this.groupObject.origintop = group.top;
     this.groupSelectedID = id;
     this.selectedID = "map-" + setting.map_idx + "-item-group";
   };
