@@ -1299,7 +1299,7 @@ app.Setting = function() {
 
         if (changed)
           {
-            console.log('modify ' + c_id + '-' + key + ' => ' + value);
+            //console.log('modify ' + c_id + '-' + key + ' => ' + value);
             this.callbacks.fire({
               cmd   : 'map.modified',
               id    : c_id,
@@ -1345,7 +1345,7 @@ app.Setting = function() {
 
         if (changed)
           {
-            console.log('modify ' + c_id + '-' + key + ' => ' + value);
+            //console.log('modify ' + c_id + '-' + key + ' => ' + value);
             this.callbacks.fire({
               cmd   : 'item.modified',
               id    : c_id,
