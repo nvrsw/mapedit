@@ -356,8 +356,7 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
-      if (obj.c_dragBoundFunc)
-        obj.c_dragBoundFunc();
+      dragBoundItem(obj, map);
     });
 
     canvas.on('object:modified', function(e) {
@@ -403,6 +402,40 @@ app.Diagram = function(diagram_id, setting) {
     diaList.push(dia);
 
     $('#' + dia.c_id).hide();
+  }
+
+  // Prevent leave to item to map.
+  function dragBoundItem(obj, map) {
+    var xoff = Math.round(obj.getWidth() / 2);
+    var yoff = Math.round(obj.getHeight() / 2);
+
+    // Not use 'oCoords' function for correct coordinate.
+    var tl = {
+      x: obj.left - xoff,
+      y: obj.top - yoff
+    };
+
+    var tr = {
+      x: obj.left + xoff,
+      y: obj.top - yoff
+    };
+
+    var bl = {
+      x: obj.left - xoff,
+      y: obj.top + yoff
+    };
+
+    if (tl.x < 0) {
+      obj.left -= tl.x;
+    } else if (tr.x > map.width) {
+      obj.left -= (tr.x - map.width);
+    }
+
+    if (tl.y < 0) {
+      obj.top -= tl.y;
+    } else if (bl.y > map.height) {
+      obj.top -= (bl.y - map.height);
+    }
   }
 
   function removeMap(dia) {
@@ -538,45 +571,6 @@ app.Diagram = function(diagram_id, setting) {
       transparentCorners: false,
       lockRotation: true
     });
-
-    obj.c_dragBoundFunc = function() {
-      var max_width = dia.width * dia.canvas.c_scaleValue;
-      var max_height = dia.height * dia.canvas.c_scaleValue;
-
-      var xoff = this.getWidth() / 2;
-      var yoff = this.getHeight() / 2;
-
-      var tl = {
-        x: this.left - xoff,
-        y: this.top - yoff
-      };
-
-      var tr = {
-        x: this.left + xoff,
-        y: this.top - yoff
-      };
-
-      var bl = {
-        x: this.left - xoff,
-        y: this.top + yoff
-      };
-
-      if (tl.x < 0) {
-        var diff = 0 - tl.x;
-        this.left += diff;
-      } else if (tr.x > max_width) {
-        var diff = tr.x - max_width;
-        this.left -= diff;
-      }
-
-      if (tl.y < 0) {
-        var diff = 0 - tl.y;
-        this.top += diff;
-      } else if (bl.y > max_height) {
-        var diff = bl.y - max_height;
-        this.top -= diff;
-      }
-    };
 
     dia.canvas.add(obj);
   }
