@@ -1763,7 +1763,7 @@ $(function() {
   };
 
   // Use option value.
-  var allNumber = false;
+  var exceptFourNine = false;
   var descOrder = false;
 
   app.window = app.gui.Window.get();
@@ -2248,12 +2248,9 @@ $(function() {
 
   });
 
-  // Except name include of '4,9' according to 'allNumber' option
+  // Except name include of '4,9' according to 'exceptFourNine' option
   function exceptName(name) {
-    if (allNumber)
-      return false;
-
-    if (name.indexOf('4') >= 0 || name.indexOf('9') >= 0)
+    if ((name.indexOf('4') >= 0 || name.indexOf('9') >= 0) && exceptFourNine)
       return true;
 
     return false;
@@ -2270,8 +2267,8 @@ $(function() {
     return idx;
   }
 
-  $('#app-sidebar-repeat-option-all-number').click(function(e) {
-    allNumber = setActive($(this));
+  $('#app-sidebar-repeat-option-except-number').click(function(e) {
+    exceptFourNine = setActive($(this));
     $(this).blur();
   });
 
