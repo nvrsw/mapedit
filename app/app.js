@@ -2303,7 +2303,14 @@ $(function() {
   if (0) app.window.showDevTools();
   app.window.show();
 
-  if (app.gui.App.argv.length >= 1) {
-    setting.openZipFile(app.gui.App.argv[0]);
-  }
+  setTimeout(function () {
+    if (app.gui.App.argv.length >= 1) {
+      setting.openZipFile(app.gui.App.argv[0]);
+    }
+
+    // Listen to `open` event
+    app.gui.App.on('open', function(cmdline) {
+      setting.openZipFile(cmdline.split(' ').reverse()[0]);
+    });
+  }, 1000);
 });
