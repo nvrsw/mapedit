@@ -2064,7 +2064,7 @@ $(function() {
 
       var n = sn + idx;
       var name = n.toString();
-      if (name.indexOf("4") >= 0 || name.indexOf("9") >= 0)
+      if (exceptName(name))
         continue;
 
       var options = {
@@ -2115,7 +2115,7 @@ $(function() {
 
       var n = sn + idx;
       var name = n.toString();
-      if (name.indexOf("4") >= 0 || name.indexOf("9") >= 0)
+      if (exceptName(name))
         continue;
 
       var options = {
@@ -2166,7 +2166,7 @@ $(function() {
 
       var n = sn + idx;
       var name = n.toString();
-      if (name.indexOf("4") >= 0 || name.indexOf("9") >= 0)
+      if (exceptName(name))
         continue;
 
       var options = {
@@ -2217,7 +2217,7 @@ $(function() {
 
       var n = sn + idx;
       var name = n.toString();
-      if (name.indexOf("4") >= 0 || name.indexOf("9") >= 0)
+      if (exceptName(name))
         continue;
 
       var options = {
@@ -2247,6 +2247,17 @@ $(function() {
       setting.select(null);
 
   });
+
+  // Except name include of '4,9' accorfing to 'All Number' option
+  function exceptName(name) {
+    if (allNumber)
+      return false;
+
+    if (name.indexOf('4') >= 0 || name.indexOf('9') >= 0)
+      return true;
+
+    return false;
+  }
 
   $('#app-sidebar-repeat-option-all-number').click(function(e) {
     allNumber = setActive($(this));
