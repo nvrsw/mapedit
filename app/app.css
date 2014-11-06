@@ -259,7 +259,7 @@ select {
   font-size: 11px;
 }
 
-#app-sidebar-repeat .btn-link {
+#app-sidebar-repeat .remove-top-margin {
   margin-top: -12px;
 }
 
