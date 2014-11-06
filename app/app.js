@@ -127,7 +127,7 @@ app.Diagram = function(diagram_id, setting) {
       }
 
     return dia;
-  };
+  }
 
   function diaForeach(callback) {
     for (var i = 0; i < diaList.length; i++)
@@ -2302,4 +2302,8 @@ $(function() {
 
   if (0) app.window.showDevTools();
   app.window.show();
+
+  if (app.gui.App.argv.length >= 1) {
+    setting.openZipFile(app.gui.App.argv[0]);
+  }
 });
