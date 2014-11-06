@@ -1762,6 +1762,10 @@ $(function() {
     return val;
   };
 
+  // Use option value.
+  var allNumber = false;
+  var descOrder = false;
+
   app.window = app.gui.Window.get();
 
   setting = new app.Setting();
@@ -2243,6 +2247,26 @@ $(function() {
       setting.select(null);
 
   });
+
+  $('#app-sidebar-repeat-option-all-number').click(function(e) {
+    allNumber = setActive($(this));
+    $(this).blur();
+  });
+
+  $('#app-sidebar-repeat-option-descending').click(function(e) {
+    descOrder = setActive($(this));
+    $(this).blur();
+  });
+
+  // Set active for button class.
+  function setActive(target) {
+    var active = !target.hasClass('active');
+    if (active)
+      target.addClass('active');
+    else
+      target.removeClass('active');
+    return active;
+  }
 
   // Set double click event for item on canvas.
   $('#app-diagram').on('dblclick', function() {

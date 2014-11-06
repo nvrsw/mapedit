@@ -259,6 +259,10 @@ select {
   font-size: 11px;
 }
 
-#app-sidebar-repeat .btn-mini {
+#app-sidebar-repeat .btn-link {
   margin-top: -12px;
+}
+
+#app-sidebar-repeat .inline-block {
+  display: inline-block;
 }
