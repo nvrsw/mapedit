@@ -2060,7 +2060,7 @@ $(function() {
     var count = 1;
     var change = false;
     while (count <= total) {
-      idx++;
+      idx = checkDesc(idx);
 
       var n = sn + idx;
       var name = n.toString();
@@ -2111,7 +2111,7 @@ $(function() {
     var count = 1;
     var change = false;
     while (count <= total) {
-      idx++;
+      idx = checkDesc(idx);
 
       var n = sn + idx;
       var name = n.toString();
@@ -2162,7 +2162,7 @@ $(function() {
     var count = 1;
     var change = false;
     while (count <= total) {
-      idx++;
+      idx = checkDesc(idx);
 
       var n = sn + idx;
       var name = n.toString();
@@ -2213,7 +2213,7 @@ $(function() {
     var count = 1;
     var change = false;
     while (count <= total) {
-      idx++;
+      idx = checkDesc(idx);
 
       var n = sn + idx;
       var name = n.toString();
@@ -2248,7 +2248,7 @@ $(function() {
 
   });
 
-  // Except name include of '4,9' accorfing to 'All Number' option
+  // Except name include of '4,9' according to 'allNumber' option
   function exceptName(name) {
     if (allNumber)
       return false;
@@ -2257,6 +2257,17 @@ $(function() {
       return true;
 
     return false;
+  }
+
+  // Set increase or decrease according to 'descOrder' option
+  function checkDesc(idx) {
+    console.log(idx);
+    if (descOrder)
+      idx -= 1;
+    else
+      idx += 1;
+    console.log(idx);
+    return idx;
   }
 
   $('#app-sidebar-repeat-option-all-number').click(function(e) {
