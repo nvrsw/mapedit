@@ -1,8 +1,9 @@
 #!/bin/sh
 
+CURDIR=$(dirname $0); cd $CURDIR
 NODE_WEBKIT_PATH=node-webkit/linux-x64
 
 LD_LIBRARY_PATH=$NODE_WEBKIT_PATH:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH
 
-exec $NODE_WEBKIT_PATH/nw app
+exec $NODE_WEBKIT_PATH/nw app "$@"
