@@ -336,6 +336,9 @@ app.Diagram = function(diagram_id, setting) {
       if (e.target.type === 'group') {
         setting.select(null);
         setting.groupSelect(e.target);
+
+        $('#app-sidebar-item-info-fill-zero').prop('disabled', false);
+        $('#app-sidebar-item-info-fill-zero-button').prop('disabled', false);
       }
     });
 
@@ -904,6 +907,8 @@ app.Sidebar = function(sidebar_id, setting) {
         $('#app-sidebar-item-info-name').val("").prop('disabled', true);
         $('#app-sidebar-item-info-type').val("").prop('disabled', true);
         $('#app-sidebar-item-info-coordinate').val("").prop('disabled', true);
+        $('#app-sidebar-item-info-fill-zero').prop('disabled', true);
+        $('#app-sidebar-item-info-fill-zero-button').prop('disabled', true);
 
         $('#app-sidebar-repeat-count').prop('disabled', true);
         $('#app-sidebar-repeat-add-left').prop('disabled', true);
@@ -1910,6 +1915,45 @@ $(function() {
 
     setting.modifySelected('points', coords);
   });
+
+  $('#app-sidebar-item-info-fill-zero').change(function(e) {
+    $('#app-sidebar-item-info-fill-zero-button').click();
+  });
+
+  $('#app-sidebar-item-info-fill-zero-button').click(function(e) {
+    var num = $.trim($('#app-sidebar-item-info-fill-zero').val());
+    if (num == '')
+      return;
+    Fillzero(num);
+  });
+
+  // Fill zero as digit number for item name in group.
+  function Fillzero(length) {
+    if (setting.groupSelectedID.length) {
+      var i = 0;
+
+      setting.groupObject.forEachObject(function (item) {
+        var elms = item.c_id.split('-');
+        var obj = setting.config.maps[elms[1]].items[elms[3]];
+        var nameLength = obj.name.length;
+
+        if (nameLength < length) {
+          for (i = 0; i < (length - nameLength); i++)
+            obj.name = '0' +  obj.name;
+          item.set('label', obj.name);
+        } else if (nameLength > length) {
+          for (i = 0; i < (nameLength - length); i++) {
+            if (obj.name.indexOf('0') == 0)
+              obj.name = obj.name.substring(1);
+            else
+              break;
+          }
+          item.set('label', obj.name);
+        }
+      });
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    }
+  }
 
   // window width(1280)/height(720) of package.json
   var diff_w = 1280 - $('#app-diagram').width();

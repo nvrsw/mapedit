@@ -266,3 +266,7 @@ select {
 #app-sidebar-repeat .inline-block {
   display: inline-block;
 }
+
+.half-width {
+  width: 50% !important;
+}
