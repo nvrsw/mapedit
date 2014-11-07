@@ -380,6 +380,7 @@ app.Diagram = function(diagram_id, setting) {
 
           setting.modify(item.c_id, 'points', item.c_points);
         });
+        dia.canvas.renderAll();
       } else {
         if (obj.c_id) {
             var points = [];
@@ -717,12 +718,16 @@ app.Diagram = function(diagram_id, setting) {
         var dia_id = 'app-dia-' + elms[1];
         var dia = lookupDia(dia_id);
         if (dia) {
-          if (setting.groupSelectedID.length) {
-            dia.canvas.renderAll();
-            break;
-          }
           modifyItem(dia, data.id, data.key, data.value);
         }
+        break;
+      // Use for avoid overlapping rendering.
+      case 'group.modified':
+        var elms = data.id.split('-');
+        var dia_id = 'app-dia-' + elms[1];
+        var dia = lookupDia(dia_id);
+        if (dia)
+          dia.canvas.renderAll();
         break;
       case 'item.removed':
         var elms = data.id.split('-');
@@ -731,7 +736,7 @@ app.Diagram = function(diagram_id, setting) {
         if (dia)
           removeItem(dia, data.id);
         break;
-      // remove the active group on canvas
+      // Remove the active group on canvas.
       case 'group.removed':
         var elms = data.id.split('-');
         var dia_id = 'app-dia-' + elms[1];
@@ -831,8 +836,6 @@ app.Sidebar = function(sidebar_id, setting) {
           }
         break;
       case 'item.modified':
-        if (setting.groupSelectedID.length)
-          break;
         var elms = data.id.split('-');
         if (elms[3] == 'null')
           {
@@ -1340,6 +1343,8 @@ app.Setting = function() {
         if (changed)
           {
             //console.log('modify ' + c_id + '-' + key + ' => ' + value);
+            if (setting.groupSelectedID.length)
+              return;
             this.callbacks.fire({
               cmd   : 'item.modified',
               id    : c_id,
@@ -1989,6 +1994,7 @@ $(function() {
         setting.selectedID = groupItemID[i];
         modifyItemCoordinate(item, e.keyCode);
       }
+      setting.callbacks.fire({ cmd: 'group.modified', id: groupItemID[0] });
     } else {
       item = setting.config.maps[elms[1]].items[elms[3]];
       if (!item)
