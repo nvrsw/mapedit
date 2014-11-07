@@ -505,8 +505,6 @@ app.Diagram = function(diagram_id, setting) {
           this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue / this.scaleX));
           this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue / this.scaleY));
           this.setCoords();
-
-          dia.canvas.renderAll();
         };
         break;
       case 1: // DAI_CIRCLE
@@ -548,8 +546,6 @@ app.Diagram = function(diagram_id, setting) {
           this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
           this.setRadius(Math.round((x2 - x1) * dia.canvas.c_scaleValue / 2 / this.scaleX));
           this.setCoords();
-
-          dia.canvas.renderAll();
         };
         break;
       }
@@ -647,8 +643,6 @@ app.Diagram = function(diagram_id, setting) {
       {
         dia.canvas.discardActiveObject();
       }
-
-    dia.canvas.renderAll();
   }
 
   function modifyItem(dia, c_id, key, value) {
@@ -2258,12 +2252,10 @@ $(function() {
 
   // Set increase or decrease according to 'descOrder' option
   function checkDesc(idx) {
-    console.log(idx);
     if (descOrder)
       idx -= 1;
     else
       idx += 1;
-    console.log(idx);
     return idx;
   }
 
