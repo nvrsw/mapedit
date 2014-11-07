@@ -310,6 +310,9 @@ app.Diagram = function(diagram_id, setting) {
       }
     });
 
+    // Remove rendering of add and remove function to fabric.js
+    canvas.renderOnAddRemove = false;
+
     if (map.background_color)
       canvas.backgroundColor = colorCSS(map.background_color);
     else
