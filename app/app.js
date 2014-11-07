@@ -383,7 +383,6 @@ app.Diagram = function(diagram_id, setting) {
 
           setting.modify(item.c_id, 'points', item.c_points);
         });
-        dia.canvas.renderAll();
       } else {
         if (obj.c_id) {
             var points = [];
@@ -725,11 +724,11 @@ app.Diagram = function(diagram_id, setting) {
         }
         break;
       // Use for avoid overlapping rendering.
-      case 'group.modified':
-        var elms = data.id.split('-');
+      case 'canvas.rendering':
+        var elms = setting.selectedID.split('-');
         var dia_id = 'app-dia-' + elms[1];
         var dia = lookupDia(dia_id);
-        if (dia)
+        if (dia && dia.canvas)
           dia.canvas.renderAll();
         break;
       case 'item.removed':
@@ -744,10 +743,8 @@ app.Diagram = function(diagram_id, setting) {
         var elms = data.id.split('-');
         var dia_id = 'app-dia-' + elms[1];
         var dia = lookupDia(dia_id);
-        if (dia && dia.canvas) {
+        if (dia && dia.canvas)
           dia.canvas.discardActiveGroup();
-          dia.canvas.renderAll();
-        }
         break;
       case 'map.draw':
         var elms = data.id.split('-');
@@ -1386,6 +1383,7 @@ app.Setting = function() {
     } else {
       removeItemData(setting.selectedID);
     }
+    setting.callbacks.fire({ cmd: 'canvas.rendering' });
   };
 
   // Remove data to selected item on canvas
@@ -1997,7 +1995,7 @@ $(function() {
         setting.selectedID = groupItemID[i];
         modifyItemCoordinate(item, e.keyCode);
       }
-      setting.callbacks.fire({ cmd: 'group.modified', id: groupItemID[0] });
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
     } else {
       item = setting.config.maps[elms[1]].items[elms[3]];
       if (!item)
@@ -2093,8 +2091,10 @@ $(function() {
       change = true;
     }
 
-    if (change)
+    if (change) {
       setting.select(null);
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    }
   });
 
   $('#app-sidebar-repeat-add-left').click(function(e) {
@@ -2144,8 +2144,10 @@ $(function() {
       change = true;
     }
 
-    if (change)
+    if (change) {
       setting.select(null);
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    }
   });
 
   $('#app-sidebar-repeat-add-up').click(function(e) {
@@ -2195,8 +2197,10 @@ $(function() {
       change = true;
     }
 
-    if (change)
+    if (change) {
       setting.select(null);
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    }
   });
 
   $('#app-sidebar-repeat-add-down').click(function(e) {
@@ -2246,8 +2250,10 @@ $(function() {
       change = true;
     }
 
-    if (change)
+    if (change) {
       setting.select(null);
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    }
 
   });
 
