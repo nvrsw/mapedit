@@ -607,10 +607,7 @@ app.Diagram = function(diagram_id, setting) {
 
     var path = setting.imageDir + '/' + filename;
     fabric.util.loadImage(path, function(img) {
-      var obj = new fabric.Image(img, {
-        left: (dia.width * dia.canvas.c_scaleValue) / 2,
-        top: (dia.height * dia.canvas.c_scaleValue) / 2
-      });
+      var obj = new fabric.Image(img);
 
       obj.c_id = c_id;
 
