@@ -506,8 +506,13 @@ app.Diagram = function(diagram_id, setting) {
           var y2 = parseInt(elms[3]);
           var c = findCenter(x1, y1, x2, y2);
 
-          this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
-          this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
+          if (setting.groupSelectedID.length) {
+            this.setLeft(Math.round((c.x - setting.groupObject.left) * dia.canvas.c_scaleValue));
+            this.setTop(Math.round((c.y -setting.groupObject.top) * dia.canvas.c_scaleValue));
+          } else {
+            this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
+            this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
+          }
           this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue / this.scaleX));
           this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue / this.scaleY));
           this.setCoords();
@@ -548,8 +553,13 @@ app.Diagram = function(diagram_id, setting) {
           var y2 = parseInt(elms[3]);
           var c = findCenter(x1, y1, x2, y2);
 
-          this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
-          this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
+          if (setting.groupSelectedID.length) {
+            this.setLeft(Math.round((c.x - setting.groupObject.left) * dia.canvas.c_scaleValue));
+            this.setTop(Math.round((c.y - setting.groupObject.top) * dia.canvas.c_scaleValue));
+          } else {
+            this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
+            this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
+          }
           this.setRadius(Math.round((x2 - x1) * dia.canvas.c_scaleValue / 2 / this.scaleX));
           this.setCoords();
         };
@@ -669,7 +679,8 @@ app.Diagram = function(diagram_id, setting) {
         break;
       }
 
-    dia.canvas.renderAll();
+    if (!setting.groupSelectedID.length)
+      dia.canvas.renderAll();
   }
 
   setting.callbacks.add(function(data) {
@@ -839,6 +850,8 @@ app.Sidebar = function(sidebar_id, setting) {
           }
         break;
       case 'item.modified':
+        if (setting.groupSelectedID.length)
+          return;
         var elms = data.id.split('-');
         if (elms[3] == 'null')
           {
@@ -1348,8 +1361,6 @@ app.Setting = function() {
         if (changed)
           {
             //console.log('modify ' + c_id + '-' + key + ' => ' + value);
-            if (setting.groupSelectedID.length)
-              return;
             this.callbacks.fire({
               cmd   : 'item.modified',
               id    : c_id,
@@ -2030,6 +2041,8 @@ $(function() {
       } else {
         return;
       }
+      setting.groupObject.originleft = setting.groupObject.left;
+      setting.groupObject.origintop = setting.groupObject.top;
 
       // Set coordinate of item in the group.
       var groupItemID = setting.groupSelectedID;
