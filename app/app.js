@@ -409,35 +409,18 @@ app.Diagram = function(diagram_id, setting) {
 
   // Prevent leave to item to map.
   function dragBoundItem(obj, map) {
-    var xoff = Math.round(obj.getWidth() / 2);
-    var yoff = Math.round(obj.getHeight() / 2);
+    obj.setCoords();
 
-    // Not use 'oCoords' function for correct coordinate.
-    var tl = {
-      x: obj.left - xoff,
-      y: obj.top - yoff
-    };
-
-    var tr = {
-      x: obj.left + xoff,
-      y: obj.top - yoff
-    };
-
-    var bl = {
-      x: obj.left - xoff,
-      y: obj.top + yoff
-    };
-
-    if (tl.x < 0) {
-      obj.left -= tl.x;
-    } else if (tr.x > map.width) {
-      obj.left -= (tr.x - map.width);
+    if (obj.oCoords.tl.x < 0) {
+      obj.left -= obj.oCoords.tl.x;
+    } else if (obj.oCoords.tr.x > map.width) {
+      obj.left -= (obj.oCoords.tr.x - map.width);
     }
 
-    if (tl.y < 0) {
-      obj.top -= tl.y;
-    } else if (bl.y > map.height) {
-      obj.top -= (bl.y - map.height);
+    if (obj.oCoords.tl.y < 0) {
+      obj.top -= obj.oCoords.tl.y;
+    } else if (obj.oCoords.bl.y > map.height) {
+      obj.top -= (obj.oCoords.bl.y - map.height);
     }
   }
 
