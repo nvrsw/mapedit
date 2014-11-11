@@ -1986,66 +1986,30 @@ $(function() {
     if (elms.length != 4 || elms[3] == 'null')
       return;
 
-    var item;
-    var i = 0;
-    var groupIdElms;
-
-    // Set keybord event for group
     e.preventDefault();
-    if (setting.groupSelectedID.length) {
 
-      // Set coordinate of group.
-      if (e.keyCode == 37) {
-        setting.groupObject.left -= 1;
-      } else if (e.keyCode == 38) {
-        setting.groupObject.top -= 1;
-      } else if (e.keyCode == 39) {
-        setting.groupObject.left += 1;
-      } else if (e.keyCode == 40) {
-        setting.groupObject.top += 1;
-      } else if (e.keyCode == 46) {
-        setting.removeSelected();
-        return;
-      } else {
-        return;
-      }
+    if (setting.groupSelectedID.length)
+      item = setting.groupObject;
+    else
+      item = setting.currentObject;
 
-      // Set coordinate of item in the group.
-      var groupItemID = setting.groupSelectedID;
-      for (i = 0; i < groupItemID.length; i++) {
-        groupIdElms = groupItemID[i].split('-');
-        item = setting.config.maps[groupIdElms[1]].items[groupIdElms[3]];
-        setting.selectedID = groupItemID[i];
-        modifyItemCoordinate(item, e.keyCode);
-      }
-      setting.callbacks.fire({ cmd: 'canvas.rendering' });
-    } else {
-      item = setting.config.maps[elms[1]].items[elms[3]];
-      if (!item)
-        return;
-      modifyItemCoordinate(item, e.keyCode);
-    }
+    if (!item)
+      return;
+
+    modifyItemCoordinate(item, e.keyCode);
   });
 
-  // Change coordinate for item on canvas.
-  function modifyItemCoordinate(item, keyCode) {
-    var x1 = item.x1;
-    var y1 = item.y1;
-    var x2 = item.x2;
-    var y2 = item.y2;
+  // Change coordinate for object on canvas.
+  function modifyItemCoordinate(obj, keyCode) {
 
     if (keyCode == 37) {
-      x1 -= 1;
-      x2 -= 1;
+      obj.left -= 1;
     } else if (keyCode == 38) {
-      y1 -= 1;
-      y2 -= 1;
+      obj.top -= 1;
     } else if (keyCode == 39) {
-      x1 += 1;
-      x2 += 1;
+      obj.left += 1;
     } else if (keyCode == 40) {
-      y1 += 1;
-      y2 += 1;
+      obj.top += 1;
     } else if (keyCode == 46) {
       setting.removeSelected();
       return;
@@ -2053,7 +2017,20 @@ $(function() {
       return;
     }
 
-    setting.modifySelected('points', [x1,y1,x2,y2].join(','));
+    if (!setting.groupSelectedID.length) {
+      var points = [];
+
+      obj.setCoords();
+
+      points.push(Math.round(obj.oCoords.tl.x / setting.currentScale));
+      points.push(Math.round(obj.oCoords.tl.y / setting.currentScale));
+      points.push(Math.round(obj.oCoords.br.x / setting.currentScale));
+      points.push(Math.round(obj.oCoords.br.y / setting.currentScale));
+
+      $('#app-sidebar-item-info-coordinate').val(points.join(','));
+    }
+
+    setting.callbacks.fire({ cmd: 'canvas.rendering' });
   }
 
   $('#app-sidebar-repeat-count').change(function(e) {
