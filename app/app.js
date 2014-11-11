@@ -1543,10 +1543,7 @@ app.Setting = function() {
   };
 
   this.openZipFile = function(zipPath) {
-    var loadingObj = $('#app-loading-overlay');
-
-    var ext = zipPath.substr(zipPath.lastIndexOf('.') + 1);
-    if (!ext || (ext != 'zip' && ext != 'ZIP'))
+    if (app.path.extname(zipPath).toLowerCase() != '.zip')
       {
         alert ("'" + zipPath + "' is not a E-MAP file.");
         return;
@@ -1557,6 +1554,7 @@ app.Setting = function() {
       return;
     }
 
+    var loadingObj = $('#app-loading-overlay');
     loadingObj.show();
 
     var rdata = app.fs.readFileSync(zipPath, 'binary');
