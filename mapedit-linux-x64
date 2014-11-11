@@ -6,4 +6,10 @@ NODE_WEBKIT_PATH=node-webkit/linux-x64
 LD_LIBRARY_PATH=$NODE_WEBKIT_PATH:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH
 
-exec $NODE_WEBKIT_PATH/nw app "$@"
+if [ "$1" != "" ]; then
+  file=$(realpath $1)
+  exec $NODE_WEBKIT_PATH/nw app "$file"
+else
+  exec $NODE_WEBKIT_PATH/nw app
+fi
+
