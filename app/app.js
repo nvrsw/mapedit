@@ -662,7 +662,6 @@ app.Diagram = function(diagram_id, setting) {
             var value = parseFloat (data.value, 10);
             if (dia.canvas.c_scaleValue != value)
               dia.canvas.c_scale(value);
-            console.log(dia.canvas.c_scaleValue);
             setting.currentScale = dia.canvas.c_scaleValue;
           }
         break;
@@ -860,8 +859,8 @@ app.Sidebar = function(sidebar_id, setting) {
 
         var coord = [Math.round(item.oCoords.tl.x / setting.currentScale),
                      Math.round(item.oCoords.tl.y / setting.currentScale),
-                     Math.round(item.oCoords.bl.x / setting.currentScale),
-                     Math.round(item.oCoords.bl.y / setting.currentScale)
+                     Math.round(item.oCoords.br.x / setting.currentScale),
+                     Math.round(item.oCoords.br.y / setting.currentScale)
                     ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
         break;
