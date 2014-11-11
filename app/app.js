@@ -211,7 +211,7 @@ app.Diagram = function(diagram_id, setting) {
     var canvas;
     canvas = new fabric.Canvas(canvasID, {
       perPixelTargetFind: true,
-      c_scaleValue: 1.0,
+      c_scaleValue: setting.currentScale,
       c_scale: function(value) {
         var self = this;
         var restoreIt = function(prop) {
@@ -615,11 +615,13 @@ app.Diagram = function(diagram_id, setting) {
       {
         dia.canvas.setActiveObject(dia.currentObject);
         dia.canvas.bringToFront(dia.currentObject);
+        setting.currentObject = dia.currentObject;
         return;
       }
     else
       {
         dia.canvas.discardActiveObject();
+        setting.currentObject = '';
       }
   }
 
@@ -660,6 +662,8 @@ app.Diagram = function(diagram_id, setting) {
             var value = parseFloat (data.value, 10);
             if (dia.canvas.c_scaleValue != value)
               dia.canvas.c_scale(value);
+            console.log(dia.canvas.c_scaleValue);
+            setting.currentScale = dia.canvas.c_scaleValue;
           }
         break;
       case 'item.addBackground':
@@ -841,19 +845,24 @@ app.Sidebar = function(sidebar_id, setting) {
             sidebar.setItemEditible(false);
             break;
           }
-        var item = setting.config.maps[elms[1]].items[elms[3]];
+        var item = setting.currentObject;
+
         sidebar.setItemEditible(true);
-        $('#app-sidebar-item-info-name').val(item.name);
+        $('#app-sidebar-item-info-name').val(item.get('label'));
 
         var typeObj = $('#app-sidebar-item-info-type');
-        if (item.type == 0)
+        if (item.type == 'labeledRect')
           typeObj.val('DAI Box');
-        else if (item.type == 1)
+        else if (item.type == 'labeledCircle')
           typeObj.val('DAI Circle');
         else
           typeObj.val('Unknown');
 
-        var coord = [item.x1, item.y1, item.x2, item.y2].join(',');
+        var coord = [Math.round(item.oCoords.tl.x / setting.currentScale),
+                     Math.round(item.oCoords.tl.y / setting.currentScale),
+                     Math.round(item.oCoords.bl.x / setting.currentScale),
+                     Math.round(item.oCoords.bl.y / setting.currentScale)
+                    ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
         break;
       case 'item.addBackground':
@@ -1046,6 +1055,8 @@ app.Setting = function() {
   this.selectedID = '';
   this.groupSelectedID = '';
   this.groupObject = '';
+  this.currentObject = '';
+  this.currentScale = 1;
 
   this.init = function(config, zipPath, tmpDir) {
     this.config = config;
