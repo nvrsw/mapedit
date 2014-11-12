@@ -430,9 +430,8 @@ app.Diagram = function(diagram_id, setting) {
 
     var obj = null;
 
-    var center = findCenter(item.x1, item.y1, item.x2, item.y2);
-    var left = center.x * dia.canvas.c_scaleValue;
-    var top = center.y * dia.canvas.c_scaleValue;
+    var left = item.x1 * dia.canvas.c_scaleValue;
+    var top = item.y1 * dia.canvas.c_scaleValue;
 
     switch (item.type)
       {
@@ -809,9 +808,9 @@ app.Sidebar = function(sidebar_id, setting) {
         $('#app-sidebar-item-info-name').val(item.get('label'));
 
         var typeObj = $('#app-sidebar-item-info-type');
-        if (item.type == 'labeledRect')
+        if (setting.setObjectType(item.type) == 0)
           typeObj.val('DAI Box');
-        else if (item.type == 'labeledCircle')
+        else if (setting.setObjectType(item.type) == 1)
           typeObj.val('DAI Circle');
         else
           typeObj.val('Unknown');
@@ -836,9 +835,9 @@ app.Sidebar = function(sidebar_id, setting) {
         $('#app-sidebar-item-info-name').val(item.get('label'));
 
         var typeObj = $('#app-sidebar-item-info-type');
-        if (item.type == 'labeledRect')
+        if (setting.setObjectType(item.type) == 0)
           typeObj.val('DAI Box');
-        else if (item.type == 'labeledCircle')
+        else if (setting.setObjectType(item.type) == 1)
           typeObj.val('DAI Circle');
         else
           typeObj.val('Unknown');
@@ -1134,6 +1133,18 @@ app.Setting = function() {
       id   : ritem.id,
       item : ritem
     });
+  };
+
+  // Set object type in canvas
+  this.setObjectType = function(type) {
+    switch (type) {
+      case 'labeledRect': // box
+        return 0;
+        break;
+      case 'labeledCircle': // circle
+        return 1;
+        break;
+    }
   };
 
   this.load = function() {
@@ -1985,14 +1996,14 @@ $(function() {
     if (elms.length != 4 || elms[3] == 'null')
       return;
 
-    var baseItem = setting.config.maps[elms[1]].items[elms[3]];
+    var baseItem = setting.currentObject;
     if (!baseItem)
       return;
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.name);
-    var width = baseItem.x2 - baseItem.x1;
+    var sn = parseInt(baseItem.get('label'));
+    var width = parseInt(baseItem.oCoords.tr.x - baseItem.oCoords.tl.x);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2005,12 +2016,12 @@ $(function() {
         continue;
 
       var options = {
-        type  : baseItem.type,
+        type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : baseItem.x1 + (width * count),
-        y1    : baseItem.y1,
-        x2    : baseItem.x2 + (width * count),
-        y2    : baseItem.y2,
+        x1    : parseInt(baseItem.oCoords.tl.x) + (width * count),
+        y1    : parseInt(baseItem.oCoords.tl.y),
+        x2    : parseInt(baseItem.oCoords.br.x) + (width * count),
+        y2    : parseInt(baseItem.oCoords.br.y),
         select: false
       };
 
@@ -2038,14 +2049,14 @@ $(function() {
     if (elms.length != 4 || elms[3] == 'null')
       return;
 
-    var baseItem = setting.config.maps[elms[1]].items[elms[3]];
+    var baseItem = setting.currentObject;
     if (!baseItem)
       return;
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.name);
-    var width = baseItem.x2 - baseItem.x1;
+    var sn = parseInt(baseItem.get('label'));
+    var width = parseInt(baseItem.oCoords.tr.x - baseItem.oCoords.tl.x);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2058,12 +2069,12 @@ $(function() {
         continue;
 
       var options = {
-        type  : baseItem.type,
+        type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : baseItem.x1 - (width * count),
-        y1    : baseItem.y1,
-        x2    : baseItem.x2 - (width * count),
-        y2    : baseItem.y2,
+        x1    : parseInt(baseItem.oCoords.tl.x) - (width * count),
+        y1    : parseInt(baseItem.oCoords.tl.y),
+        x2    : parseInt(baseItem.oCoords.br.x) - (width * count),
+        y2    : parseInt(baseItem.oCoords.br.y),
         select: false
       };
 
@@ -2091,14 +2102,14 @@ $(function() {
     if (elms.length != 4 || elms[3] == 'null')
       return;
 
-    var baseItem = setting.config.maps[elms[1]].items[elms[3]];
+    var baseItem = setting.currentObject;
     if (!baseItem)
       return;
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.name);
-    var height = baseItem.y2 - baseItem.y1;
+    var sn = parseInt(baseItem.get('label'));
+    var height = parseInt(baseItem.oCoords.tl.y - baseItem.oCoords.br.y);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2111,12 +2122,12 @@ $(function() {
         continue;
 
       var options = {
-        type  : baseItem.type,
+        type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : baseItem.x1,
-        y1    : baseItem.y1 - (height * count),
-        x2    : baseItem.x2,
-        y2    : baseItem.y2 - (height * count),
+        x1    : parseInt(baseItem.oCoords.tl.x),
+        y1    : parseInt(baseItem.oCoords.tl.y) + (height * count),
+        x2    : parseInt(baseItem.oCoords.br.x),
+        y2    : parseInt(baseItem.oCoords.br.y) + (height * count),
         select: false
       };
 
@@ -2144,14 +2155,14 @@ $(function() {
     if (elms.length != 4 || elms[3] == 'null')
       return;
 
-    var baseItem = setting.config.maps[elms[1]].items[elms[3]];
+    var baseItem = setting.currentObject;
     if (!baseItem)
       return;
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.name);
-    var height = baseItem.y2 - baseItem.y1;
+    var sn = parseInt(baseItem.get('label'));
+    var height = parseInt(baseItem.oCoords.tl.y - baseItem.oCoords.br.y);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2164,12 +2175,12 @@ $(function() {
         continue;
 
       var options = {
-        type  : baseItem.type,
+        type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : baseItem.x1,
-        y1    : baseItem.y1 + (height * count),
-        x2    : baseItem.x2,
-        y2    : baseItem.y2 + (height * count),
+        x1    : parseInt(baseItem.oCoords.tl.x),
+        y1    : parseInt(baseItem.oCoords.tl.y) - (height * count),
+        x2    : parseInt(baseItem.oCoords.br.x),
+        y2    : parseInt(baseItem.oCoords.br.y) - (height * count),
         select: false
       };
 
