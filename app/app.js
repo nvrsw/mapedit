@@ -459,9 +459,6 @@ app.Diagram = function(diagram_id, setting) {
         obj.c_type = item.type;
         obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
         obj.c_changePoints = function(points) {
-          if (this.c_points == points)
-            return;
-
           this.c_points = points;
 
           var elms = points.split(',');
@@ -469,15 +466,9 @@ app.Diagram = function(diagram_id, setting) {
           var y1 = parseInt(elms[1]);
           var x2 = parseInt(elms[2]);
           var y2 = parseInt(elms[3]);
-          var c = findCenter(x1, y1, x2, y2);
 
-          if (setting.groupSelectedID.length) {
-            this.setLeft(Math.round((c.x - setting.groupObject.left) * dia.canvas.c_scaleValue));
-            this.setTop(Math.round((c.y -setting.groupObject.top) * dia.canvas.c_scaleValue));
-          } else {
-            this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
-            this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
-          }
+          this.setLeft(Math.round(x1 * dia.canvas.c_scaleValue));
+          this.setTop(Math.round(y1 * dia.canvas.c_scaleValue));
           this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue / this.scaleX));
           this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue / this.scaleY));
           this.setCoords();
@@ -506,9 +497,6 @@ app.Diagram = function(diagram_id, setting) {
         obj.c_type = item.type;
         obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
         obj.c_changePoints = function(points) {
-          if (this.c_points == points)
-            return;
-
           this.c_points = points;
 
           var elms = points.split(',');
@@ -516,15 +504,9 @@ app.Diagram = function(diagram_id, setting) {
           var y1 = parseInt(elms[1]);
           var x2 = parseInt(elms[2]);
           var y2 = parseInt(elms[3]);
-          var c = findCenter(x1, y1, x2, y2);
 
-          if (setting.groupSelectedID.length) {
-            this.setLeft(Math.round((c.x - setting.groupObject.left) * dia.canvas.c_scaleValue));
-            this.setTop(Math.round((c.y - setting.groupObject.top) * dia.canvas.c_scaleValue));
-          } else {
-            this.setLeft(Math.round(c.x * dia.canvas.c_scaleValue));
-            this.setTop(Math.round(c.y * dia.canvas.c_scaleValue));
-          }
+          this.setLeft(Math.round(x1 * dia.canvas.c_scaleValue));
+          this.setTop(Math.round(y1 * dia.canvas.c_scaleValue));
           this.setRadius(Math.round((x2 - x1) * dia.canvas.c_scaleValue / 2 / this.scaleX));
           this.setCoords();
         };
@@ -823,18 +805,22 @@ app.Sidebar = function(sidebar_id, setting) {
             sidebar.setItemEditible(false);
             break;
           }
-        var item = setting.config.maps[elms[1]].items[elms[3]];
-        $('#app-sidebar-item-info-name').val(item.name);
+        var item = setting.currentObject;
+        $('#app-sidebar-item-info-name').val(item.get('label'));
 
         var typeObj = $('#app-sidebar-item-info-type');
-        if (item.type == 0)
+        if (item.type == 'labeledRect')
           typeObj.val('DAI Box');
-        else if (item.type == 1)
+        else if (item.type == 'labeledCircle')
           typeObj.val('DAI Circle');
         else
           typeObj.val('Unknown');
 
-        var coord = [item.x1, item.y1, item.x2, item.y2].join(',');
+        var coord = [Math.round(item.oCoords.tl.x / setting.currentScale),
+                     Math.round(item.oCoords.tl.y / setting.currentScale),
+                     Math.round(item.oCoords.br.x / setting.currentScale),
+                     Math.round(item.oCoords.br.y / setting.currentScale)
+                    ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
         break;
       case 'item.selected':
@@ -1292,67 +1278,6 @@ app.Setting = function() {
               value : value
             });
           }
-      }
-    else if (k.length == 4) /* map-0-item-0 */
-      {
-        var item;
-
-        item = setting.config.maps[k[1]].items[k[3]];
-        switch (key)
-          {
-          case 'points':
-            var points = value.split(',');
-            var x1 = parseInt(points[0]);
-            var y1 = parseInt(points[1]);
-            var x2 = parseInt(points[2]);
-            var y2 = parseInt(points[3]);
-
-            if (item.x1 != x1
-                || item.y1 != y1
-                || item.x2 != x2
-                || item.y2 != y2)
-              {
-                item.x1 = x1;
-                item.y1 = y1;
-                item.x2 = x2;
-                item.y2 = y2;
-                changed = true;
-              }
-            break;
-          case 'name':
-            if (item.name != value)
-              {
-                item.name = value;
-                changed = true;
-              }
-            break;
-          }
-
-        if (changed)
-          {
-            //console.log('modify ' + c_id + '-' + key + ' => ' + value);
-            this.callbacks.fire({
-              cmd   : 'item.modified',
-              id    : c_id,
-              key   : key,
-              value : value
-            });
-          }
-      }
-  };
-
-  this.modifySelected = function(key, value) {
-    if (!inited)
-      return;
-
-    if (setting.selectedID && setting.selectedID != '')
-      {
-        var elms = setting.selectedID.split('-');
-        if (elms[3] == 'null')
-          return;
-
-        if (setting.config.maps[elms[1]].items[elms[3]])
-          setting.modify(setting.selectedID, key, value);
       }
   };
 
@@ -1880,7 +1805,13 @@ $(function() {
     var name = $.trim($(this).val());
     if (name == '')
       return;
-    setting.modifySelected('name', name);
+
+    setting.callbacks.fire({
+      cmd   : 'item.modified',
+      id    : setting.selectedID,
+      key   : 'name',
+      value : name
+    });
   });
 
   $('#app-sidebar-item-info-coordinate').change(function(e) {
@@ -1892,7 +1823,12 @@ $(function() {
     if (length != 4)
       return;
 
-    setting.modifySelected('points', coords);
+    setting.callbacks.fire({
+      cmd   : 'item.modified',
+      id    : setting.selectedID,
+      key   : 'points',
+      value : coords
+    });
   });
 
   $('#app-sidebar-item-info-fill-zero').change(function(e) {
