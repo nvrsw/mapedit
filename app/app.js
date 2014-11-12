@@ -373,10 +373,10 @@ app.Diagram = function(diagram_id, setting) {
         if (obj.c_id) {
           var points = [];
 
-          points.push(Math.round(obj.oCoords.tl.x / dia.canvas.c_scaleValue));
-          points.push(Math.round(obj.oCoords.tl.y / dia.canvas.c_scaleValue));
-          points.push(Math.round(obj.oCoords.br.x / dia.canvas.c_scaleValue));
-          points.push(Math.round(obj.oCoords.br.y / dia.canvas.c_scaleValue));
+          points.push(Math.floor(obj.oCoords.tl.x / dia.canvas.c_scaleValue));
+          points.push(Math.floor(obj.oCoords.tl.y / dia.canvas.c_scaleValue));
+          points.push(Math.floor(obj.oCoords.br.x / dia.canvas.c_scaleValue));
+          points.push(Math.floor(obj.oCoords.br.y / dia.canvas.c_scaleValue));
 
           $('#app-sidebar-item-info-coordinate').val(points.join(','));
         }
@@ -467,10 +467,10 @@ app.Diagram = function(diagram_id, setting) {
           var x2 = parseInt(elms[2]);
           var y2 = parseInt(elms[3]);
 
-          this.setLeft(Math.round(x1 * dia.canvas.c_scaleValue));
-          this.setTop(Math.round(y1 * dia.canvas.c_scaleValue));
-          this.setWidth(Math.round((x2 - x1) * dia.canvas.c_scaleValue / this.scaleX));
-          this.setHeight(Math.round((y2 - y1) * dia.canvas.c_scaleValue / this.scaleY));
+          this.setLeft(Math.floor(x1 * dia.canvas.c_scaleValue));
+          this.setTop(Math.floor(y1 * dia.canvas.c_scaleValue));
+          this.setWidth(Math.floor((x2 - x1) * dia.canvas.c_scaleValue / this.scaleX));
+          this.setHeight(Math.floor((y2 - y1) * dia.canvas.c_scaleValue / this.scaleY));
           this.setCoords();
         };
         break;
@@ -505,9 +505,9 @@ app.Diagram = function(diagram_id, setting) {
           var x2 = parseInt(elms[2]);
           var y2 = parseInt(elms[3]);
 
-          this.setLeft(Math.round(x1 * dia.canvas.c_scaleValue));
-          this.setTop(Math.round(y1 * dia.canvas.c_scaleValue));
-          this.setRadius(Math.round((x2 - x1) * dia.canvas.c_scaleValue / 2 / this.scaleX));
+          this.setLeft(Math.floor(x1 * dia.canvas.c_scaleValue));
+          this.setTop(Math.floor(y1 * dia.canvas.c_scaleValue));
+          this.setRadius(Math.floor((x2 - x1) * dia.canvas.c_scaleValue / 2 / this.scaleX));
           this.setCoords();
         };
         break;
@@ -816,10 +816,10 @@ app.Sidebar = function(sidebar_id, setting) {
         else
           typeObj.val('Unknown');
 
-        var coord = [Math.round(item.oCoords.tl.x / setting.currentScale),
-                     Math.round(item.oCoords.tl.y / setting.currentScale),
-                     Math.round(item.oCoords.br.x / setting.currentScale),
-                     Math.round(item.oCoords.br.y / setting.currentScale)
+        var coord = [Math.floor(item.oCoords.tl.x / setting.currentScale),
+                     Math.floor(item.oCoords.tl.y / setting.currentScale),
+                     Math.floor(item.oCoords.br.x / setting.currentScale),
+                     Math.floor(item.oCoords.br.y / setting.currentScale)
                     ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
         break;
@@ -843,10 +843,10 @@ app.Sidebar = function(sidebar_id, setting) {
         else
           typeObj.val('Unknown');
 
-        var coord = [Math.round(item.oCoords.tl.x / setting.currentScale),
-                     Math.round(item.oCoords.tl.y / setting.currentScale),
-                     Math.round(item.oCoords.br.x / setting.currentScale),
-                     Math.round(item.oCoords.br.y / setting.currentScale)
+        var coord = [Math.floor(item.oCoords.tl.x / setting.currentScale),
+                     Math.floor(item.oCoords.tl.y / setting.currentScale),
+                     Math.floor(item.oCoords.br.x / setting.currentScale),
+                     Math.floor(item.oCoords.br.y / setting.currentScale)
                     ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
         break;
@@ -1958,10 +1958,10 @@ $(function() {
 
       obj.setCoords();
 
-      points.push(Math.round(obj.oCoords.tl.x / setting.currentScale));
-      points.push(Math.round(obj.oCoords.tl.y / setting.currentScale));
-      points.push(Math.round(obj.oCoords.br.x / setting.currentScale));
-      points.push(Math.round(obj.oCoords.br.y / setting.currentScale));
+      points.push(Math.floor(obj.oCoords.tl.x / setting.currentScale));
+      points.push(Math.floor(obj.oCoords.tl.y / setting.currentScale));
+      points.push(Math.floor(obj.oCoords.br.x / setting.currentScale));
+      points.push(Math.floor(obj.oCoords.br.y / setting.currentScale));
 
       $('#app-sidebar-item-info-coordinate').val(points.join(','));
     }
