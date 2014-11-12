@@ -628,6 +628,35 @@ app.Diagram = function(diagram_id, setting) {
       dia.canvas.renderAll();
   }
 
+  // Save items data for save file
+  function saveItemData() {
+    var dia = null;
+
+    for (var i = 0; i < diaList.length; i++) {
+      var dia = diaList[i];
+
+      if (dia.c_id) {
+        dia.canvas.forEachObject(function(item) {
+          if (!item.c_id)
+            return;
+
+          var elms = item.c_id.split('-');
+          if (elms[2] !== 'item')
+            return;
+
+          var obj = setting.config.maps[elms[1]].items[elms[3]];
+          if (obj.id) {
+            obj.name = item.get('label');
+            obj.x1 = Math.floor(item.oCoords.tl.x / dia.canvas.c_scaleValue);
+            obj.y1 = Math.floor(item.oCoords.tl.y / dia.canvas.c_scaleValue);
+            obj.x2 = Math.floor(item.oCoords.br.x / dia.canvas.c_scaleValue);
+            obj.y2 = Math.floor(item.oCoords.br.y / dia.canvas.c_scaleValue);
+          }
+        });
+      }
+    }
+  }
+
   setting.callbacks.add(function(data) {
     switch(data.cmd)
       {
@@ -645,6 +674,9 @@ app.Diagram = function(diagram_id, setting) {
               dia.canvas.c_scale(value);
             setting.currentScale = dia.canvas.c_scaleValue;
           }
+        break;
+      case 'setting.saveData':
+        saveItemData();
         break;
       case 'item.addBackground':
         var elms = data.id.split('-');
@@ -1619,6 +1651,8 @@ app.Setting = function() {
   this.saveZipFile = function() {
     if (!inited)
       return;
+
+    setting.callbacks.fire({ cmd: 'setting.saveData' });
 
     var loadingObj = $('#app-loading-overlay');
     loadingObj.show();
