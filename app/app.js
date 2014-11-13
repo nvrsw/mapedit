@@ -456,10 +456,7 @@ app.Diagram = function(diagram_id, setting) {
           label: item.name,
         });
         obj.c_type = item.type;
-        obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
         obj.c_changePoints = function(points) {
-          this.c_points = points;
-
           var elms = points.split(',');
           var x1 = parseInt(elms[0]);
           var y1 = parseInt(elms[1]);
@@ -494,10 +491,7 @@ app.Diagram = function(diagram_id, setting) {
           label: item.name
         });
         obj.c_type = item.type;
-        obj.c_points = [item.x1, item.y1, item.x2, item.y2].join(',');
         obj.c_changePoints = function(points) {
-          this.c_points = points;
-
           var elms = points.split(',');
           var x1 = parseInt(elms[0]);
           var y1 = parseInt(elms[1]);
