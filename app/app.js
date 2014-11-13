@@ -2031,7 +2031,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var width = parseInt(baseItem.oCoords.tr.x - baseItem.oCoords.tl.x);
+    var width = Math.floor(baseItem.getWidth() / setting.currentScale);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2046,10 +2046,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : parseInt(baseItem.oCoords.tl.x) + (width * count),
-        y1    : parseInt(baseItem.oCoords.tl.y),
-        x2    : parseInt(baseItem.oCoords.br.x) + (width * count),
-        y2    : parseInt(baseItem.oCoords.br.y),
+        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale) + (width * count),
+        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale),
+        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale) + (width * count),
+        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale),
         select: false
       };
 
@@ -2084,7 +2084,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var width = parseInt(baseItem.oCoords.tr.x - baseItem.oCoords.tl.x);
+    var width = Math.floor(baseItem.getWidth() / setting.currentScale);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2099,10 +2099,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : parseInt(baseItem.oCoords.tl.x) - (width * count),
-        y1    : parseInt(baseItem.oCoords.tl.y),
-        x2    : parseInt(baseItem.oCoords.br.x) - (width * count),
-        y2    : parseInt(baseItem.oCoords.br.y),
+        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale) - (width * count),
+        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale),
+        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale) - (width * count),
+        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale),
         select: false
       };
 
@@ -2137,7 +2137,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var height = parseInt(baseItem.oCoords.tl.y - baseItem.oCoords.br.y);
+    var height = Math.floor(baseItem.getHeight() / setting.currentScale);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2152,10 +2152,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : parseInt(baseItem.oCoords.tl.x),
-        y1    : parseInt(baseItem.oCoords.tl.y) + (height * count),
-        x2    : parseInt(baseItem.oCoords.br.x),
-        y2    : parseInt(baseItem.oCoords.br.y) + (height * count),
+        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale),
+        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale) - (height * count),
+        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale),
+        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale) - (height * count),
         select: false
       };
 
@@ -2190,7 +2190,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var height = parseInt(baseItem.oCoords.tl.y - baseItem.oCoords.br.y);
+    var height = Math.floor(baseItem.getHeight() / setting.currentScale);
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2205,10 +2205,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : parseInt(baseItem.oCoords.tl.x),
-        y1    : parseInt(baseItem.oCoords.tl.y) - (height * count),
-        x2    : parseInt(baseItem.oCoords.br.x),
-        y2    : parseInt(baseItem.oCoords.br.y) - (height * count),
+        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale),
+        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale) + (height * count),
+        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale),
+        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale) + (height * count),
         select: false
       };
 
