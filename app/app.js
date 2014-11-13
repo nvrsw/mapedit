@@ -194,37 +194,6 @@ app.Diagram = function(diagram_id, setting) {
     rootContainer.empty();
   }
 
-  // Resize selected group object.
-  function scaleGroup() {
-    var obj = setting.groupObject;
-    if (!obj)
-      return;
-
-    obj.set({
-      top: scaleIt(restoreIt(obj.top)),
-      left: scaleIt(restoreIt(obj.left)),
-      scaleX: scaleIt(restoreIt(obj.scaleX)),
-      scaleY: scaleIt(restoreIt(obj.scaleY))
-    });
-
-    obj.setCoords();
-  }
-
-  // Except object in group for scale value
-  function checkGroupObject(obj) {
-    if (!setting.groupSelectedID.length)
-      return;
-    var itemID = setting.groupSelectedID;
-
-    for (var i = 0; i < itemID.length; i++) {
-      if (obj.c_id == itemID[i]) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   function addMap(map) {
     var dia = {
       c_id   : 'app-dia-' + map.id.split('-')[1],
@@ -253,6 +222,37 @@ app.Diagram = function(diagram_id, setting) {
         var scaleIt = function(prop) {
           return parseFloat(prop, 10) * value;
         };
+
+        // Resize selected group object.
+        var scaleGroup = function() {
+          var obj = setting.groupObject;
+          if (!obj)
+            return;
+
+          obj.set({
+            top: scaleIt(restoreIt(obj.top)),
+            left: scaleIt(restoreIt(obj.left)),
+            scaleX: scaleIt(restoreIt(obj.scaleX)),
+            scaleY: scaleIt(restoreIt(obj.scaleY))
+          });
+
+          obj.setCoords();
+        };
+
+        // Except object in group for scale value
+        var checkGroupObject = function(obj) {
+          if (!setting.groupSelectedID.length)
+            return;
+          var itemID = setting.groupSelectedID;
+
+          for (var i = 0; i < itemID.length; i++) {
+            if (obj.c_id == itemID[i]) {
+              return true;
+            }
+          }
+
+          return false;
+        }
 
         scaleGroup();
 
