@@ -1,7 +1,14 @@
+// jshint browser:true, devel:true
+// global $
+
+$(function() {
+
+//'use strict';
+
 var LabeledRect = fabric.util.createClass(fabric.Rect, {
   type: 'labeledRect',
   initialize: function(options) {
-    options || (options = { });
+    if (!options) options = { };
     this.callSuper('initialize', options);
     this.set('label', options.label || '');
   },
@@ -29,7 +36,7 @@ var LabeledRect = fabric.util.createClass(fabric.Rect, {
 var LabeledCircle = fabric.util.createClass(fabric.Circle, {
   type: 'labeledCircle',
   initialize: function(options) {
-    options || (options = { });
+    if (!options) options = { };
     this.callSuper('initialize', options);
     this.set('label', options.label || '');
   },
@@ -140,15 +147,18 @@ app.Diagram = function(diagram_id, setting) {
 
   function colorCSS(hexString) {  // #ffffffff
     var color;
-
+    var hr;
+    var hg;
+    var hb;
+    var ha;
     if (hexString && hexString[0] == '#')
       {
         if (hexString.length == 9) // rgba
           {
-            var hr = hexString.substring(1, 3);
-            var hg = hexString.substring(3, 5);
-            var hb = hexString.substring(5, 7);
-            var ha = hexString.substring(7, 9);
+            hr = hexString.substring(1, 3);
+            hg = hexString.substring(3, 5);
+            hb = hexString.substring(5, 7);
+            ha = hexString.substring(7, 9);
             color  = 'rgba(';
             color += parseInt(hr, 16) + ',';
             color += parseInt(hg, 16) + ',';
@@ -157,9 +167,9 @@ app.Diagram = function(diagram_id, setting) {
           }
         else if (hexString.length == 7) // rgb
           {
-            var hr = hexString.substring(1, 3);
-            var hg = hexString.substring(3, 5);
-            var hb = hexString.substring(5, 7);
+            hr = hexString.substring(1, 3);
+            hg = hexString.substring(3, 5);
+            hb = hexString.substring(5, 7);
             color  = 'rgb(';
             color += parseInt(hr, 16) + ',';
             color += parseInt(hg, 16) + ',';
@@ -252,7 +262,7 @@ app.Diagram = function(diagram_id, setting) {
           }
 
           return false;
-        }
+        };
 
         scaleGroup();
 
@@ -474,15 +484,22 @@ app.Diagram = function(diagram_id, setting) {
     var left = item.x1 * dia.canvas.c_scaleValue;
     var top = item.y1 * dia.canvas.c_scaleValue;
 
+    var baseWidth;
+    var baseHeight;
+    var width;
+    var height;
+    var scaleX;
+    var scaleY;
+    var baseRadius;
     switch (item.type)
       {
       case 0: // DAI_BOX
-        var baseWidth = 30;
-        var baseHeight = 20;
-        var width = (item.x2 - item.x1) * dia.canvas.c_scaleValue;
-        var height = (item.y2 - item.y1) * dia.canvas.c_scaleValue;
-        var scaleX = width / baseWidth;
-        var scaleY = height / baseHeight;
+        baseWidth = 30;
+        baseHeight = 20;
+        width = (item.x2 - item.x1) * dia.canvas.c_scaleValue;
+        height = (item.y2 - item.y1) * dia.canvas.c_scaleValue;
+        scaleX = width / baseWidth;
+        scaleY = height / baseHeight;
 
         obj = new LabeledRect({
           left: left,
@@ -512,13 +529,13 @@ app.Diagram = function(diagram_id, setting) {
         };
         break;
       case 1: // DAI_CIRCLE
-        var baseWidth = 30;
-        var baseHeight = 30;
-        var width = (item.x2 - item.x1) * dia.canvas.c_scaleValue;
-        var height = (item.y2 - item.y1) * dia.canvas.c_scaleValue;
-        var scaleX = width / baseWidth;
-        var scaleY = height / baseHeight;
-        var baseRadius = 15;
+        baseWidth = 30;
+        baseHeight = 30;
+        width = (item.x2 - item.x1) * dia.canvas.c_scaleValue;
+        height = (item.y2 - item.y1) * dia.canvas.c_scaleValue;
+        scaleX = width / baseWidth;
+        scaleY = height / baseHeight;
+        baseRadius = 15;
 
         obj = new LabeledCircle({
           left: left,
@@ -612,7 +629,7 @@ app.Diagram = function(diagram_id, setting) {
     var obj = dia.canvas.c_getObjectById(c_id);
     if (obj)
       dia.canvas.c_removeBackground(obj);
-  };
+  }
 
   function selectItem(dia, c_id) {
     if (!dia.canvas)
@@ -668,7 +685,7 @@ app.Diagram = function(diagram_id, setting) {
     var dia = null;
 
     for (var i = 0; i < diaList.length; i++) {
-      var dia = diaList[i];
+      dia = diaList[i];
 
       if (dia.c_id) {
         dia.canvas.forEachObject(function(item) {
@@ -693,15 +710,18 @@ app.Diagram = function(diagram_id, setting) {
   }
 
   setting.callbacks.add(function(data) {
+    var elms;
+    var dia_id;
+    var dia;
     switch(data.cmd)
       {
       case 'setting.init':
         init();
         break;
       case 'setting.zoom':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia && dia.canvas)
           {
             var value = parseFloat (data.value, 10);
@@ -714,69 +734,69 @@ app.Diagram = function(diagram_id, setting) {
         saveItemData();
         break;
       case 'item.addBackground':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia)
           addBackgroundImage(dia, data.id, data.file);
         break;
       case 'item.removeBackground':
         $('#app-sidebar-' + data.id).text('empty');
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia)
           removeBackgroundImage(dia, data.id);
         break;
       case 'item.add':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia)
           addItem(dia, data.id, data.item);
         break;
       case 'item.selected':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia)
           selectItem(dia, data.id);
         break;
       case 'item.modified':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia) {
           modifyItem(dia, data.id, data.key, data.value);
         }
         break;
       // Use for avoid overlapping rendering.
       case 'canvas.rendering':
-        var elms = setting.selectedID.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = setting.selectedID.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia && dia.canvas)
           dia.canvas.renderAll();
         break;
       case 'item.removed':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia)
           removeItem(dia, data.id);
         break;
       // Remove the active group on canvas.
       case 'group.removed':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia && dia.canvas)
           dia.canvas.discardActiveGroup();
         break;
       case 'map.draw':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia && dia.canvas)
           dia.canvas.renderAll();
         break;
@@ -784,9 +804,9 @@ app.Diagram = function(diagram_id, setting) {
         addMap(data.map);
         break;
       case 'map.modified':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia && dia.canvas)
           {
             dia.canvas.backgroundColor = colorCSS(data.value);
@@ -794,15 +814,15 @@ app.Diagram = function(diagram_id, setting) {
           }
         break;
       case 'map.removed':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
-        var dia = lookupDia(dia_id);
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
+        dia = lookupDia(dia_id);
         if (dia)
           removeMap(dia);
         break;
       case 'map.selected':
-        var elms = data.id.split('-');
-        var dia_id = 'app-dia-' + elms[1];
+        elms = data.id.split('-');
+        dia_id = 'app-dia-' + elms[1];
 
         $('#app-diagram').scrollTop(0).scrollLeft(0);
         diaForeach(function(dia) {
@@ -832,6 +852,10 @@ app.Sidebar = function(sidebar_id, setting) {
   var selectedMap = '';
 
   setting.callbacks.add(function(data) {
+    var elms;
+    var item;
+    var typeObj;
+    var coord;
     switch(data.cmd)
       {
       case 'setting.init':
@@ -865,24 +889,24 @@ app.Sidebar = function(sidebar_id, setting) {
       case 'item.modified':
         if (setting.groupSelectedID.length)
           return;
-        var elms = data.id.split('-');
+        elms = data.id.split('-');
         if (elms[3] == 'null')
           {
             sidebar.setItemEditible(false);
             break;
           }
-        var item = setting.currentObject;
+        item = setting.currentObject;
         $('#app-sidebar-item-info-name').val(item.get('label'));
 
-        var typeObj = $('#app-sidebar-item-info-type');
-        if (setting.setObjectType(item.type) == 0)
+        typeObj = $('#app-sidebar-item-info-type');
+        if (setting.setObjectType(item.type) === 0)
           typeObj.val('DAI Box');
         else if (setting.setObjectType(item.type) == 1)
           typeObj.val('DAI Circle');
         else
           typeObj.val('Unknown');
 
-        var coord = [Math.floor(item.oCoords.tl.x / setting.currentScale),
+        coord = [Math.floor(item.oCoords.tl.x / setting.currentScale),
                      Math.floor(item.oCoords.tl.y / setting.currentScale),
                      Math.floor(item.oCoords.br.x / setting.currentScale),
                      Math.floor(item.oCoords.br.y / setting.currentScale)
@@ -890,26 +914,26 @@ app.Sidebar = function(sidebar_id, setting) {
         $('#app-sidebar-item-info-coordinate').val(coord);
         break;
       case 'item.selected':
-        var elms = data.id.split('-');
+        elms = data.id.split('-');
         if (elms[3] == 'null')
           {
             sidebar.setItemEditible(false);
             break;
           }
-        var item = setting.currentObject;
+        item = setting.currentObject;
 
         sidebar.setItemEditible(true);
         $('#app-sidebar-item-info-name').val(item.get('label'));
 
-        var typeObj = $('#app-sidebar-item-info-type');
-        if (setting.setObjectType(item.type) == 0)
+        typeObj = $('#app-sidebar-item-info-type');
+        if (setting.setObjectType(item.type) === 0)
           typeObj.val('DAI Box');
         else if (setting.setObjectType(item.type) == 1)
           typeObj.val('DAI Circle');
         else
           typeObj.val('Unknown');
 
-        var coord = [Math.floor(item.oCoords.tl.x / setting.currentScale),
+        coord = [Math.floor(item.oCoords.tl.x / setting.currentScale),
                      Math.floor(item.oCoords.tl.y / setting.currentScale),
                      Math.floor(item.oCoords.br.x / setting.currentScale),
                      Math.floor(item.oCoords.br.y / setting.currentScale)
@@ -954,6 +978,8 @@ app.Sidebar = function(sidebar_id, setting) {
   };
 
   function createMapEntry(map, sibling) {
+    var i;
+
     var c_id = "app-sidebar-" + map.id;
 
     var html  = "<div class='accordion-group app-sidebar-accordion-group'>";
@@ -998,8 +1024,8 @@ app.Sidebar = function(sidebar_id, setting) {
         html +=       "</table>";
         html +=       "<label>Background Images</label>";
         html +=       "<div class='app-sidebar-bg-container'>";
-        html +=         "<ul>"
-        for (var i = 0; i < map.backgrounds.length; i++) {
+        html +=         "<ul>";
+        for (i = 0; i < map.backgrounds.length; i++) {
           html +=         "<li>";
           html +=           "<div id='" + c_id + "-bg-" + i + "'>empty</div>";
           html +=           "<button type='button' class='btn btn-mini btn-link'";
@@ -1008,7 +1034,7 @@ app.Sidebar = function(sidebar_id, setting) {
           html +=           "</button>";
           html +=         "</li>";
         }
-        html +=         "</ul>"
+        html +=         "</ul>";
         html +=       "<div>";
         html +=     "</div>";
         html +=   "</div>";
@@ -1038,7 +1064,7 @@ app.Sidebar = function(sidebar_id, setting) {
 
     $('#' + c_id + '-name').change(function(e) {
       var name = $.trim($(this).val());
-      if (name == '')
+      if (name === '')
         return;
 
       var map_idx = $(this).attr('id').split('-')[3];
@@ -1048,7 +1074,7 @@ app.Sidebar = function(sidebar_id, setting) {
 
     $('#' + c_id + '-background_color').change(function(e) {
       var color = $.trim($(this).val());
-      if (color == '')
+      if (color === '')
         return;
 
       var map_idx = $(this).attr('id').split('-')[3];
@@ -1062,8 +1088,8 @@ app.Sidebar = function(sidebar_id, setting) {
       setting.removeMap(mapID);
     });
 
-    for (var i = 0; i < map.backgrounds.length; i++) {
-      if (map.backgrounds[i] == "")
+    for (i = 0; i < map.backgrounds.length; i++) {
+      if (map.backgrounds[i] === "")
         {
           $('#' + c_id + "-bg-" + i).text("empty");
         }
@@ -1073,7 +1099,7 @@ app.Sidebar = function(sidebar_id, setting) {
         }
     }
 
-    for (var i = 0; i < map.backgrounds.length; i++) {
+    for (i = 0; i < map.backgrounds.length; i++) {
       $('#' + c_id + "-bg-" + i).click(function(e) {
         app.curBgTarget=$(this).attr('id');
         $('#app-sidebar-bg-file').trigger('click');
@@ -1121,17 +1147,18 @@ app.Setting = function() {
 
     $('#app-overlay').hide();
 
+    var i;
     for (var m = 0; m < config.maps.length; m++)
       {
         config.maps[m].valid = true;
-        for (var i = 0; i < config.maps[m].items.length; i++)
+        for (i = 0; i < config.maps[m].items.length; i++)
           config.maps[m].items[i].valid = true;
 
         config.maps[m].backgrounds = [];
-        for (var i = 0; i < 5; i++)
+        for (i = 0; i < 5; i++)
           config.maps[m].backgrounds.push("empty");
 
-        for (var i = 0; i < config.maps[m].background_images.length && i < 5; i++)
+        for (i = 0; i < config.maps[m].background_images.length && i < 5; i++)
           config.maps[m].backgrounds[i] = config.maps[m].background_images[i];
       }
 
@@ -1207,10 +1234,8 @@ app.Setting = function() {
     switch (type) {
       case 'labeledRect': // box
         return 0;
-        break;
       case 'labeledCircle': // circle
         return 1;
-        break;
     }
   };
 
@@ -1220,7 +1245,8 @@ app.Setting = function() {
     inited = true;
 
     var config = setting.config;
-    for (var i = 0; i < config.maps.length; i++)
+    var i;
+    for (i = 0; i < config.maps.length; i++)
       {
         var map = config.maps[i];
 
@@ -1238,10 +1264,10 @@ app.Setting = function() {
         if (config.maps[m_idx].backgrounds)
           {
             var files = config.maps[m_idx].backgrounds;
-            for (var i = 0; i < files.length; i++) {
-              if (!files[i]
-                  || files[i] == ""
-                  || files[i] == "empty")
+            for (i = 0; i < files.length; i++) {
+              if (!files[i] ||
+                  files[i] === "" ||
+                  files[i] == "empty")
                 continue;
 
               this.addBackground(i, files[i]);
@@ -1249,7 +1275,7 @@ app.Setting = function() {
           }
 
         var items = config.maps[m_idx].items;
-        for (var i = 0; i < items.length; i++)
+        for (i = 0; i < items.length; i++)
           {
             var item = items[i];
             item.id = "map-" + m_idx + "-item-" + i;
@@ -1280,7 +1306,7 @@ app.Setting = function() {
       cmd   : 'setting.zoom',
       id    : "map-" + setting.map_idx,
       value : scale
-    })
+    });
   };
   this.select = function(c_id) {
     var id;
@@ -1377,7 +1403,7 @@ app.Setting = function() {
 
   // Remove data to selected item on canvas
   function removeItemData(id) {
-    if (id && id != '') {
+    if (id && id !== '') {
       var elms = id.split('-');
       if (elms[3] == 'null')
         return;
@@ -1398,9 +1424,9 @@ app.Setting = function() {
       return;
 
     var m_idx = setting.map_idx;
-    if (!setting.config
-        || !setting.config.maps[m_idx]
-        || !setting.config.maps[m_idx].items)
+    if (!setting.config ||
+        !setting.config.maps[m_idx] ||
+        !setting.config.maps[m_idx].items)
       return;
 
     var valid = true;
@@ -1455,9 +1481,9 @@ app.Setting = function() {
       return;
 
     var m_idx = setting.map_idx;
-    if (!setting.config
-        || !setting.config.maps[m_idx]
-        || !setting.config.maps[m_idx].items)
+    if (!setting.config ||
+        !setting.config.maps[m_idx] ||
+        !setting.config.maps[m_idx].items)
       return;
 
     if (!ext)
@@ -1471,9 +1497,9 @@ app.Setting = function() {
       return;
 
     var m_idx = setting.map_idx;
-    if (!setting.config
-        || !setting.config.maps[m_idx]
-        || !setting.config.maps[m_idx].items)
+    if (!setting.config ||
+        !setting.config.maps[m_idx] ||
+        !setting.config.maps[m_idx].items)
       return;
 
     setting.config.maps[m_idx].backgrounds[bgIndex] = "empty";
@@ -1573,7 +1599,7 @@ app.Setting = function() {
         return;
       }
 
-    var rdata = app.fs.readFileSync(mapPath);
+    rdata = app.fs.readFileSync(mapPath);
     var config;
     try {
       config = eval("(" + rdata + ")");
@@ -1641,9 +1667,9 @@ app.Setting = function() {
       new_map.background_images = [];
       for (var i = 0; i < map.backgrounds.length; i++)
         {
-          if (!map.backgrounds[i] 
-              || map.backgrounds[i] == ""
-              || map.backgrounds[i] == "empty")
+          if (!map.backgrounds[i] ||
+              map.backgrounds[i] === "" ||
+              map.backgrounds[i] == "empty")
             continue;
 
           new_map.background_images.push(map.backgrounds[i]);
@@ -1656,7 +1682,7 @@ app.Setting = function() {
         new_map.text_color = map.text_color;
 
       new_map.items = [];
-      for (var i = 0; i < map.items.length; i++) {
+      for (i = 0; i < map.items.length; i++) {
           var item = map.items[i];
           if (!item.valid)
             continue;
@@ -1692,10 +1718,11 @@ app.Setting = function() {
     zip.file(app.mapFilename, mapJson);
 
     var images = [];
+    var i;
     for (m = 0; m < mapData.maps.length; m++) {
       var map = mapData.maps[m];
 
-      for (var i = 0; i < map.background_images.length; i++)
+      for (i = 0; i < map.background_images.length; i++)
         images.push(map.background_images[i]);
     }
 
@@ -1703,7 +1730,7 @@ app.Setting = function() {
       if (images.length <= 0)
         return false;
 
-      for (var i = 0; i < images.length; i++) {
+      for (i = 0; i < images.length; i++) {
         if (images[i] == filename)
           return true;
       }
@@ -1715,7 +1742,7 @@ app.Setting = function() {
       {
         var files = app.fs.readdirSync(setting.imageDir);
         var zipFolder = zip.folder('images');
-        for (var i = 0; i < files.length; i++)
+        for (i = 0; i < files.length; i++)
           {
             if (!lookupImage(files[i]))
               continue;
@@ -1769,7 +1796,7 @@ $(function() {
   });
   $('#app-map-new-file').on('change', function(e) {
     var path = $.trim($(this).val());
-    if (path == '')
+    if (path === '')
       return;
 
     var zipPath = path;
@@ -1786,7 +1813,7 @@ $(function() {
   });
   $('#app-map-open-file').on('change', function(e) {
     var path = $.trim($(this).val());
-    if (path == '')
+    if (path === '')
       return;
 
     setting.openZipFile(path);
@@ -1795,12 +1822,12 @@ $(function() {
 
   $('#app-sidebar-bg-file').on('change', function(e) {
     var path = $.trim($(this).val());
-    if (path == '')
+    if (path === '')
       return;
     $(this).val('');
 
     var filename = app.path.basename(path);
-    if (!filename || filename == "")
+    if (!filename || filename === "")
       return;
 
     var ext = filename.toLowerCase().substr(filename.lastIndexOf('.') + 1);
@@ -1853,7 +1880,7 @@ $(function() {
   $('#app-modal-map-ok').click(function(e) {
     $('#app-modal-map').modal('hide');
     var name = $.trim($('#app-modal-map-name').val());
-    if (name == '')
+    if (name === '')
       return;
 
     var width = parseInt($('#app-modal-map-width').val());
@@ -1873,7 +1900,7 @@ $(function() {
 
   $('#app-sidebar-item-info-name').change(function(e) {
     var name = $.trim($(this).val());
-    if (name == '')
+    if (name === '')
       return;
 
     setting.callbacks.fire({
@@ -1907,7 +1934,7 @@ $(function() {
 
   $('#app-sidebar-item-info-fill-zero-button').click(function(e) {
     var num = $.trim($('#app-sidebar-item-info-fill-zero').val());
-    if (num == '')
+    if (num === '')
       return;
     Fillzero(num);
   });
@@ -1928,7 +1955,7 @@ $(function() {
           item.set('label', obj.name);
         } else if (nameLength > length) {
           for (i = 0; i < (nameLength - length); i++) {
-            if (obj.name.indexOf('0') == 0)
+            if (obj.name.indexOf('0') === 0)
               obj.name = obj.name.substring(1);
             else
               break;
@@ -2322,4 +2349,6 @@ $(function() {
       setting.openZipFile(cmdline.split(' ').reverse()[0]);
     });
   }, 1000);
+});
+
 });
