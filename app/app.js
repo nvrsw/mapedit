@@ -1981,11 +1981,10 @@ $(function() {
     } else {
       return;
     }
+    obj.setCoords();
 
     if (!setting.groupSelectedID.length) {
       var points = [];
-
-      obj.setCoords();
 
       points.push(Math.floor(obj.oCoords.tl.x / setting.currentScale));
       points.push(Math.floor(obj.oCoords.tl.y / setting.currentScale));
