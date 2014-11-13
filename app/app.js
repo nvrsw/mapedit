@@ -1564,12 +1564,6 @@ app.Setting = function() {
     setting.load();
     loadingObj.hide();
   };
-  this.reopenZipFile = function() {
-    if (!this.zipPath)
-      return;
-
-    this.openZipFile(this.zipPath);
-  };
   this.newZipFile = function(zipPath) {
     var mapData = {
       'format' : 1,
@@ -1779,10 +1773,6 @@ $(function() {
     var imagePath = app.path.join(setting.imageDir, fname);
     app.fs.writeFileSync(imagePath, app.fs.readFileSync(path), 'binary');
     setting.addBackground(bgIndex, fname);
-  });
-
-  $('#app-menu-openrecent').click(function(e) {
-    setting.reopenZipFile();
   });
 
   $('#app-menu-save-file').click(function(e) {
