@@ -189,6 +189,8 @@ app.Diagram = function(diagram_id, setting) {
     });
 
     diaList = [];
+    setting.currentScale = 1;
+    setting.map_idx = 0;
     rootContainer.empty();
   }
 
