@@ -194,6 +194,37 @@ app.Diagram = function(diagram_id, setting) {
     rootContainer.empty();
   }
 
+  // Resize selected group object.
+  function scaleGroup() {
+    var obj = setting.groupObject;
+    if (!obj)
+      return;
+
+    obj.set({
+      top: scaleIt(restoreIt(obj.top)),
+      left: scaleIt(restoreIt(obj.left)),
+      scaleX: scaleIt(restoreIt(obj.scaleX)),
+      scaleY: scaleIt(restoreIt(obj.scaleY))
+    });
+
+    obj.setCoords();
+  }
+
+  // Except object in group for scale value
+  function checkGroupObject(obj) {
+    if (!setting.groupSelectedID.length)
+      return;
+    var itemID = setting.groupSelectedID;
+
+    for (var i = 0; i < itemID.length; i++) {
+      if (obj.c_id == itemID[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function addMap(map) {
     var dia = {
       c_id   : 'app-dia-' + map.id.split('-')[1],
@@ -223,9 +254,14 @@ app.Diagram = function(diagram_id, setting) {
           return parseFloat(prop, 10) * value;
         };
 
+        scaleGroup();
+
         self.setHeight(self.getHeight() / self.c_scaleValue);
         self.setWidth(self.getWidth() / self.c_scaleValue);
         self.forEachObject(function(obj) {
+          if (checkGroupObject(obj))
+            return;
+
           var currentObjTop = obj.get('top'),
               currentObjLeft = obj.get('left'),
               currentObjScaleX = obj.get('scaleX'),
@@ -247,6 +283,9 @@ app.Diagram = function(diagram_id, setting) {
         self.setHeight(self.getHeight() * value);
         self.setWidth(self.getWidth() * value);
         self.forEachObject(function(obj) {
+          if (checkGroupObject(obj))
+            return;
+
           var currentObjTop = obj.get('top'),
               currentObjLeft = obj.get('left'),
               currentObjScaleX = obj.get('scaleX'),
