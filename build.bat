@@ -9,6 +9,9 @@ copy node-webkit\win-ia32\icudtl.dat release\
 copy node-webkit\win-ia32\nw.pak release\
 mkdir release\samples
 copy samples\* release\samples\
+copy ChangeLog.md release\ChangeLog.txt
 del app.nw
 
-@rem pause
+cd release
+ren app.exe mapedit.exe
+cd ..
