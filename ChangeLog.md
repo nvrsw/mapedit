@@ -1,7 +1,7 @@
 VMS Map Editor ChangeLog
 ========================
 
-### VMS Map Editor 1.1 (2014-11-13) ###
+### VMS Map Editor 1.1 (2014-11-14) ###
 
 - 지도 파일(zip) 로딩 속도 개선
 
