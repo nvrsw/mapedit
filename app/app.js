@@ -1703,7 +1703,7 @@ app.Setting = function() {
     return config;
   }
 
-  this.saveZipFile = function() {
+  this.saveZipFile = function(filePath) {
     if (!inited)
       return;
 
@@ -1715,6 +1715,7 @@ app.Setting = function() {
     var mapData = generateMap();
     var mapJson = JSON.stringify(mapData, null, 2);
     var zip = new require('node-zip')();
+
     zip.file(app.mapFilename, mapJson);
 
     var images = [];
@@ -1754,7 +1755,12 @@ app.Setting = function() {
           }
       }
     var data = zip.generate({ base64: false });
-    app.fs.writeFileSync(setting.zipPath, data, 'binary');
+
+    // Separate whether 'Savs As File' function as 'filePath' value.
+    if (filePath)
+      app.fs.writeFileSync(filePath, data, 'binary');
+    else
+      app.fs.writeFileSync(setting.zipPath, data, 'binary');
 
     loadingObj.hide();
   };
@@ -1845,6 +1851,29 @@ $(function() {
 
   $('#app-menu-save-file').click(function(e) {
     setting.saveZipFile();
+  });
+
+  $('#app-menu-save-as-file').click(function(e) {
+    if (!setting.zipPath)
+      return;
+
+    $('#app-map-save-as-file').attr('nwsaveas', setting.zipPath);
+    $('#app-map-save-as-file').trigger('click');
+  });
+
+  $('#app-map-save-as-file').on('change', function(e) {
+    var path = $.trim($(this).val());
+    if (path === '')
+      return;
+
+    var zipPath = path;
+    var ext = zipPath.substr(zipPath.lastIndexOf('.') + 1);
+    if (!ext || ext == zipPath)
+      zipPath += ".zip";
+
+    setting.saveZipFile(zipPath);
+    setting.openZipFile(zipPath);
+    $(this).val("");
   });
 
   $('#app-view-200').click(function(e) {
