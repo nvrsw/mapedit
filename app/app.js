@@ -1707,6 +1707,12 @@ app.Setting = function() {
     if (!inited)
       return;
 
+    // Remove group selection be caused by changed coordinate as save.
+    if (setting.groupSelectedID.length) {
+      setting.callbacks.fire({ cmd: 'group.removed', id: setting.groupSelectedID[0] });
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    }
+
     setting.callbacks.fire({ cmd: 'setting.saveData' });
 
     var loadingObj = $('#app-loading-overlay');
