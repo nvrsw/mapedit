@@ -1757,9 +1757,10 @@ app.Setting = function() {
     var data = zip.generate({ base64: false });
 
     // Separate whether 'Savs As File' function as 'filePath' value.
-    if (filePath)
+    if (filePath) {
       app.fs.writeFileSync(filePath, data, 'binary');
-    else
+      setting.zipPath = filePath;
+    } else
       app.fs.writeFileSync(setting.zipPath, data, 'binary');
 
     loadingObj.hide();
@@ -1872,7 +1873,6 @@ $(function() {
       zipPath += ".zip";
 
     setting.saveZipFile(zipPath);
-    setting.openZipFile(zipPath);
     $(this).val("");
   });
 
