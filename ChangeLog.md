@@ -1,7 +1,14 @@
 VMS Map Editor ChangeLog
 ========================
 
-### VMS Map Editor 1.1 (2014-11-14) ###
+### VMS Map Editor 1.1.1 (2014-12-02) ###
+
+- 그룹 선택 상태에서 저장하면 잘못된 좌표가 저장되는 문제 고침
+
+- 다른 이름으로 저장하는 기능 추가
+
+
+### VMS Map Editor 1.1.0 (2014-11-14) ###
 
 - 지도 파일(zip) 로딩 속도 개선
 
@@ -20,3 +27,4 @@ VMS Map Editor ChangeLog
 - Delete키로 항목 삭제
 
 - 'Open Recent' 메뉴 제거
+
