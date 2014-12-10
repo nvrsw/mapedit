@@ -1740,7 +1740,9 @@ app.Setting = function() {
       if (images.length <= 0)
         return false;
 
-      for (i = 0; i < images.length; i++) {
+      var i = 0;
+
+      for (i; i < images.length; i++) {
         if (images[i] == filename)
           return true;
       }
