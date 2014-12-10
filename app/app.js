@@ -411,7 +411,7 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
-      dragBoundItem(obj, map);
+      dragBoundItem(obj, map, dia.canvas.c_scaleValue);
     });
 
     canvas.on('object:modified', function(e) {
@@ -441,19 +441,22 @@ app.Diagram = function(diagram_id, setting) {
   }
 
   // Prevent leave to item to map.
-  function dragBoundItem(obj, map) {
+  function dragBoundItem(obj, map, scaleValue) {
     obj.setCoords();
+
+    var maxWidth = map.width * scaleValue;
+    var maxHeight = map.height * scaleValue;
 
     if (obj.oCoords.tl.x < 0) {
       obj.left -= obj.oCoords.tl.x;
-    } else if (obj.oCoords.tr.x > map.width) {
-      obj.left -= (obj.oCoords.tr.x - map.width);
+    } else if (obj.oCoords.tr.x > maxWidth) {
+      obj.left -= (obj.oCoords.tr.x - maxWidth);
     }
 
     if (obj.oCoords.tl.y < 0) {
       obj.top -= obj.oCoords.tl.y;
-    } else if (obj.oCoords.bl.y > map.height) {
-      obj.top -= (obj.oCoords.bl.y - map.height);
+    } else if (obj.oCoords.bl.y > maxHeight) {
+      obj.top -= (obj.oCoords.bl.y - maxHeight);
     }
   }
 
