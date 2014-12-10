@@ -1270,6 +1270,9 @@ app.Setting = function() {
                   files[i] == "empty")
                 continue;
 
+              // Apply current map index.
+              setting.map_idx = m_idx;
+
               this.addBackground(i, files[i]);
             }
           }
