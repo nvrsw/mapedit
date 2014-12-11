@@ -2153,6 +2153,9 @@ $(function() {
       if (exceptName(name))
         continue;
 
+      name = fillZeroLikeBaseItem(name, baseItem);
+      console.log(name);
+
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
@@ -2205,6 +2208,8 @@ $(function() {
       var name = n.toString();
       if (exceptName(name))
         continue;
+
+      name = fillZeroLikeBaseItem(name, baseItem);
 
       var options = {
         type  : setting.setObjectType(baseItem.type),
@@ -2259,6 +2264,8 @@ $(function() {
       if (exceptName(name))
         continue;
 
+      name = fillZeroLikeBaseItem(name, baseItem);
+
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
@@ -2312,6 +2319,8 @@ $(function() {
       if (exceptName(name))
         continue;
 
+      name = fillZeroLikeBaseItem(name, baseItem);
+
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
@@ -2341,6 +2350,19 @@ $(function() {
     }
 
   });
+
+  // Fill zero as digit number for item name like length of baseitem name.
+  function fillZeroLikeBaseItem(name, baseItem) {
+    var baseLength = baseItem.get('label').length;
+
+    if (name.length == baseLength || name.length > baseLength)
+      return name;
+
+    for(var i = name.length; i < (baseLength); i++) {
+      name = '0' + name;
+    }
+    return name;
+  }
 
   // Except name include of '4,9' according to 'exceptFourNine' option
   function exceptName(name) {
