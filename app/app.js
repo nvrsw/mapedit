@@ -2141,7 +2141,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var width = Math.floor(baseItem.getWidth() / setting.currentScale);
+    var width = baseItem.getWidth() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2156,10 +2156,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale) + (width * count),
-        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale),
-        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale) + (width * count),
-        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale),
+        x1    : (baseItem.left / setting.currentScale) + (width * count),
+        y1    : baseItem.top / setting.currentScale,
+        x2    : ((baseItem.left + baseItem.getWidth()) / setting.currentScale) + (width * count),
+        y2    : (baseItem.top + baseItem.getHeight()) / setting.currentScale,
         select: false
       };
 
@@ -2194,7 +2194,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var width = Math.floor(baseItem.getWidth() / setting.currentScale);
+    var width = baseItem.getWidth() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2209,10 +2209,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale) - (width * count),
-        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale),
-        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale) - (width * count),
-        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale),
+        x1    : (baseItem.left / setting.currentScale) - (width * count),
+        y1    : baseItem.top / setting.currentScale,
+        x2    : ((baseItem.left + baseItem.getWidth()) / setting.currentScale) - (width * count),
+        y2    : (baseItem.top + baseItem.getHeight()) / setting.currentScale,
         select: false
       };
 
@@ -2247,7 +2247,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var height = Math.floor(baseItem.getHeight() / setting.currentScale);
+    var height = baseItem.getHeight() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2262,10 +2262,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale),
-        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale) - (height * count),
-        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale),
-        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale) - (height * count),
+        x1    : baseItem.left / setting.currentScale,
+        y1    : (baseItem.top / setting.currentScale) - (height * count),
+        x2    : (baseItem.left + baseItem.getWidth()) / setting.currentScale,
+        y2    : ((baseItem.top + baseItem.getHeight()) / setting.currentScale) - (height * count),
         select: false
       };
 
@@ -2300,7 +2300,7 @@ $(function() {
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
     var sn = parseInt(baseItem.get('label'));
-    var height = Math.floor(baseItem.getHeight() / setting.currentScale);
+    var height = baseItem.getHeight() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
@@ -2315,10 +2315,10 @@ $(function() {
       var options = {
         type  : setting.setObjectType(baseItem.type),
         name  : name,
-        x1    : Math.floor(baseItem.oCoords.tl.x / setting.currentScale),
-        y1    : Math.floor(baseItem.oCoords.tl.y / setting.currentScale) + (height * count),
-        x2    : Math.floor(baseItem.oCoords.br.x / setting.currentScale),
-        y2    : Math.floor(baseItem.oCoords.br.y / setting.currentScale) + (height * count),
+        x1    : baseItem.left / setting.currentScale,
+        y1    : (baseItem.top / setting.currentScale) + (height * count),
+        x2    : (baseItem.left + baseItem.getWidth()) / setting.currentScale,
+        y2    : ((baseItem.top + baseItem.getHeight()) / setting.currentScale) + (height * count),
         select: false
       };
 
