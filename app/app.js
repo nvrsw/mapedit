@@ -420,6 +420,12 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
+      obj.setLeft(Math.round(obj.left));
+      obj.setTop(Math.round(obj.top));
+      obj.setWidth(Math.round(obj.width));
+      obj.setHeight(Math.round(obj.height));
+      obj.setCoords();
+
       if (obj.type !== 'group') {
         if (obj.c_id) {
           var points = [];
@@ -431,6 +437,14 @@ app.Diagram = function(diagram_id, setting) {
 
           $('#app-sidebar-item-info-coordinate').val(points.join(','));
         }
+      } else {
+        obj.forEachObject(function (item) {
+          item.setLeft(Math.round(item.left));
+          item.setTop(Math.round(item.top));
+          item.setWidth(Math.round(item.width));
+          item.setHeight(Math.round(item.height));
+          item.setCoords();
+        });
       }
     });
 
