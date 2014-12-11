@@ -1243,8 +1243,6 @@ app.Setting = function() {
   };
 
   this.load = function() {
-    var t = new Date();
-
     inited = true;
 
     var config = setting.config;
@@ -1292,8 +1290,6 @@ app.Setting = function() {
 
     if (config.maps.length > 0)
       this.selectMap('map-' + setting.map_idx);
-
-    console.log ("load time : " + (new Date() - t) / 1000 + " seconds");
   };
   this.selectMap = function(mapID) {
     var elms = mapID.split('-');
@@ -1608,7 +1604,7 @@ app.Setting = function() {
     rdata = app.fs.readFileSync(mapPath);
     var config;
     try {
-      config = eval("(" + rdata + ")");
+      config = JSON.parse(rdata);
       if (!config) {
         alert('invalid map file1 : ' + zipPath);
         app.releaseTemporaryDir(tmpDir);
@@ -1956,7 +1952,7 @@ $(function() {
 
   $('#app-sidebar-item-info-coordinate').change(function(e) {
     var coords = $.trim($(this).val());
-    if (coords == '')
+    if (coords === '')
       return;
 
     var length = coords.split(',').length;
