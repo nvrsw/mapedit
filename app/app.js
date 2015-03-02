@@ -1998,22 +1998,24 @@ $(function() {
       var i = 0;
 
       setting.groupObject.forEachObject(function (item) {
-        var elms = item.c_id.split('-');
-        var obj = setting.config.maps[elms[1]].items[elms[3]];
-        var nameLength = obj.name.length;
+        if (!item.c_id)
+          return;
+
+        var item_name = item.get('label');
+        var nameLength = item_name.length;
 
         if (nameLength < length) {
           for (i = 0; i < (length - nameLength); i++)
-            obj.name = '0' +  obj.name;
-          item.set('label', obj.name);
+            item_name = '0' +  item_name;
+          item.set('label', item_name);
         } else if (nameLength > length) {
           for (i = 0; i < (nameLength - length); i++) {
-            if (obj.name.indexOf('0') === 0)
-              obj.name = obj.name.substring(1);
+            if (item_name.indexOf('0') === 0)
+              item_name = item_name.substring(1);
             else
               break;
           }
-          item.set('label', obj.name);
+          item.set('label', item_name);
         }
       });
       setting.callbacks.fire({ cmd: 'canvas.rendering' });
