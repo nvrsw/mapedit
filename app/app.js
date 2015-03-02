@@ -1901,7 +1901,7 @@ $(function() {
   });
 
   $('#app-menu-quit').click(function(e) {
-    window.close();
+    window.open('', '_self').close();
   });
 
   $('#app-view-400').click(function(e) {
