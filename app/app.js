@@ -1900,6 +1900,14 @@ $(function() {
     $(this).val("");
   });
 
+  $('#app-menu-quit').click(function(e) {
+    window.close();
+  });
+
+  $('#app-view-400').click(function(e) {
+    setting.zoom("4.0");
+  });
+
   $('#app-view-200').click(function(e) {
     setting.zoom("2.0");
   });
