@@ -2074,8 +2074,82 @@ $(function() {
     checkFocusSidebar = false;
   });
 
+  // Check the shortcut key.
+  var keyCtrl = false;
+  var keyShift = false;
+  var keyAlt = false;
+
+  function excuteShortcutKey(keyCode) {
+    if (keyCtrl)
+    {
+      // Ctrl+N : new file
+      if (keyCode == 78) {
+        $('#app-menu-new-file').click();
+
+      // Ctrl+O : open file
+      } else if (keyCode == 79) {
+        $('#app-menu-open-file').click();
+
+      // Ctrl+q : quit
+      } else if (keyCode == 81) {
+        $('#app-menu-quit').click();
+
+      // Ctrl+s : save file
+      } else if (keyCode == 83) {
+        $('#app-menu-save-file').click();
+      }
+      keyCtrl = false;
+      return;
+    }
+  }
+
+  $('body').keyup(function(e) {
+    if (e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+      switch (e.keyCode)
+      {
+        case 16:
+          keyShift = false;
+          break;
+        case 17:
+          keyCtrl = false;
+          break;
+        case 18:
+          keyAlt = false;
+          break;
+        default:
+          break;
+      }
+
+      return;
+    }
+  });
+
   // Move item of canvas by key event
   $('body').keydown(function(e) {
+    if (e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+      switch (e.keyCode)
+      {
+        case 16:
+          keyShift = true;
+          break;
+        case 17:
+          keyCtrl = true;
+          break;
+        case 18:
+          keyAlt = true;
+          break;
+        default:
+          break;
+      }
+
+      return;
+    }
+
+    if (keyCtrl || keyShift || keyAlt) {
+      excuteShortcutKey(e.keyCode);
+      return;
+    }
+
     if (checkFocusSidebar)
       return;
     var elms = setting.selectedID.split('-');
