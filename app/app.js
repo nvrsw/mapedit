@@ -1318,6 +1318,9 @@ app.Setting = function() {
     setting.select(null);
   };
   this.zoom = function(scale) {
+    if (!inited)
+      return;
+
     this.callbacks.fire({
       cmd   : 'setting.zoom',
       id    : "map-" + setting.map_idx,
@@ -2141,7 +2144,48 @@ $(function() {
         default:
           break;
       }
+      return;
+    }
 
+    // Setting zoom in / out
+    if (e.keyCode == 187) {
+      switch (setting.currentScale)
+      {
+        case 2:
+          setting.zoom('4.0');
+          break;
+        case 1:
+          setting.zoom('2.0');
+          break;
+        case 0.75:
+          setting.zoom('1.0');
+          break;
+        case 0.5:
+          setting.zoom('0.75');
+          break;
+        default:
+          break;
+      }
+      return;
+    }
+    if (e.keyCode == 189) {
+      switch (setting.currentScale)
+      {
+        case 4:
+          setting.zoom('2.0');
+          break;
+        case 2:
+          setting.zoom('1.0');
+          break;
+        case 1:
+          setting.zoom('0.75');
+          break;
+        case 0.75:
+          setting.zoom('0.5');
+          break;
+        default:
+          break;
+      }
       return;
     }
 
