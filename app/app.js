@@ -1143,6 +1143,7 @@ app.Setting = function() {
   this.zipPath = null;
   this.tmpDir = null;
   this.imageDir = null;
+  this.originMapFile = null;
 
   this.map_idx = 0;
   this.callbacks = $.Callbacks();
@@ -1621,6 +1622,7 @@ app.Setting = function() {
       }
 
     rdata = app.fs.readFileSync(mapPath);
+    setting.originMapFile = rdata;
     var config;
     try {
       config = JSON.parse(rdata);
@@ -1659,6 +1661,7 @@ app.Setting = function() {
     };
 
     var mapJson = JSON.stringify(mapData, null, 2);
+    setting.originMapFile = mapJson;
     var zip = new require('node-zip')();
     zip.file(app.mapFilename, mapJson);
     var zipFolder = zip.folder('images');
@@ -1741,6 +1744,10 @@ app.Setting = function() {
 
     var mapData = generateMap();
     var mapJson = JSON.stringify(mapData, null, 2);
+    if (setting.originMapFile == mapJson) {
+      loadingObj.hide();
+      return;
+    }
     var zip = new require('node-zip')();
 
     zip.file(app.mapFilename, mapJson);
