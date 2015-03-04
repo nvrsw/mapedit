@@ -726,46 +726,6 @@ app.Diagram = function(diagram_id, setting) {
     }
   }
 
-  // Show current scale to view menu.
-  function markCurrentView(prevScale, currentScale) {
-    switch (prevScale)
-    {
-      case 4.0:
-        $('#app-view-400').html('400%');
-        break;
-      case 2.0:
-        $('#app-view-200').html('200%');
-        break;
-      case 1.0:
-        $('#app-view-100').html('100%');
-        break;
-      case 0.75:
-        $('#app-view-75').html('75%');
-        break;
-      case 0.5:
-        $('#app-view-50').html('50%');
-        break;
-    }
-    switch (currentScale)
-    {
-      case 4.0:
-        $('#app-view-400').html("<b>400%</b>");
-        break;
-      case 2.0:
-        $('#app-view-200').html("<b>200%</b>");
-        break;
-      case 1.0:
-        $('#app-view-100').html("<b>100%</b>");
-        break;
-      case 0.75:
-        $('#app-view-75').html("<b>75%</b>");
-        break;
-      case 0.5:
-        $('#app-view-50').html("<b>50%</b>");
-        break;
-    }
-  }
-
   setting.callbacks.add(function(data) {
     var elms;
     var dia_id;
@@ -784,8 +744,6 @@ app.Diagram = function(diagram_id, setting) {
             var value = parseFloat (data.value, 10);
             if (dia.canvas.c_scaleValue != value)
               dia.canvas.c_scale(value);
-
-            markCurrentView(setting.currentScale, dia.canvas.c_scaleValue);
             setting.currentScale = dia.canvas.c_scaleValue;
           }
         break;
@@ -1919,6 +1877,8 @@ $(function() {
     type: 'checkbox',
     label: '400%',
     click: function() {
+      clearCheckViewMenu();
+      this.checked = true;
       setting.zoom("4.0");
     }
   }));
@@ -1926,13 +1886,18 @@ $(function() {
     type: 'checkbox',
     label: '200%',
     click: function() {
+      clearCheckViewMenu();
+      this.checked = true;
       setting.zoom("2.0");
     }
   }));
   viewMenu.append(new gui.MenuItem({
     type: 'checkbox',
+    checked: true,
     label: '100%',
     click: function() {
+      clearCheckViewMenu();
+      this.checked = true;
       setting.zoom("1.0");
     }
   }));
@@ -1940,6 +1905,8 @@ $(function() {
     type: 'checkbox',
     label: '75%',
     click: function() {
+      clearCheckViewMenu();
+      this.checked = true;
       setting.zoom("0.75");
     }
   }));
@@ -1947,6 +1914,8 @@ $(function() {
     type: 'checkbox',
     label: '50%',
     click: function() {
+      clearCheckViewMenu('50%');
+      this.checked = true;
       setting.zoom("0.5");
     }
   }));
@@ -1962,6 +1931,14 @@ $(function() {
   $('#app-diagram').css('left', app_sidebar_width + "px");
 
   $('#app-overlay').show();
+
+  function clearCheckViewMenu() {
+    var i;
+
+    for (i = 0; i < viewMenu.items.length; i++) {
+      viewMenu.items[i].checked = false;
+    }
+  }
 
   $('#app-map-new-file').on('change', function(e) {
     var path = $.trim($(this).val());
@@ -2181,16 +2158,16 @@ $(function() {
       switch (setting.currentScale)
       {
         case 2:
-          setting.zoom('4.0');
+          viewMenu.items[0].click();
           break;
         case 1:
-          setting.zoom('2.0');
+          viewMenu.items[1].click();
           break;
         case 0.75:
-          setting.zoom('1.0');
+          viewMenu.items[2].click();
           break;
         case 0.5:
-          setting.zoom('0.75');
+          viewMenu.items[3].click();
           break;
         default:
           break;
@@ -2201,16 +2178,16 @@ $(function() {
       switch (setting.currentScale)
       {
         case 4:
-          setting.zoom('2.0');
+          viewMenu.items[1].click();
           break;
         case 2:
-          setting.zoom('1.0');
+          viewMenu.items[2].click();
           break;
         case 1:
-          setting.zoom('0.75');
+          viewMenu.items[3].click();
           break;
         case 0.75:
-          setting.zoom('0.5');
+          viewMenu.items[4].click();
           break;
         default:
           break;
