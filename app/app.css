@@ -1,7 +1,3 @@
-body {
-  padding-top: 40px;
-}
-
 label,
 input,
 button,
@@ -64,16 +60,14 @@ select {
 
 #app-diagram-container {
   position: fixed;
-  top: 40px;
-  height: 680px;
+  height: 720px;
   overflow: auto;
   background-color: #2e3436; /* screen2 background color */
 }
 
 #app-diagram {
   position: fixed;
-  top: 40px;
-  height: 680px;
+  height: 720px;
   overflow: auto;
   background-color: rgba(16,16,16, 0.25); /* screen2 map_background_color #10101040 */
   background-image: url('img/background-noisy.png'); /* screen2 background_image */

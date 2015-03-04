@@ -1859,6 +1859,94 @@ $(function() {
   sidebar = new app.Sidebar('app-sidebar', setting);
   sidebar.setItemEditible(false);
 
+  // Create menu bar.
+  var gui = require('nw.gui');
+  var menu = new gui.Menu({type: 'menubar'});
+  var fileMenu = new gui.Menu();
+  var viewMenu = new gui.Menu();
+  var itemfile;
+  var itemView;
+
+  itemfile = new gui.MenuItem({ label: 'File' });
+  itemView = new gui.MenuItem({ label: 'View' });
+  menu.append(itemfile);
+  menu.append(itemView);
+
+  fileMenu.append(new gui.MenuItem({
+    label: 'New file...',
+    click: function() {
+      $('#app-map-new-file').trigger('click');
+    }
+  }));
+  fileMenu.append(new gui.MenuItem({
+    label: 'Open file...',
+    click: function() {
+      $('#app-map-open-file').trigger('click');
+    }
+  }));
+  fileMenu.append(new gui.MenuItem({
+    label: 'Save',
+    click: function() {
+      setting.saveZipFile();
+    }
+  }));
+  fileMenu.append(new gui.MenuItem({
+    label: 'Save As...',
+    click: function() {
+      if (!setting.zipPath)
+      return;
+
+      $('#app-map-save-as-file').attr('nwsaveas', setting.zipPath);
+      $('#app-map-save-as-file').trigger('click');
+    }
+  }));
+  fileMenu.append(new gui.MenuItem({
+    label: 'Quit',
+    click: function() {
+      window.open('', '_self').close();
+    }
+  }));
+
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
+    label: '400%',
+    click: function() {
+      setting.zoom("4.0");
+    }
+  }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
+    label: '200%',
+    click: function() {
+      setting.zoom("2.0");
+    }
+  }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
+    label: '100%',
+    click: function() {
+      setting.zoom("1.0");
+    }
+  }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
+    label: '75%',
+    click: function() {
+      setting.zoom("0.75");
+    }
+  }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
+    label: '50%',
+    click: function() {
+      setting.zoom("0.5");
+    }
+  }));
+
+  app.window.menu = menu;
+  itemfile.submenu = fileMenu;
+  itemView.submenu = viewMenu;
+
   var app_sidebar_width = parseInt($('#app-sidebar').css('width'));
   $('#app-diagram-container').css('width', (1280 - app_sidebar_width) + "px");
   $('#app-diagram-container').css('left', app_sidebar_width + "px");
@@ -1867,9 +1955,6 @@ $(function() {
 
   $('#app-overlay').show();
 
-  $('#app-menu-new-file').click(function(e) {
-    $('#app-map-new-file').trigger('click');
-  });
   $('#app-map-new-file').on('change', function(e) {
     var path = $.trim($(this).val());
     if (path === '')
@@ -1884,9 +1969,6 @@ $(function() {
     $(this).val("");
   });
 
-  $('#app-menu-open-file').click(function(e) {
-    $('#app-map-open-file').trigger('click');
-  });
   $('#app-map-open-file').on('change', function(e) {
     var path = $.trim($(this).val());
     if (path === '')
@@ -1919,18 +2001,6 @@ $(function() {
     setting.addBackground(bgIndex, fname);
   });
 
-  $('#app-menu-save-file').click(function(e) {
-    setting.saveZipFile();
-  });
-
-  $('#app-menu-save-as-file').click(function(e) {
-    if (!setting.zipPath)
-      return;
-
-    $('#app-map-save-as-file').attr('nwsaveas', setting.zipPath);
-    $('#app-map-save-as-file').trigger('click');
-  });
-
   $('#app-map-save-as-file').on('change', function(e) {
     var path = $.trim($(this).val());
     if (path === '')
@@ -1943,30 +2013,6 @@ $(function() {
 
     setting.saveZipFile(zipPath);
     $(this).val("");
-  });
-
-  $('#app-menu-quit').click(function(e) {
-    window.open('', '_self').close();
-  });
-
-  $('#app-view-400').click(function(e) {
-    setting.zoom("4.0");
-  });
-
-  $('#app-view-200').click(function(e) {
-    setting.zoom("2.0");
-  });
-
-  $('#app-view-100').click(function(e) {
-    setting.zoom("1.0");
-  });
-
-  $('#app-view-75').click(function(e) {
-    setting.zoom("0.75");
-  });
-
-  $('#app-view-50').click(function(e) {
-    setting.zoom("0.5");
   });
 
   $('#app-sidebar-map-add').click(function(e) {
@@ -2129,19 +2175,19 @@ $(function() {
     {
       // Ctrl+N : new file
       if (keyCode == 78) {
-        $('#app-menu-new-file').click();
+        $('#app-map-new-file').trigger('click');
 
       // Ctrl+O : open file
       } else if (keyCode == 79) {
-        $('#app-menu-open-file').click();
+        $('#app-map-open-file').trigger('click');
 
       // Ctrl+q : quit
       } else if (keyCode == 81) {
-        $('#app-menu-quit').click();
+        window.open('', '_self').close();
 
       // Ctrl+s : save file
       } else if (keyCode == 83) {
-        $('#app-menu-save-file').click();
+        setting.saveZipFile();
       }
       keyCtrl = false;
       return;
