@@ -1258,6 +1258,8 @@ app.Setting = function() {
 
   this.load = function() {
     inited = true;
+    if (!app.window.menu.items[1].enabled)
+      app.window.menu.items[1].enabled = true;
 
     var config = setting.config;
     var i;
@@ -1919,6 +1921,7 @@ $(function() {
   }));
   menu.append(new gui.MenuItem({
     label: 'View',
+    enabled: false,
     submenu: viewMenu
   }));
   app.window.menu = menu;
