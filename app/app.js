@@ -1822,13 +1822,6 @@ $(function() {
   var menu = new gui.Menu({type: 'menubar'});
   var fileMenu = new gui.Menu();
   var viewMenu = new gui.Menu();
-  var itemfile;
-  var itemView;
-
-  itemfile = new gui.MenuItem({ label: 'File' });
-  itemView = new gui.MenuItem({ label: 'View' });
-  menu.append(itemfile);
-  menu.append(itemView);
 
   fileMenu.append(new gui.MenuItem({
     label: 'New file...',
@@ -1920,9 +1913,15 @@ $(function() {
     }
   }));
 
+  menu.append(new gui.MenuItem({
+    label: 'File',
+    submenu: fileMenu
+  }));
+  menu.append(new gui.MenuItem({
+    label: 'View',
+    submenu: viewMenu
+  }));
   app.window.menu = menu;
-  itemfile.submenu = fileMenu;
-  itemView.submenu = viewMenu;
 
   var app_sidebar_width = parseInt($('#app-sidebar').css('width'));
   $('#app-diagram-container').css('width', (1280 - app_sidebar_width) + "px");
