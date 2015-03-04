@@ -1876,19 +1876,25 @@ $(function() {
     label: 'New file...',
     click: function() {
       $('#app-map-new-file').trigger('click');
-    }
+    },
+    key: 'n',
+    modifiers: 'ctrl'
   }));
   fileMenu.append(new gui.MenuItem({
     label: 'Open file...',
     click: function() {
       $('#app-map-open-file').trigger('click');
-    }
+    },
+    key: 'o',
+    modifiers: 'ctrl'
   }));
   fileMenu.append(new gui.MenuItem({
     label: 'Save',
     click: function() {
       setting.saveZipFile();
-    }
+    },
+    key: 's',
+    modifiers: 'ctrl'
   }));
   fileMenu.append(new gui.MenuItem({
     label: 'Save As...',
@@ -1904,7 +1910,9 @@ $(function() {
     label: 'Quit',
     click: function() {
       window.open('', '_self').close();
-    }
+    },
+    key: 'q',
+    modifiers: 'ctrl'
   }));
 
   viewMenu.append(new gui.MenuItem({
@@ -2165,75 +2173,8 @@ $(function() {
     checkFocusSidebar = false;
   });
 
-  // Check the shortcut key.
-  var keyCtrl = false;
-  var keyShift = false;
-  var keyAlt = false;
-
-  function excuteShortcutKey(keyCode) {
-    if (keyCtrl)
-    {
-      // Ctrl+N : new file
-      if (keyCode == 78) {
-        $('#app-map-new-file').trigger('click');
-
-      // Ctrl+O : open file
-      } else if (keyCode == 79) {
-        $('#app-map-open-file').trigger('click');
-
-      // Ctrl+q : quit
-      } else if (keyCode == 81) {
-        window.open('', '_self').close();
-
-      // Ctrl+s : save file
-      } else if (keyCode == 83) {
-        setting.saveZipFile();
-      }
-      keyCtrl = false;
-      return;
-    }
-  }
-
-  $('body').keyup(function(e) {
-    if (e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
-      switch (e.keyCode)
-      {
-        case 16:
-          keyShift = false;
-          break;
-        case 17:
-          keyCtrl = false;
-          break;
-        case 18:
-          keyAlt = false;
-          break;
-        default:
-          break;
-      }
-
-      return;
-    }
-  });
-
   // Move item of canvas by key event
   $('body').keydown(function(e) {
-    if (e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
-      switch (e.keyCode)
-      {
-        case 16:
-          keyShift = true;
-          break;
-        case 17:
-          keyCtrl = true;
-          break;
-        case 18:
-          keyAlt = true;
-          break;
-        default:
-          break;
-      }
-      return;
-    }
 
     // Setting zoom in / out
     if (e.keyCode == 187) {
@@ -2274,11 +2215,6 @@ $(function() {
         default:
           break;
       }
-      return;
-    }
-
-    if (keyCtrl || keyShift || keyAlt) {
-      excuteShortcutKey(e.keyCode);
       return;
     }
 
