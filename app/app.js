@@ -1671,7 +1671,7 @@ app.Setting = function() {
     this.openZipFile(zipPath);
   };
 
-  function generateMap() {
+  this.generateMap = function() {
     var config = {};
 
     config.format = setting.config.format;
@@ -1742,12 +1742,13 @@ app.Setting = function() {
     var loadingObj = $('#app-loading-overlay');
     loadingObj.show();
 
-    var mapData = generateMap();
+    var mapData = setting.generateMap();
     var mapJson = JSON.stringify(mapData, null, 2);
     if (setting.originMapFile == mapJson) {
       loadingObj.hide();
       return;
     }
+    setting.originMapFile = mapJson;
     var zip = new require('node-zip')();
 
     zip.file(app.mapFilename, mapJson);
@@ -2044,6 +2045,26 @@ $(function() {
     });
   });
 
+  var confirmFunc = null;
+  var confirm = function (msg, title, func) {
+    confirmFunc = func;
+    $('#app-modal-confirm-title').html(title || 'Confirm');
+    $('#app-modal-confirm-message').html(msg || 'Hello~');
+    $('#app-modal-confirm').modal();
+  };
+  $('#app-modal-confirm .btn-primary').on('click', function () {
+    $('#app-modal-confirm').hide();
+    if (confirmFunc) {
+      confirmFunc();
+      confirmFunc = null;
+    }
+  });
+  $('#app-modal-confirm-quit').click(function(e) {
+    $('#app-modal-confirm').hide();
+    setting.originMapFile = null;
+    window.open('', '_self').close();
+  });
+
   $('#app-sidebar-item-info-name').change(function(e) {
     var name = $.trim($(this).val());
     if (name === '')
@@ -2137,6 +2158,25 @@ $(function() {
   });
 
   app.window.on('close', function() {
+    // Check whether the data is changed.
+    if (setting.originMapFile)
+    {
+      // Remove group selection be caused by changed coordinate as save.
+      if (setting.groupSelectedID.length) {
+        setting.callbacks.fire({ cmd: 'group.removed', id: setting.groupSelectedID[0] });
+        setting.callbacks.fire({ cmd: 'canvas.rendering' });
+      }
+
+      setting.callbacks.fire({ cmd: 'setting.saveData' });
+
+      var mapData = setting.generateMap();
+      var mapJson = JSON.stringify(mapData, null, 2);
+      if (setting.originMapFile != mapJson) {
+        confirm('Your file needs to saved for changes to take effect. Do you want to save?', 'Quit', function () { setting.saveZipFile(); });
+        return;
+      }
+    }
+
     // cleanup temporary directories
     if (setting.tmpDir && app.fs.existsSync(setting.tmpDir))
       app.releaseTemporaryDir(setting.tmpDir);
