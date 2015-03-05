@@ -2172,7 +2172,7 @@ $(function() {
       var mapData = setting.generateMap();
       var mapJson = JSON.stringify(mapData, null, 2);
       if (setting.originMapFile != mapJson) {
-        confirm('Your file needs to saved for changes to take effect. Do you want to save?', 'Quit', function () { setting.saveZipFile(); });
+        confirm('Do you want to save changes before closing?', 'Quit the program', function () { setting.saveZipFile(); });
         return;
       }
     }
