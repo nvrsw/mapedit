@@ -637,6 +637,7 @@ app.Diagram = function(diagram_id, setting) {
       obj.set('lockRotation', true);
       obj.set('disableHover', true);
       obj.set('selectable', false);
+      obj.set('evented', false);
 
       dia.canvas.c_addBackground(obj);
     });
