@@ -874,6 +874,9 @@ app.Sidebar = function(sidebar_id, setting) {
     var item;
     var typeObj;
     var coord;
+    var angle;
+    var range;
+
     switch(data.cmd)
       {
       case 'setting.init':
@@ -957,6 +960,14 @@ app.Sidebar = function(sidebar_id, setting) {
                      Math.floor(item.oCoords.br.y / setting.currentScale)
                     ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
+
+        angle = setting.config.maps[elms[1]].items[elms[3]].camera_direction;
+        if (!angle && angle != 0)
+          angle = '-1';
+        range = setting.config.maps[elms[1]].items[elms[3]].camera_range;
+        if (!range && angle != 0)
+          range = '-1';
+        $('#app-sidebar-item-info-direction').val(angle + ',' + range);
         break;
       case 'item.addBackground':
         $('#app-sidebar-' + data.id).text(data.file);
@@ -972,6 +983,7 @@ app.Sidebar = function(sidebar_id, setting) {
       {
         $('#app-sidebar-item-info-name').prop('disabled', false);
         $('#app-sidebar-item-info-coordinate').prop('disabled', false);
+        $('#app-sidebar-item-info-direction').prop('disabled', false);
 
         $('#app-sidebar-repeat-count').prop('disabled', false);
         $('#app-sidebar-repeat-add-left').prop('disabled', false);
@@ -984,6 +996,7 @@ app.Sidebar = function(sidebar_id, setting) {
         $('#app-sidebar-item-info-name').val("").prop('disabled', true);
         $('#app-sidebar-item-info-type').val("").prop('disabled', true);
         $('#app-sidebar-item-info-coordinate').val("").prop('disabled', true);
+        $('#app-sidebar-item-info-direction').val("").prop('disabled', true);
         $('#app-sidebar-item-info-fill-zero').prop('disabled', true);
         $('#app-sidebar-item-info-fill-zero-button').prop('disabled', true);
 
