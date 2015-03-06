@@ -1961,10 +1961,10 @@ $(function() {
   function clearCheckViewMenu() {
     var i;
 
-    for (i = 0; i < viewMenu.items.length; i++) {
-      if (viewMenu.items[i].type == 'checkbox')
-        viewMenu.items[i].checked = false;
-    }
+    viewMenu.items.forEach(function (item) {
+      if (item.type == 'checkbox' && item.label.indexOf('%') >= 0)
+        item.checked = false;
+    });
   }
 
   $('#app-map-new-file').on('change', function(e) {
