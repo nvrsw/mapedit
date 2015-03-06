@@ -1,7 +1,7 @@
 #!/bin/sh
 
 [ "$VERSION" = "" ] && VERSION='0.9.9'
-[ "$PLATFORMS" = "" ] && PLATFORMS='linux-ia32 linux-x64 win-ia32 win-x64'
+[ "$PLATFORMS" = "" ] && PLATFORMS='linux-ia32 linux-x64 win-ia32'
 
 rm -rf vms-mapedit*
 
