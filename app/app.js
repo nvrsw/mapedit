@@ -1871,7 +1871,7 @@ $(function() {
   fileMenu.append(new gui.MenuItem({
     label: 'Quit',
     click: function() {
-      window.open('', '_self').close();
+      app.window.close();
     },
     key: 'q',
     modifiers: 'ctrl'
@@ -2079,7 +2079,7 @@ $(function() {
   $('#app-modal-confirm-quit').click(function(e) {
     $('#app-modal-confirm').hide();
     setting.originMapFile = null;
-    window.open('', '_self').close();
+    app.window.close();
   });
 
   $('#app-sidebar-item-info-name').change(function(e) {
@@ -2193,7 +2193,7 @@ $(function() {
                 'Quit the program',
                 function () {
                   setting.saveZipFile();
-                  window.open('', '_self').close();
+                  app.window.close();
                 });
         return;
       }
