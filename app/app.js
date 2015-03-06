@@ -95,7 +95,7 @@ var app = {
     for(var i = 0; i < files.length; i++) {
       var filename = this.path.join(dir, files[i]);
       var stat = this.fs.statSync(filename);
-      
+
       if(filename == "." || filename == "..") {
         // nothing to do
       } else if(stat.isDirectory()) {
@@ -1923,6 +1923,21 @@ $(function() {
       setting.zoom("0.5");
     }
   }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'separator',
+    label: '-',
+    click: function() {}
+  }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
+    label: 'Developer Tools',
+    click: function() {
+      if (this.checked)
+        app.window.showDevTools();
+      else
+        app.window.closeDevTools();
+    }
+  }));
 
   menu.append(new gui.MenuItem({
     label: 'File',
@@ -1947,7 +1962,8 @@ $(function() {
     var i;
 
     for (i = 0; i < viewMenu.items.length; i++) {
-      viewMenu.items[i].checked = false;
+      if (viewMenu.items[i].type == 'checkbox')
+        viewMenu.items[i].checked = false;
     }
   }
 
