@@ -1,2 +1,2 @@
-node-webkit\win-ia32\nw.exe app
+nwjs\win-ia32\nw.exe app
 exit
