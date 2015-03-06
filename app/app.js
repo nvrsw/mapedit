@@ -585,6 +585,12 @@ app.Diagram = function(diagram_id, setting) {
       return;
 
     obj.c_id = c_id;
+    obj.camera_direction = item.camera_direction;
+    if (!obj.camera_direction && obj.camera_direction != 0)
+      obj.camera_direction = -1;
+    obj.camera_range = item.camera_range;
+    if (!obj.camera_range && obj.camera_range != 0)
+      obj.camera_range = -1;
     obj.set({
       hasRotatingPoint: false,
       hasControls: true,
@@ -693,7 +699,6 @@ app.Diagram = function(diagram_id, setting) {
         obj.set('label', value);
         break;
       }
-
     if (!setting.groupSelectedID.length)
       dia.canvas.renderAll();
   }
@@ -721,6 +726,8 @@ app.Diagram = function(diagram_id, setting) {
             obj.y1 = Math.floor(item.oCoords.tl.y / dia.canvas.c_scaleValue);
             obj.x2 = Math.floor(item.oCoords.br.x / dia.canvas.c_scaleValue);
             obj.y2 = Math.floor(item.oCoords.br.y / dia.canvas.c_scaleValue);
+            obj.camera_direction = item.camera_direction;
+            obj.camera_range = item.camera_range;
           }
         });
       }
@@ -874,8 +881,7 @@ app.Sidebar = function(sidebar_id, setting) {
     var item;
     var typeObj;
     var coord;
-    var angle;
-    var range;
+    var direction;
 
     switch(data.cmd)
       {
@@ -961,13 +967,8 @@ app.Sidebar = function(sidebar_id, setting) {
                     ].join(',');
         $('#app-sidebar-item-info-coordinate').val(coord);
 
-        angle = setting.config.maps[elms[1]].items[elms[3]].camera_direction;
-        if (!angle && angle != 0)
-          angle = '-1';
-        range = setting.config.maps[elms[1]].items[elms[3]].camera_range;
-        if (!range && angle != 0)
-          range = '-1';
-        $('#app-sidebar-item-info-direction').val(angle + ',' + range);
+        direction = item.camera_direction + ',' + item.camera_range;
+        $('#app-sidebar-item-info-direction').val(direction);
         break;
       case 'item.addBackground':
         $('#app-sidebar-' + data.id).text(data.file);
@@ -1732,6 +1733,8 @@ app.Setting = function() {
           new_item.y1 = item.y1;
           new_item.x2 = item.x2;
           new_item.y2 = item.y2;
+          new_item.camera_direction = item.camera_direction;
+          new_item.camera_range = item.camera_range;
           new_map.items.push(new_item);
       }
 
@@ -2123,6 +2126,35 @@ $(function() {
       key   : 'points',
       value : coords
     });
+  });
+
+  $('#app-sidebar-item-info-direction').change(function(e) {
+    var direction = $.trim($(this).val());
+    if (direction === '')
+      return;
+
+    var length = direction.split(',').length;
+    if (length != 2)
+      return;
+
+    var item = setting.currentObject;
+    if (!item)
+      return;
+
+    var value = direction.split(',');
+    var i;
+
+    for (i = 0; i < length; i++) {
+      if (value[i] == -1)
+        continue;
+
+      if (value[i] < -1)
+        value[i] = -1;
+      if (value[i] > 359)
+        value[i] = 359;
+    }
+    item.camera_direction = value[0];
+    item.camera_range = value[1];
   });
 
   $('#app-sidebar-item-info-fill-zero').change(function(e) {
