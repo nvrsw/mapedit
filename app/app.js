@@ -421,6 +421,7 @@ app.Diagram = function(diagram_id, setting) {
 
         $('#app-sidebar-item-info-fill-zero').prop('disabled', false);
         $('#app-sidebar-item-info-fill-zero-button').prop('disabled', false);
+        $('#app-sidebar-item-info-direction').prop('disabled', false);
       }
     });
 
@@ -734,24 +735,8 @@ app.Diagram = function(diagram_id, setting) {
         obj.set('label', value);
         break;
       case 'direction':
-        var camera_direction = value.split(',');
-
-        // Camera direction
-        if (camera_direction[0] < -1)
-          camera_direction[0] = -1;
-        else if (camera_direction[0] > 359)
-          camera_direction[0] = 359;
-
-        // Camera range
-        if (camera_direction[1] < -1)
-          camera_direction[1] = -1;
-        else if (camera_direction[1] == 0)
-          camera_direction[1] = 1;
-        else if (camera_direction[1] > 360)
-          camera_direction[1] = 360;
-
-        obj.camera_direction = camera_direction[0];
-        obj.camera_range = camera_direction[1];
+        obj.camera_direction = value[0];
+        obj.camera_range = value[1];
         break;
       }
     if (!setting.groupSelectedID.length)
@@ -2195,16 +2180,46 @@ $(function() {
     if (length != 2)
       return;
 
-    var item = setting.currentObject;
-    if (!item)
-      return;
+    var value = direction.split(',');
 
-    setting.callbacks.fire({
-      cmd   : 'item.modified',
-      id    : setting.selectedID,
-      key   : 'direction',
-      value : direction
-    });
+    // Camera direction
+    if (value[0] < -1)
+      value[0] = -1;
+    else if (value[0] > 359)
+      value[0] = 359;
+
+    // Camera range
+    if (value[1] < -1)
+      value[1] = -1;
+    else if (value[1] == 0)
+      value[1] = 1;
+    else if (value[1] > 360)
+      value[1] = 360;
+
+    if (setting.groupSelectedID.length) {
+      var i = 0;
+
+      setting.groupObject.forEachObject(function (item) {
+        if (!item.c_id)
+          return;
+
+        item.camera_direction = value[0];
+        item.camera_range = value[1];
+      });
+      $('#app-sidebar-item-info-direction').val(value[0] + ',' + value[1]);
+      setting.callbacks.fire({ cmd: 'canvas.rendering' });
+    } else {
+      var item = setting.currentObject;
+      if (!item)
+        return;
+
+      setting.callbacks.fire({
+        cmd   : 'item.modified',
+        id    : setting.selectedID,
+        key   : 'direction',
+        value : value
+      });
+    }
   });
 
   $('#app-sidebar-item-info-fill-zero').change(function(e) {
