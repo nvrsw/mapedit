@@ -45,3 +45,5 @@ for platform in $PLATFORMS; do
 
   rm -rf $dir
 done
+
+rm -f app.nw
