@@ -21,13 +21,27 @@ var LabeledRect = fabric.util.createClass(fabric.Rect, {
   _render: function(ctx) {
     this.callSuper('_render', ctx);
 
-    var fs;
+    if (this.camera_direction >= 0 && this.camera_range >= 1)
+    {
+      var direction = (this.camera_direction - 90) * (Math.PI / 180);
+      var range = (this.camera_range * (Math.PI / 180)) / 2;
+      var radius = (this.height < this.width ? this.height : this.width) / 2.0 - 3.0;
+
+      ctx.beginPath();
+      ctx.fillStyle = 'red';
+      ctx.moveTo(0, 0);
+      ctx.arc(0,
+              0,
+              radius,
+              direction - range,
+              direction + range);
+      ctx.fill();
+    }
 
     if (this.label.length <= 3)
       ctx.font = '12px Sans Mono';
     else
       ctx.font = '10px Sans Mono';
-
     ctx.fillStyle = this.stroke;
     ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 13);
   }
@@ -47,11 +61,28 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
   },
   _render: function(ctx) {
     this.callSuper('_render', ctx);
+
+    if (this.camera_direction >= 0 && this.camera_range >= 1)
+    {
+      var direction = (this.camera_direction - 90) * (Math.PI / 180);
+      var range = (this.camera_range * (Math.PI / 180)) / 2;
+      var radius = (this.height < this.width ? this.height : this.width) / 2.0 - 3.0;
+
+      ctx.beginPath();
+      ctx.fillStyle = 'red';
+      ctx.moveTo(0, 0);
+      ctx.arc(0,
+              0,
+              radius,
+              direction - range,
+              direction + range);
+      ctx.fill();
+    }
+
     if (this.label.length <= 3)
       ctx.font = '12px Sans Mono';
     else
       ctx.font = '10px Sans Mono';
-
     ctx.fillStyle = this.stroke;
     ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 18);
   }
@@ -529,6 +560,8 @@ app.Diagram = function(diagram_id, setting) {
           stroke: colorCSS(app.defaultLineColor),
           strokeWidth: 1,
           label: item.name,
+          direction: item.camera_direction,
+          range: item.camera_range
         });
         obj.c_type = item.type;
         obj.c_changePoints = function(points) {
@@ -563,7 +596,9 @@ app.Diagram = function(diagram_id, setting) {
           fill: colorCSS(app.defaultFillColor),
           stroke: colorCSS(app.defaultLineColor),
           strokeWidth: 1,
-          label: item.name
+          label: item.name,
+          direction: item.camera_direction,
+          range: item.camera_range
         });
         obj.c_type = item.type;
         obj.c_changePoints = function(points) {
