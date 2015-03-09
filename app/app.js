@@ -2142,17 +2142,21 @@ $(function() {
       return;
 
     var value = direction.split(',');
-    var i;
 
-    for (i = 0; i < length; i++) {
-      if (value[i] == -1)
-        continue;
+    // Camera direction
+    if (value[0] < -1)
+      value[0] = -1;
+    else if (value[0] > 359)
+      value[0] = 359;
 
-      if (value[i] < -1)
-        value[i] = -1;
-      if (value[i] > 359)
-        value[i] = 359;
-    }
+    // Camera range
+    if (value[1] < -1)
+      value[1] = -1;
+    else if (value[1] == 0)
+      value[1] = 1;
+    else if (value[1] > 360)
+      value[1] = 360;
+
     item.camera_direction = value[0];
     item.camera_range = value[1];
   });
