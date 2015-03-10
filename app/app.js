@@ -896,6 +896,8 @@ app.Diagram = function(diagram_id, setting) {
               $('#' + dia.c_id).show("slow");
               if (dia.canvas)
                 {
+                  if (dia.canvas.c_scaleValue != setting.currentScale)
+                    dia.canvas.c_scale(setting.currentScale);
                   dia.canvas.calcOffset();
                   dia.canvas._hoveredTarget = null;
                   dia.canvas.deactivateAll();
