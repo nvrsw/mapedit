@@ -930,6 +930,14 @@ app.Sidebar = function(sidebar_id, setting) {
       case 'setting.init':
         $('#app-sidebar-map-pivot').siblings().remove();
         sidebar.setItemEditible(false);
+        viewMenu.items.forEach(function (item) {
+          if (item.type == 'checkbox') {
+            if (item.label == '100%')
+              item.checked = true;
+            else
+              item.checked = false;
+          }
+        });
         break;
       case 'map.selected':
         if (selectedMap == data.id)
@@ -1866,6 +1874,12 @@ app.Setting = function() {
   };
 };
 
+// Create menu bar.
+var gui = require('nw.gui');
+var menu = new gui.Menu({type: 'menubar'});
+var fileMenu = new gui.Menu();
+var viewMenu = new gui.Menu();
+
 $(function() {
   var setting;
   var diagram;
@@ -1888,12 +1902,6 @@ $(function() {
   diagram = new app.Diagram('app-diagram', setting);
   sidebar = new app.Sidebar('app-sidebar', setting);
   sidebar.setItemEditible(false);
-
-  // Create menu bar.
-  var gui = require('nw.gui');
-  var menu = new gui.Menu({type: 'menubar'});
-  var fileMenu = new gui.Menu();
-  var viewMenu = new gui.Menu();
 
   fileMenu.append(new gui.MenuItem({
     label: 'New file...',
