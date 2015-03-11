@@ -469,14 +469,6 @@ app.Diagram = function(diagram_id, setting) {
 
           $('#app-sidebar-item-info-coordinate').val(points.join(','));
         }
-      } else {
-        obj.forEachObject(function (item) {
-          item.setLeft(Math.round(item.left));
-          item.setTop(Math.round(item.top));
-          item.setWidth(Math.round(item.width));
-          item.setHeight(Math.round(item.height));
-          item.setCoords();
-        });
       }
     });
 
