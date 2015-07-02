@@ -443,7 +443,114 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
+      obj.setLeft(Math.round(obj.left / setting.currentScale) * setting.currentScale);
+      obj.setTop(Math.round(obj.top / setting.currentScale) * setting.currentScale);
+
       dragBoundItem(obj, map, dia.canvas.c_scaleValue);
+    });
+
+    canvas.on('object:scaling', function(e) {
+      var obj = e.target;
+      var height;
+      var width;
+      var snap;
+      var dist;
+      var attrs;
+      var grid;
+
+      if (!obj)
+        return;
+
+      width = obj.getWidth();
+      height = obj.getHeight();
+      grid = setting.currentScale;
+
+      snap = {   // Closest snapping points
+        top: Math.round(obj.top / grid) * grid,
+        left: Math.round(obj.left / grid) * grid,
+        bottom: Math.round((obj.top + height) / grid) * grid,
+        right: Math.round((obj.left + width) / grid) * grid
+      };
+      dist = {   // Distance from snapping points
+        top: Math.abs(snap.top - obj.top),
+        left: Math.abs(snap.left - obj.left),
+        bottom: Math.abs(snap.bottom - obj.top - height),
+        right: Math.abs(snap.right - obj.left - width)
+      };
+      attrs = {
+        scaleX: obj.scaleX,
+        scaleY: obj.scaleY,
+        top: obj.top,
+        left: obj.left
+      };
+
+      switch(obj.__corner)
+        {
+        case 'tl':
+          if (dist.left < dist.top) {
+            attrs.scaleX = (width - (snap.left - obj.left)) / obj.width;
+            attrs.scaleY = (attrs.scaleX / obj.scaleX) * obj.scaleY;
+            attrs.top = obj.top + (height - obj.height * attrs.scaleY);
+            attrs.left = snap.left;
+          }
+          else {
+            attrs.scaleY = (height - (snap.top - obj.top)) / obj.height;
+            attrs.scaleX = (attrs.scaleY / obj.scaleY) * obj.scaleX;
+            attrs.left = attrs.left + (width - obj.width * attrs.scaleX);
+            attrs.top = snap.top;
+          }
+          break;
+        case 'mt':
+          attrs.scaleY = (height - (snap.top - obj.top)) / obj.height;
+          attrs.top = snap.top;
+          break;
+        case 'tr':
+          if (dist.right < dist.top) {
+            attrs.scaleX = (snap.right - obj.left) / obj.width;
+            attrs.scaleY = (attrs.scaleX / obj.scaleX) * obj.scaleY;
+            attrs.top = obj.top + (height - obj.height * attrs.scaleY);
+          }
+          else {
+            attrs.scaleY = (height - (snap.top - obj.top)) / obj.height;
+            attrs.scaleX = (attrs.scaleY / obj.scaleY) * obj.scaleX;
+            attrs.top = snap.top;
+          }
+          break;
+        case 'ml':
+          attrs.scaleX = (width - (snap.left - obj.left)) / obj.width;
+          attrs.left = snap.left;
+          break;
+        case 'mr':
+          attrs.scaleX = (snap.right - obj.left) / obj.width;
+          break;
+        case 'bl':
+          if (dist.left < dist.bottom) {
+            attrs.scaleX = (width - (snap.left - obj.left)) / obj.width;
+            attrs.scaleY = (attrs.scaleX / obj.scaleX) * obj.scaleY;
+            attrs.left = snap.left;
+          }
+          else {
+            attrs.scaleY = (snap.bottom - obj.top) / obj.height;
+            attrs.scaleX = (attrs.scaleY / obj.scaleY) * obj.scaleX;
+            attrs.left = attrs.left + (width - obj.width * attrs.scaleX);
+          }
+          break;
+        case 'mb':
+          attrs.scaleY = (snap.bottom - obj.top) / obj.height;
+          break;
+        case 'br':
+          if (dist.right < dist.bottom) {
+            attrs.scaleX = (snap.right - obj.left) / obj.width;
+            attrs.scaleY = (attrs.scaleX / obj.scaleX) * obj.scaleY;
+          }
+          else {
+            attrs.scaleY = (snap.bottom - obj.top) / obj.height;
+            attrs.scaleX = (attrs.scaleY / obj.scaleY) * obj.scaleX;
+          }
+          break;
+        }
+
+      obj.set(attrs);
     });
 
     canvas.on('object:modified', function(e) {
@@ -452,10 +559,8 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
-      obj.setLeft(Math.round(obj.left));
-      obj.setTop(Math.round(obj.top));
-      obj.setWidth(Math.round(obj.width));
-      obj.setHeight(Math.round(obj.height));
+      obj.setLeft(Math.round(obj.left / setting.currentScale) * setting.currentScale);
+      obj.setTop(Math.round(obj.top / setting.currentScale) * setting.currentScale);
       obj.setCoords();
 
       if (obj.type !== 'group') {
@@ -2401,13 +2506,13 @@ $(function() {
   function modifyItemCoordinate(obj, keyCode) {
 
     if (keyCode == 37) {
-      obj.left -= 1;
+      obj.left -= setting.currentScale;
     } else if (keyCode == 38) {
-      obj.top -= 1;
+      obj.top -= setting.currentScale;
     } else if (keyCode == 39) {
-      obj.left += 1;
+      obj.left += setting.currentScale;
     } else if (keyCode == 40) {
-      obj.top += 1;
+      obj.top += setting.currentScale;
     } else if (keyCode == 46) {
       setting.removeSelected();
       return;
