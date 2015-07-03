@@ -2351,19 +2351,21 @@ $(function() {
 
         var item_name = item.get('label');
         var nameLength = item_name.length;
+        var char_name = item_name.replace(/[\d]+/g,'');
+        var num_name = item_name.replace(/[\D]+/g,'');
 
         if (nameLength < length) {
           for (i = 0; i < (length - nameLength); i++)
-            item_name = '0' +  item_name;
-          item.set('label', item_name);
+            num_name = '0' +  num_name;
+          item.set('label', char_name + num_name);
         } else if (nameLength > length) {
           for (i = 0; i < (nameLength - length); i++) {
-            if (item_name.indexOf('0') === 0)
-              item_name = item_name.substring(1);
+            if (num_name.indexOf('0') === 0)
+              num_name = num_name.substring(1);
             else
               break;
           }
-          item.set('label', item_name);
+          item.set('label', char_name + num_name);
         }
       });
       setting.callbacks.fire({ cmd: 'canvas.rendering' });
@@ -2557,21 +2559,24 @@ $(function() {
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.get('label'));
+    var sn = baseItem.get('label');
     var width = baseItem.getWidth() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
+    var char_name = sn.replace(/[\d]+/g,'');
+    var num_name = parseInt(sn.replace(/[\D]+/g,''));
+
     while (count <= total) {
       idx = checkDesc(idx);
 
-      var n = sn + idx;
+      var n = num_name + idx;
       var name = n.toString();
       if (exceptName(name))
         continue;
 
-      name = fillZeroLikeBaseItem(name, baseItem);
-      console.log(name);
+      name = fillZeroLikeBaseItem(name, char_name, baseItem);
+      name = char_name + name;
 
       var options = {
         type  : setting.setObjectType(baseItem.type),
@@ -2613,20 +2618,24 @@ $(function() {
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.get('label'));
+    var sn = baseItem.get('label');
     var width = baseItem.getWidth() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
+    var char_name = sn.replace(/[\d]+/g,'');
+    var num_name = parseInt(sn.replace(/[\D]+/g,''));
+
     while (count <= total) {
       idx = checkDesc(idx);
 
-      var n = sn + idx;
+      var n = num_name + idx;
       var name = n.toString();
       if (exceptName(name))
         continue;
 
-      name = fillZeroLikeBaseItem(name, baseItem);
+      name = fillZeroLikeBaseItem(name, char_name, baseItem);
+      name = char_name + name;
 
       var options = {
         type  : setting.setObjectType(baseItem.type),
@@ -2668,20 +2677,24 @@ $(function() {
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.get('label'));
+    var sn = baseItem.get('label');
     var height = baseItem.getHeight() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
+    var char_name = sn.replace(/[\d]+/g,'');
+    var num_name = parseInt(sn.replace(/[\D]+/g,''));
+
     while (count <= total) {
       idx = checkDesc(idx);
 
-      var n = sn + idx;
+      var n = num_name + idx;
       var name = n.toString();
       if (exceptName(name))
         continue;
 
-      name = fillZeroLikeBaseItem(name, baseItem);
+      name = fillZeroLikeBaseItem(name, char_name, baseItem);
+      name = char_name + name;
 
       var options = {
         type  : setting.setObjectType(baseItem.type),
@@ -2723,20 +2736,24 @@ $(function() {
 
     var map = setting.config.maps[elms[1]];
     var total = parseInt($('#app-sidebar-repeat-count').val());
-    var sn = parseInt(baseItem.get('label'));
+    var sn = baseItem.get('label');
     var height = baseItem.getHeight() / setting.currentScale;
     var idx = 0;
     var count = 1;
     var change = false;
+    var char_name = sn.replace(/[\d]+/g,'');
+    var num_name = parseInt(sn.replace(/[\D]+/g,''));
+
     while (count <= total) {
       idx = checkDesc(idx);
 
-      var n = sn + idx;
+      var n = num_name + idx;
       var name = n.toString();
       if (exceptName(name))
         continue;
 
-      name = fillZeroLikeBaseItem(name, baseItem);
+      name = fillZeroLikeBaseItem(name, char_name, baseItem);
+      name = char_name + name;
 
       var options = {
         type  : setting.setObjectType(baseItem.type),
@@ -2769,8 +2786,8 @@ $(function() {
   });
 
   // Fill zero as digit number for item name like length of baseitem name.
-  function fillZeroLikeBaseItem(name, baseItem) {
-    var baseLength = baseItem.get('label').length;
+  function fillZeroLikeBaseItem(name, char_name, baseItem) {
+    var baseLength = baseItem.get('label').length - char_name.length;
 
     if (name.length == baseLength || name.length > baseLength)
       return name;
