@@ -5,6 +5,21 @@ $(function() {
 
 //'use strict';
 
+function changeFontSize(str_len) {
+  var font;
+  var font_size = 14;
+
+  if (str_len > 9)
+    font =  '4px Sans Mono';
+  else {
+    if (str_len > 4)
+      font_size -= 1;
+    font = (font_size - str_len).toString() + 'px Sans Mono';
+  }
+
+  return font;
+}
+
 var LabeledRect = fabric.util.createClass(fabric.Rect, {
   type: 'labeledRect',
   initialize: function(options) {
@@ -38,10 +53,7 @@ var LabeledRect = fabric.util.createClass(fabric.Rect, {
       ctx.fill();
     }
 
-    if (this.label.length <= 3)
-      ctx.font = '12px Sans Mono';
-    else
-      ctx.font = '10px Sans Mono';
+    ctx.font = changeFontSize(this.label.length);
     ctx.fillStyle = this.stroke;
     ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 13);
   }
@@ -79,10 +91,7 @@ var LabeledCircle = fabric.util.createClass(fabric.Circle, {
       ctx.fill();
     }
 
-    if (this.label.length <= 3)
-      ctx.font = '12px Sans Mono';
-    else
-      ctx.font = '10px Sans Mono';
+    ctx.font = changeFontSize(this.label.length);
     ctx.fillStyle = this.stroke;
     ctx.fillText(this.label, -this.width/2 + 4, -this.height/2 + 18);
   }
