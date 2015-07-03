@@ -452,10 +452,31 @@ app.Diagram = function(diagram_id, setting) {
       if (!obj)
         return;
 
-      obj.setLeft(Math.round(obj.left / setting.currentScale) * setting.currentScale);
-      obj.setTop(Math.round(obj.top / setting.currentScale) * setting.currentScale);
+      // Prevent leave to item to map.
+      obj.setCoords();
+      var scaledWidth = dia.canvas.c_scaleValue * map.width;
+      if (obj.oCoords.tl.x < 0) {
+        obj.left -= obj.oCoords.tl.x;
+      } else if (obj.oCoords.tr.x > scaledWidth) {
+        obj.left -= (obj.oCoords.tr.x - scaledWidth);
+      }
+      var scaledHeight = dia.canvas.c_scaleValue * map.height;
+      if (obj.oCoords.tl.y < 0) {
+        obj.top -= obj.oCoords.tl.y;
+      } else if (obj.oCoords.bl.y > scaledHeight) {
+        obj.top -= (obj.oCoords.bl.y - scaledHeight);
+      }
 
-      dragBoundItem(obj, map, dia.canvas.c_scaleValue);
+      // Snap to grid.
+      var scale = setting.currentScale;
+      var left = Math.round(obj.left / scale) * scale;
+      if (obj.left != left) {
+        obj.setLeft(left);
+      }
+      var top = Math.round(obj.top / scale) * scale;
+      if (obj.top != top) {
+        obj.setTop(top);
+      }
     });
 
     canvas.on('object:scaling', function(e) {
@@ -590,26 +611,6 @@ app.Diagram = function(diagram_id, setting) {
     diaList.push(dia);
 
     $('#' + dia.c_id).hide();
-  }
-
-  // Prevent leave to item to map.
-  function dragBoundItem(obj, map, scaleValue) {
-    obj.setCoords();
-
-    var maxWidth = map.width * scaleValue;
-    var maxHeight = map.height * scaleValue;
-
-    if (obj.oCoords.tl.x < 0) {
-      obj.left -= obj.oCoords.tl.x;
-    } else if (obj.oCoords.tr.x > maxWidth) {
-      obj.left -= (obj.oCoords.tr.x - maxWidth);
-    }
-
-    if (obj.oCoords.tl.y < 0) {
-      obj.top -= obj.oCoords.tl.y;
-    } else if (obj.oCoords.bl.y > maxHeight) {
-      obj.top -= (obj.oCoords.bl.y - maxHeight);
-    }
   }
 
   function removeMap(dia) {
