@@ -2063,6 +2063,15 @@ $(function() {
   }));
   viewMenu.append(new gui.MenuItem({
     type: 'checkbox',
+    label: '300%',
+    click: function() {
+      clearCheckViewMenu();
+      this.checked = true;
+      setting.zoom("3.0");
+    }
+  }));
+  viewMenu.append(new gui.MenuItem({
+    type: 'checkbox',
     label: '200%',
     click: function() {
       clearCheckViewMenu();
@@ -2456,17 +2465,20 @@ $(function() {
     if (e.keyCode == 187) {
       switch (setting.currentScale)
       {
-        case 2:
+        case 3:
           viewMenu.items[0].click();
           break;
-        case 1:
+        case 2:
           viewMenu.items[1].click();
           break;
-        case 0.75:
+        case 1:
           viewMenu.items[2].click();
           break;
-        case 0.5:
+        case 0.75:
           viewMenu.items[3].click();
+          break;
+        case 0.5:
+          viewMenu.items[4].click();
           break;
         default:
           break;
@@ -2479,14 +2491,17 @@ $(function() {
         case 4:
           viewMenu.items[1].click();
           break;
-        case 2:
+        case 3:
           viewMenu.items[2].click();
           break;
-        case 1:
+        case 2:
           viewMenu.items[3].click();
           break;
-        case 0.75:
+        case 1:
           viewMenu.items[4].click();
+          break;
+        case 0.75:
+          viewMenu.items[5].click();
           break;
         default:
           break;
