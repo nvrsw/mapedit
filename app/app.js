@@ -32,6 +32,52 @@ function changeFontSize(str_len) {
   return font;
 }
 
+function set_zoom_in(current_scale) {
+  switch (current_scale)
+  {
+    case 3:
+      viewMenu.items[0].click();
+      break;
+    case 2:
+      viewMenu.items[1].click();
+      break;
+    case 1:
+      viewMenu.items[2].click();
+      break;
+    case 0.75:
+      viewMenu.items[3].click();
+      break;
+    case 0.5:
+      viewMenu.items[4].click();
+      break;
+    default:
+      break;
+  }
+}
+
+function set_zoom_out(current_scale) {
+  switch (current_scale)
+  {
+    case 4:
+      viewMenu.items[1].click();
+      break;
+    case 3:
+      viewMenu.items[2].click();
+      break;
+    case 2:
+      viewMenu.items[3].click();
+      break;
+    case 1:
+      viewMenu.items[4].click();
+      break;
+    case 0.75:
+      viewMenu.items[5].click();
+      break;
+    default:
+      break;
+  }
+}
+
 var LabeledRect = fabric.util.createClass(fabric.Rect, {
   type: 'labeledRect',
   initialize: function(options) {
@@ -617,6 +663,19 @@ app.Diagram = function(diagram_id, setting) {
           $('#app-sidebar-item-info-coordinate').val(points.join(','));
         }
       }
+    });
+
+    $(canvas.wrapperEl).on('mousewheel', function(e) {
+      var delta = e.originalEvent.wheelDelta / 120;
+
+      // delta value  1 : wheel up
+      //             -1 : whell down
+      if (delta == 1) {
+        set_zoom_in (setting.currentScale);
+      } else {
+        set_zoom_out (setting.currentScale);
+      }
+
     });
 
     dia.canvas = canvas;
@@ -2477,49 +2536,11 @@ $(function() {
 
     // Setting zoom in / out
     if (e.keyCode == 187) {
-      switch (setting.currentScale)
-      {
-        case 3:
-          viewMenu.items[0].click();
-          break;
-        case 2:
-          viewMenu.items[1].click();
-          break;
-        case 1:
-          viewMenu.items[2].click();
-          break;
-        case 0.75:
-          viewMenu.items[3].click();
-          break;
-        case 0.5:
-          viewMenu.items[4].click();
-          break;
-        default:
-          break;
-      }
+      set_zoom_in(setting.currentScale);
       return;
     }
     if (e.keyCode == 189) {
-      switch (setting.currentScale)
-      {
-        case 4:
-          viewMenu.items[1].click();
-          break;
-        case 3:
-          viewMenu.items[2].click();
-          break;
-        case 2:
-          viewMenu.items[3].click();
-          break;
-        case 1:
-          viewMenu.items[4].click();
-          break;
-        case 0.75:
-          viewMenu.items[5].click();
-          break;
-        default:
-          break;
-      }
+      set_zoom_out(setting.currentScale);
       return;
     }
 
