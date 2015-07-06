@@ -5,6 +5,18 @@ $(function() {
 
 //'use strict';
 
+// disable mouse wheel scroll
+function wheel(e) {
+  e.preventDefault();
+  e.returnValue=false;
+}
+function disable_scroll() {
+  if (window.addEventListener) {
+    window.addEventListener('DOMMouseScroll', wheel, false);
+  }
+  window.onmousewheel = document.onmousewheel = wheel;
+}
+
 function changeFontSize(str_len) {
   var font;
   var font_size = 14;
@@ -2004,6 +2016,7 @@ $(function() {
   var descOrder = false;
 
   app.window = app.gui.Window.get();
+  disable_scroll();
 
   setting = new app.Setting();
   diagram = new app.Diagram('app-diagram', setting);
