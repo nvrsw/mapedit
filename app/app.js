@@ -606,24 +606,23 @@ app.Diagram = function(diagram_id, setting) {
       }
     });
 
-    $(canvas.wrapperEl).on('mousewheel', function(e) {
-      var delta = e.originalEvent.wheelDelta / 120;
-
-      // delta value  1 : wheel up
-      //             -1 : whell down
-      if (delta == 1) {
-        setting.zoomIn(setting.currentScale);
-      } else {
-        setting.zoomOut(setting.currentScale);
-      }
-
-    });
-
     dia.canvas = canvas;
     diaList.push(dia);
 
     $('#' + dia.c_id).hide();
   }
+
+  $(window).on('mousewheel', function(e) {
+    var delta = e.originalEvent.wheelDelta / 120;
+
+    // delta value  1 : wheel up
+    //             -1 : wheel down
+    if (delta == 1) {
+      setting.zoomIn(setting.currentScale);
+    } else {
+      setting.zoomOut(setting.currentScale);
+    }
+  });
 
   function removeMap(dia) {
     var idx = -1;
