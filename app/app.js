@@ -612,7 +612,7 @@ app.Diagram = function(diagram_id, setting) {
     $('#' + dia.c_id).hide();
   }
 
-  $(window).on('mousewheel', function(e) {
+  $('#app-diagram').on('mousewheel', function(e) {
     var delta = e.originalEvent.wheelDelta / 120;
 
     // delta value  1 : wheel up
