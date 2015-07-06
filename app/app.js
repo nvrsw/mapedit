@@ -20,52 +20,6 @@ function changeFontSize(str_len) {
   return font;
 }
 
-function set_zoom_in(current_scale) {
-  switch (current_scale)
-  {
-    case 3:
-      viewMenu.items[0].click();
-      break;
-    case 2:
-      viewMenu.items[1].click();
-      break;
-    case 1:
-      viewMenu.items[2].click();
-      break;
-    case 0.75:
-      viewMenu.items[3].click();
-      break;
-    case 0.5:
-      viewMenu.items[4].click();
-      break;
-    default:
-      break;
-  }
-}
-
-function set_zoom_out(current_scale) {
-  switch (current_scale)
-  {
-    case 4:
-      viewMenu.items[1].click();
-      break;
-    case 3:
-      viewMenu.items[2].click();
-      break;
-    case 2:
-      viewMenu.items[3].click();
-      break;
-    case 1:
-      viewMenu.items[4].click();
-      break;
-    case 0.75:
-      viewMenu.items[5].click();
-      break;
-    default:
-      break;
-  }
-}
-
 var LabeledRect = fabric.util.createClass(fabric.Rect, {
   type: 'labeledRect',
   initialize: function(options) {
@@ -659,9 +613,9 @@ app.Diagram = function(diagram_id, setting) {
       // delta value  1 : wheel up
       //             -1 : whell down
       if (delta == 1) {
-        set_zoom_in (setting.currentScale);
+        setting.zoomIn(setting.currentScale);
       } else {
-        set_zoom_out (setting.currentScale);
+        setting.zoomOut(setting.currentScale);
       }
 
     });
@@ -1563,6 +1517,50 @@ app.Setting = function() {
       id    : "map-" + setting.map_idx,
       value : scale
     });
+  };
+  this.zoomIn = function(current_scale) {
+    switch (current_scale)
+      {
+      case 3:
+        viewMenu.items[0].click();
+        break;
+      case 2:
+        viewMenu.items[1].click();
+        break;
+      case 1:
+        viewMenu.items[2].click();
+        break;
+      case 0.75:
+        viewMenu.items[3].click();
+        break;
+      case 0.5:
+        viewMenu.items[4].click();
+        break;
+      default:
+        break;
+      }
+  };
+  this.zoomOut = function(current_scale) {
+    switch (current_scale)
+      {
+      case 4:
+        viewMenu.items[1].click();
+        break;
+      case 3:
+        viewMenu.items[2].click();
+        break;
+      case 2:
+        viewMenu.items[3].click();
+        break;
+      case 1:
+        viewMenu.items[4].click();
+        break;
+      case 0.75:
+        viewMenu.items[5].click();
+        break;
+      default:
+        break;
+      }
   };
   this.select = function(c_id) {
     var id;
@@ -2535,11 +2533,11 @@ $(function() {
 
     // Setting zoom in / out
     if (e.keyCode == 187) {
-      set_zoom_in(setting.currentScale);
+      setting.zoomIn(setting.currentScale);
       return;
     }
     if (e.keyCode == 189) {
-      set_zoom_out(setting.currentScale);
+      setting.zoomOut(setting.currentScale);
       return;
     }
 
