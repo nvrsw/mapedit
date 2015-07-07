@@ -408,6 +408,15 @@ app.Diagram = function(diagram_id, setting) {
     else
       canvas.backgroundColor = colorCSS(app.defaultBackgroundColor);
 
+    canvas.on('mouse:move', function(e) {
+      if (setting.isShift)
+        $('.upper-canvas').css('cursor', 'move');
+    });
+
+    canvas.on('mouse:up', function(e) {
+      $('.upper-canvas').css('cursor', 'default');
+    });
+
     canvas.on('mouse:down', function(e) {
       if (e.target) {
         if (setting.isShift)
