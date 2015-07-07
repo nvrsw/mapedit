@@ -1490,7 +1490,7 @@ app.Setting = function() {
       }
 
     if (config.maps.length > 0)
-      this.selectMap('map-' + setting.map_idx);
+      this.selectMap('map-0');
   };
   this.selectMap = function(mapID) {
     var elms = mapID.split('-');
