@@ -224,7 +224,6 @@ app.Diagram = function(diagram_id, setting) {
   }
 
   diagram.reflectSizeChaged = function() {
-    $('#app-diagram').scrollTop(0).scrollLeft(0);
     diaForeach(function(dia) {
       if (dia.canvas)
         dia.canvas.calcOffset();
