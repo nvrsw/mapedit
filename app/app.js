@@ -408,28 +408,14 @@ app.Diagram = function(diagram_id, setting) {
     else
       canvas.backgroundColor = colorCSS(app.defaultBackgroundColor);
 
-    canvas.on('mouse:move', function(e) {
-      if (setting.isShift)
-        $('.upper-canvas').css('cursor', 'move');
-    });
-
-    canvas.on('mouse:up', function(e) {
-      $('.upper-canvas').css('cursor', 'default');
-    });
-
     canvas.on('mouse:down', function(e) {
       if (e.target) {
-        if (setting.isShift)
-          canvas.selection = true;
 
         // Initial to selected group ID.
         if (e.target.type !== 'group')
           setting.groupSelectedID = '';
         return;
       }
-
-      if (setting.isShift)
-        canvas.selection = false;
 
       setting.groupSelectedID = '';
       setting.select(null);
@@ -990,14 +976,6 @@ app.Diagram = function(diagram_id, setting) {
         if (dia && dia.canvas)
           dia.canvas.discardActiveGroup();
         break;
-      // Setting group selection.
-      case 'group.enabled':
-        elms = setting.selectedID.split('-');
-        dia_id = 'app-dia-' + elms[1];
-        dia = lookupDia(dia_id);
-        if (dia && dia.canvas)
-          dia.canvas.selection = data.value;
-        break;
       case 'map.draw':
         elms = data.id.split('-');
         dia_id = 'app-dia-' + elms[1];
@@ -1360,7 +1338,6 @@ app.Setting = function() {
   this.groupObject = '';
   this.currentObject = '';
   this.currentScale = 1;
-  this.isShift = false;
 
   this.init = function(config, zipPath, tmpDir) {
     this.config = config;
@@ -2549,22 +2526,8 @@ $(function() {
     checkFocusSidebar = false;
   });
 
-  $('body').keyup(function(e) {
-    if (e.keyCode == 16) {
-      setting.isShift = false;
-      setting.callbacks.fire({
-        cmd   : 'group.enabled',
-        value : true
-      });
-    }
-  });
-
   // Move item of canvas by key event
   $('body').keydown(function(e) {
-    if (e.keyCode == 16) {
-      setting.isShift = true;
-      return;
-    }
 
     // Setting zoom in / out
     if (e.keyCode == 187) {

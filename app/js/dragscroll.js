@@ -49,11 +49,11 @@
 
                         e.preventDefault();
                         e.stopPropagation();
-                    }, 0
+                    }, 1
                 );
 
                  _window[addEventListener](
-                     mouseup, el.mu = function() {pushed = 0;}, 0
+                     mouseup, el.mu = function() {pushed = 0;}, 1
                  );
 
                 _window[addEventListener](
@@ -61,6 +61,7 @@
                     el.mm = function(e, scroller) {
                         if (!e.shiftKey)
                             return;
+
                         scroller = el.scroller||el;
                         if (pushed) {
                              scroller.scrollLeft -=
@@ -68,7 +69,7 @@
                              scroller.scrollTop -=
                                  (- lastClientY + (lastClientY=e.clientY));
                         }
-                    }, 0
+                    }, 1
                 );
              })(dragged[i++]);
         }
