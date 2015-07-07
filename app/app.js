@@ -613,11 +613,7 @@ app.Diagram = function(diagram_id, setting) {
   }
 
   $('#app-diagram').on('mousewheel', function(e) {
-    var delta = e.originalEvent.wheelDelta / 120;
-
-    // delta value  1 : wheel up
-    //             -1 : wheel down
-    if (delta == 1) {
+    if (e.originalEvent.wheelDelta > 0) {
       setting.zoomIn(setting.currentScale);
     } else {
       setting.zoomOut(setting.currentScale);
