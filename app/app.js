@@ -740,10 +740,10 @@ app.Diagram = function(diagram_id, setting) {
 
     obj.c_id = c_id;
     obj.camera_direction = item.camera_direction;
-    if (!obj.camera_direction && obj.camera_direction != 0)
+    if (!obj.camera_direction && obj.camera_direction !== 0)
       obj.camera_direction = -1;
     obj.camera_range = item.camera_range;
-    if (!obj.camera_range && obj.camera_range != 0)
+    if (!obj.camera_range && obj.camera_range !== 0)
       obj.camera_range = -1;
     obj.set({
       hasRotatingPoint: false,
@@ -865,9 +865,7 @@ app.Diagram = function(diagram_id, setting) {
   function saveItemData() {
     var dia = null;
 
-    for (var i = 0; i < diaList.length; i++) {
-      dia = diaList[i];
-
+    diaList.forEach(function (dia, i) {
       if (dia.c_id) {
         dia.canvas.forEachObject(function(item) {
           if (!item.c_id)
@@ -889,7 +887,7 @@ app.Diagram = function(diagram_id, setting) {
           }
         });
       }
-    }
+    });
   }
 
   setting.callbacks.add(function(data) {
@@ -1302,7 +1300,7 @@ app.Sidebar = function(sidebar_id, setting) {
         }
     }
 
-    for (i = 0; i < map.backgrounds.length; i++) {
+    map.backgrounds.forEach(function (bg, i) {
       $('#' + c_id + "-bg-" + i).click(function(e) {
         app.curBgTarget=$(this).attr('id');
         $('#app-sidebar-bg-file').trigger('click');
@@ -1311,7 +1309,7 @@ app.Sidebar = function(sidebar_id, setting) {
         var elms = $(this).attr('id').split('-');
         setting.removeBackground(elms[5]);
       });
-    }
+    });
   }
 
   function removeMapEntry(mapID) {
@@ -1957,7 +1955,7 @@ app.Setting = function() {
     }
 
     return config;
-  }
+  };
 
   this.saveZipFile = function(filePath) {
     if (!inited)
@@ -2384,7 +2382,7 @@ $(function() {
     // Camera range
     if (value[1] < -1)
       value[1] = -1;
-    else if (value[1] == 0)
+    else if (value[1] === 0)
       value[1] = 1;
     else if (value[1] > 360)
       value[1] = 360;
