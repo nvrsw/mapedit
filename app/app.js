@@ -901,8 +901,26 @@ app.Diagram = function(diagram_id, setting) {
         if (dia && dia.canvas)
           {
             var value = parseFloat (data.value, 10);
-            if (dia.canvas.c_scaleValue != value)
+            if (dia.canvas.c_scaleValue != value) {
+              // Center points
+              var pointX = ($('#app-diagram').width() / 2) + $('#app-diagram').scrollLeft();
+              var pointY = ($('#app-diagram').height() / 2) + $('#app-diagram').scrollTop();
+              var scrollX = parseFloat (pointX, 10);
+              var scrollY = parseFloat (pointY, 10);
+
               dia.canvas.c_scale(value);
+
+              scrollX = (scrollX / setting.currentScale) * dia.canvas.c_scaleValue;
+              scrollY = (scrollY / setting.currentScale) * dia.canvas.c_scaleValue;
+
+              scrollX = scrollX - ($('#app-diagram').width() / 2);
+              if (scrollX < 0)
+                scrollX = 0;
+              scrollY = scrollY - ($('#app-diagram').height() / 2);
+              if (scrollY < 0)
+                scrollY = 0;
+              $('#app-diagram').scrollLeft(scrollX).scrollTop(scrollY);
+            }
             setting.currentScale = dia.canvas.c_scaleValue;
           }
         break;
