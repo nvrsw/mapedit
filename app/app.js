@@ -612,6 +612,9 @@ app.Diagram = function(diagram_id, setting) {
   }
 
   $('#app-diagram').on('mousewheel', function(e) {
+    setting.mousePointX = e.clientX - $('#app-sidebar').width();
+    setting.mousePointY = e.clientY;
+
     if (e.originalEvent.wheelDelta > 0) {
       setting.zoomIn(setting.currentScale);
     } else {
@@ -902,21 +905,32 @@ app.Diagram = function(diagram_id, setting) {
           {
             var value = parseFloat (data.value, 10);
             if (dia.canvas.c_scaleValue != value) {
-              // Center points
-              var pointX = ($('#app-diagram').width() / 2) + $('#app-diagram').scrollLeft();
-              var pointY = ($('#app-diagram').height() / 2) + $('#app-diagram').scrollTop();
-              var scrollX = parseFloat (pointX, 10);
-              var scrollY = parseFloat (pointY, 10);
+              var pointX;
+              var pointY;
+              var scrollX;
+              var scrollY;
+              if (setting.mousePointX && setting.mousePointY) {
+                pointX = setting.mousePointX;
+                pointY = setting.mousePointY;
+                setting.mousePointX = null;
+                setting.mousePointY = null;
+              } else {
+                // Center points
+                pointX = ($('#app-diagram').width() / 2);
+                pointY = ($('#app-diagram').height() / 2);
+              }
+              scrollX = parseFloat (pointX + $('#app-diagram').scrollLeft(), 10);
+              scrollY = parseFloat (pointY + $('#app-diagram').scrollTop(), 10);
 
               dia.canvas.c_scale(value);
 
               scrollX = (scrollX / setting.currentScale) * dia.canvas.c_scaleValue;
               scrollY = (scrollY / setting.currentScale) * dia.canvas.c_scaleValue;
 
-              scrollX = scrollX - ($('#app-diagram').width() / 2);
+              scrollX = scrollX - pointX;
               if (scrollX < 0)
                 scrollX = 0;
-              scrollY = scrollY - ($('#app-diagram').height() / 2);
+              scrollY = scrollY - pointY;
               if (scrollY < 0)
                 scrollY = 0;
               $('#app-diagram').scrollLeft(scrollX).scrollTop(scrollY);
@@ -1349,6 +1363,8 @@ app.Setting = function() {
   this.groupObject = '';
   this.currentObject = '';
   this.currentScale = 1;
+  this.mousePointX = null;
+  this.mousePointY = null;
 
   this.init = function(config, zipPath, tmpDir) {
     this.config = config;
