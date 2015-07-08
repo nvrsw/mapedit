@@ -614,11 +614,14 @@ app.Diagram = function(diagram_id, setting) {
   $('#app-diagram').on('mousewheel', function(e) {
     setting.mousePointX = e.clientX - $('#app-sidebar').width();
     setting.mousePointY = e.clientY;
-
-    if (e.originalEvent.wheelDelta > 0) {
+    var delta = e.originalEvent.wheelDelta / 120;
+    switch (delta) {
+    case 1:
       setting.zoomIn(setting.currentScale);
-    } else {
+      break;
+    case -1:
       setting.zoomOut(setting.currentScale);
+      break;
     }
   });
 
