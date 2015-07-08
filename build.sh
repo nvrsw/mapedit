@@ -1,7 +1,8 @@
 #!/bin/sh
 
-[ "$VERSION" = "" ] && VERSION='0.9.9'
-[ "$PLATFORMS" = "" ] && PLATFORMS='linux-ia32 linux-x64 win-ia32'
+[ "$VERSION" = "" ] && VERSION=$(grep '<title>VMS MAP Editor' app/app.html | awk '{print $4}' | sed 's/<.*$//g'
+)
+[ "$PLATFORMS" = "" ] && PLATFORMS='win-ia32'
 
 rm -rf vms-mapedit*
 
