@@ -1549,7 +1549,7 @@ app.Setting = function() {
   this.zoomIn = function(current_scale) {
     switch (current_scale)
       {
-      case 3:
+      case 4:
         viewMenu.items[0].click();
         break;
       case 2:
@@ -1558,11 +1558,8 @@ app.Setting = function() {
       case 1:
         viewMenu.items[2].click();
         break;
-      case 0.75:
-        viewMenu.items[3].click();
-        break;
       case 0.5:
-        viewMenu.items[4].click();
+        viewMenu.items[3].click();
         break;
       default:
         break;
@@ -1571,10 +1568,10 @@ app.Setting = function() {
   this.zoomOut = function(current_scale) {
     switch (current_scale)
       {
-      case 4:
+      case 8:
         viewMenu.items[1].click();
         break;
-      case 3:
+      case 4:
         viewMenu.items[2].click();
         break;
       case 2:
@@ -1582,9 +1579,6 @@ app.Setting = function() {
         break;
       case 1:
         viewMenu.items[4].click();
-        break;
-      case 0.75:
-        viewMenu.items[5].click();
         break;
       default:
         break;
@@ -2152,20 +2146,20 @@ $(function() {
 
   viewMenu.append(new gui.MenuItem({
     type: 'checkbox',
-    label: '400%',
+    label: '800%',
     click: function() {
       clearCheckViewMenu();
       this.checked = true;
-      setting.zoom("4.0");
+      setting.zoom('8.0');
     }
   }));
   viewMenu.append(new gui.MenuItem({
     type: 'checkbox',
-    label: '300%',
+    label: '400%',
     click: function() {
       clearCheckViewMenu();
       this.checked = true;
-      setting.zoom("3.0");
+      setting.zoom('4.0');
     }
   }));
   viewMenu.append(new gui.MenuItem({
@@ -2174,7 +2168,7 @@ $(function() {
     click: function() {
       clearCheckViewMenu();
       this.checked = true;
-      setting.zoom("2.0");
+      setting.zoom('2.0');
     }
   }));
   viewMenu.append(new gui.MenuItem({
@@ -2184,16 +2178,7 @@ $(function() {
     click: function() {
       clearCheckViewMenu();
       this.checked = true;
-      setting.zoom("1.0");
-    }
-  }));
-  viewMenu.append(new gui.MenuItem({
-    type: 'checkbox',
-    label: '75%',
-    click: function() {
-      clearCheckViewMenu();
-      this.checked = true;
-      setting.zoom("0.75");
+      setting.zoom('1.0');
     }
   }));
   viewMenu.append(new gui.MenuItem({
@@ -2202,7 +2187,7 @@ $(function() {
     click: function() {
       clearCheckViewMenu('50%');
       this.checked = true;
-      setting.zoom("0.5");
+      setting.zoom('0.5');
     }
   }));
   viewMenu.append(new gui.MenuItem({
