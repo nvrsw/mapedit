@@ -854,8 +854,8 @@ app.Diagram = function(diagram_id, setting) {
         obj.set('label', value);
         break;
       case 'direction':
-        obj.camera_direction = value[0];
-        obj.camera_range = value[1];
+        obj.camera_direction = Number(value[0]);
+        obj.camera_range = Number(value[1]);
         break;
       }
     if (!setting.groupSelectedID.length)
@@ -883,8 +883,8 @@ app.Diagram = function(diagram_id, setting) {
             obj.y1 = Math.floor(item.oCoords.tl.y / dia.canvas.c_scaleValue);
             obj.x2 = Math.floor(item.oCoords.br.x / dia.canvas.c_scaleValue);
             obj.y2 = Math.floor(item.oCoords.br.y / dia.canvas.c_scaleValue);
-            obj.camera_direction = item.camera_direction;
-            obj.camera_range = item.camera_range;
+            obj.camera_direction = Number(item.camera_direction);
+            obj.camera_range = Number(item.camera_range);
           }
         });
       }
@@ -1972,8 +1972,8 @@ app.Setting = function() {
           new_item.y1 = item.y1;
           new_item.x2 = item.x2;
           new_item.y2 = item.y2;
-          new_item.camera_direction = item.camera_direction;
-          new_item.camera_range = item.camera_range;
+          new_item.camera_direction = Number(item.camera_direction);
+          new_item.camera_range = Number(item.camera_range);
           new_map.items.push(new_item);
       }
 
@@ -2411,8 +2411,8 @@ $(function() {
         if (!item.c_id)
           return;
 
-        item.camera_direction = value[0];
-        item.camera_range = value[1];
+        item.camera_direction = Number(value[0]);
+        item.camera_range = Number(value[1]);
       });
       $('#app-sidebar-item-info-direction').val(value[0] + ',' + value[1]);
       setting.callbacks.fire({ cmd: 'canvas.rendering' });
