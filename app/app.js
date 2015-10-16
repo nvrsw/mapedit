@@ -1845,7 +1845,8 @@ app.Setting = function() {
       }
 
     if (!app.fs.existsSync(zipPath)) {
-      console.log("there is no '" + zipPath + "'");
+      console.log("there is no '" + zipPath + "', create a new file.");
+      this.newZipFile(zipPath);
       return;
     }
 
