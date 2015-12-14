@@ -1,8 +1,8 @@
 #!/bin/sh
 
-[ "$VERSION" = "" ] && VERSION=$(grep '<title>VMS MAP Editor' app/app.html | awk '{print $4}' | sed 's/<.*$//g'
+[ "$VERSION" = "" ] && VERSION=$(grep '<title>.*MAP Editor' app/app.html | awk '{print $4}' | sed 's/<.*$//g'
 )
-[ "$PLATFORMS" = "" ] && PLATFORMS='win-ia32'
+[ "$PLATFORMS" = "" ] && PLATFORMS="win-ia32 win-x64 linux-ia32 linux-x64"
 
 rm -rf vms-mapedit*
 
@@ -34,7 +34,7 @@ for platform in $PLATFORMS; do
   cp "nwjs/$platform/nw.pak" $dir
 
   cp -fr samples $dir
-  cp -fr ../doc/ChangeLog-mapedit.html $dir/ChangeLog.html
+  cp -fr ChangeLog.md $dir/ChangeLog.md
 
   if [ "$suffix" = ".exe" ]; then
     echo "$dir".zip
