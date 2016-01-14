@@ -59,19 +59,19 @@
 - 'Open Recent' 메뉴 제거
 
 
-[4873]: https://bugs.linuxnvr.com/show_bug.cgi?id=4873
-[4963]: https://bugs.linuxnvr.com/show_bug.cgi?id=4963
-[4974]: https://bugs.linuxnvr.com/show_bug.cgi?id=4974
-[4975]: https://bugs.linuxnvr.com/show_bug.cgi?id=4975
-[4978]: https://bugs.linuxnvr.com/show_bug.cgi?id=4978
-[5039]: https://bugs.linuxnvr.com/show_bug.cgi?id=5039
-[5040]: https://bugs.linuxnvr.com/show_bug.cgi?id=5040
-[5041]: https://bugs.linuxnvr.com/show_bug.cgi?id=5041
-[5042]: https://bugs.linuxnvr.com/show_bug.cgi?id=5042
-[5046]: https://bugs.linuxnvr.com/show_bug.cgi?id=5046
-[5053]: https://bugs.linuxnvr.com/show_bug.cgi?id=5053
-[5058]: https://bugs.linuxnvr.com/show_bug.cgi?id=5058
-[5159]: https://bugs.linuxnvr.com/show_bug.cgi?id=5159
-[5160]: https://bugs.linuxnvr.com/show_bug.cgi?id=5160
-[5161]: https://bugs.linuxnvr.com/show_bug.cgi?id=5161
+[4873]: https://bugs.nvrsw.com/show_bug.cgi?id=4873
+[4963]: https://bugs.nvrsw.com/show_bug.cgi?id=4963
+[4974]: https://bugs.nvrsw.com/show_bug.cgi?id=4974
+[4975]: https://bugs.nvrsw.com/show_bug.cgi?id=4975
+[4978]: https://bugs.nvrsw.com/show_bug.cgi?id=4978
+[5039]: https://bugs.nvrsw.com/show_bug.cgi?id=5039
+[5040]: https://bugs.nvrsw.com/show_bug.cgi?id=5040
+[5041]: https://bugs.nvrsw.com/show_bug.cgi?id=5041
+[5042]: https://bugs.nvrsw.com/show_bug.cgi?id=5042
+[5046]: https://bugs.nvrsw.com/show_bug.cgi?id=5046
+[5053]: https://bugs.nvrsw.com/show_bug.cgi?id=5053
+[5058]: https://bugs.nvrsw.com/show_bug.cgi?id=5058
+[5159]: https://bugs.nvrsw.com/show_bug.cgi?id=5159
+[5160]: https://bugs.nvrsw.com/show_bug.cgi?id=5160
+[5161]: https://bugs.nvrsw.com/show_bug.cgi?id=5161
 
