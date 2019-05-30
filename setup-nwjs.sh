@@ -34,3 +34,5 @@ for i in $LIST; do
     echo "dist/$ndir"
     [ -d dist/$ndir ] && cp -f dist/$ndir/* $DIR/$ndir
 done
+
+exit 0
