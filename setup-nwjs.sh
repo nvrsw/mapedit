@@ -1,12 +1,13 @@
 #!/bin/sh
 
 DIR=nwjs
-BASE=http://dl.nwjs.io/latest/
+VERSION=v0.12.3
+BASE=http://dl.nwjs.io/$VERSION
 
-LIST=$(curl -s $BASE | \
-       grep 'nwjs-v[0-9\.]' | \
-       grep 'linux-ia32\|linux-x64\|win-ia32\|win-x64' | \
-       grep -o -E 'href="([^"#]+)"' | cut -d'"' -f2)
+LIST="nwjs-$VERSION-linux-ia32.tar.gz
+      nwjs-$VERSION-linux-x64.tar.gz
+      nwjs-$VERSION-win-ia32.zip
+      nwjs-$VERSION-win-x64.zip"
 
 mkdir -p $DIR/
 for i in $LIST; do
@@ -16,7 +17,6 @@ for i in $LIST; do
 done
 
 for i in $LIST; do
-    [ -f $DIR/$i ] || continue
     echo "Extracting $i..."
     odir=$(echo $i | cut -d- -f1,2,3,4 | cut -d. -f1,2,3)
     ndir=$(echo $i | cut -d- -f3,4 | cut -d. -f1)
@@ -31,4 +31,6 @@ for i in $LIST; do
 	    ;;
     esac
     mv $DIR/$odir $DIR/$ndir
+    echo "dist/$ndir"
+    [ -d dist/$ndir ] && cp -f dist/$ndir/* $DIR/$ndir
 done
